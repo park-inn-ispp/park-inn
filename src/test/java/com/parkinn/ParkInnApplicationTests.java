@@ -1,10 +1,10 @@
-package com.trigo;
+package com.parkinn;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class TrigoApplicationTests {
+class ParkInnApplicationTests {
 
 	@Test
 	void contextLoads() {

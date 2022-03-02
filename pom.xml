@@ -8,11 +8,11 @@
 		<version>2.6.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.trigo</groupId>
-	<artifactId>Trigo</artifactId>
+	<groupId>com.parkinn</groupId>
+	<artifactId>Park-Inn</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Trigo</name>
-	<description>Trigo - Sistema de alquiler de parkings</description>
+	<name>Park-Inn</name>
+	<description>Park-Inn | Sistema de alquiler de parkings</description>
 	
 	<properties>
 		<java.version>1.11</java.version>

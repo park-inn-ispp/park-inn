@@ -1,4 +1,4 @@
-package com.trigo.model;
+package com.parkinn.model;
 
 import javax.persistence.*;
 

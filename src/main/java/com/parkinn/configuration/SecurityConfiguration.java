@@ -1,4 +1,4 @@
-package com.trigo.configuration;
+package com.parkinn.configuration;
 
 import java.util.Arrays;
 

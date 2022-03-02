@@ -1,11 +1,11 @@
-package com.trigo.web;
+package com.parkinn.web;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import com.trigo.model.Client;
-import com.trigo.repository.ClientRepository;
+import com.parkinn.model.Client;
+import com.parkinn.repository.ClientRepository;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
