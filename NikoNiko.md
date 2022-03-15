@@ -21,7 +21,7 @@ In the retrospective meeting, the team has a discussion about those results.
 
 ### Sprint 3: L3-Measurement 
 
-| Day           | J. A. Parejo  |
+| Day           |   |
 | ------------- | ------------- |
 | Day 1         |    :smiley: (Meaning that I am learning, I like the work and I think I can do it without problems, but with some effort) |
 | Day 2         |    - (Meaning that I did no work regarding the PSG2 project)           |
@@ -32,7 +32,7 @@ In the retrospective meeting, the team has a discussion about those results.
 
 ## Sprint Template
 
-| Day           | JAPAREJO    | Juanito  | [Member C]     | [Member D]     | [Member E]     | [Member F]     |
+| Day           | Jose Manuel   | Manuel  | Miguel     | Francisco    | Alejandro     | Sergio     |
 | ------------- | ------------- | -------------  | -------------  | -------------  | -------------  | -------------  |
 | Day 1         | :smile:        |                |                |                |                |                |
 | Day 2         |               |    :smile:            |                |                |                |                |
