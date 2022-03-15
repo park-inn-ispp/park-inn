@@ -15,8 +15,8 @@
 
 | Day           | Jose Manuel   | Manuel  | Miguel     | Francisco    | Alejandro     | Sergio     |
 | ------------- | ------------- | -------------  | -------------  | -------------  | -------------  | -------------  |
-| 15/03        | :smile:        |                |                |                |                |                |
-| 22/03         |               |    :smile:            |                |                |                |                |
-| 29/03         |               |    :worried:            |                |                |                |                |
-| 5/04         |  :neutral_face:             |    :smile:           |                |                |                |                |
+| 15/03        | :smile:        | :smile:               | :smile:               | :smile:               | :smile:               | :smile:               |
+| 22/03         |               |               |                |                |                |                |
+| 29/03         |               |              |                |                |                |                |
+| 5/04         |               |             |                |                |                |                |
 ...
