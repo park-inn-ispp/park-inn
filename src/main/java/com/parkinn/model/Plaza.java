@@ -1,5 +1,7 @@
 package com.parkinn.model;
 
+import java.util.Collection;
+
 import javax.persistence.*;
 
 @Entity
@@ -12,12 +14,15 @@ public class Plaza {
 
     private String direccion;
     private Double precioHora;
-    private Double ratioFianza;
+    private Double fianza;
     private Double ancho;
     private Double largo;
     private Boolean estaDisponible;
     private Boolean esAireLibre;
     private String descripcion;
+
+    @OneToMany(mappedBy="plaza", cascade = CascadeType.ALL)
+    private Collection<Horario> horarios;
 
     public Long getId() {
         return this.id;
@@ -34,11 +39,11 @@ public class Plaza {
     public void setPrecioHora(Double precioHora) {
         this.precioHora=precioHora;
     }
-    public Double getRatioFianza() {
-        return this.ratioFianza;
+    public Double getFianza() {
+        return this.fianza;
     }
-    public void setRatioFianza(Double ratioFianza) {
-        this.ratioFianza=ratioFianza;
+    public void setFianza(Double fianza) {
+        this.fianza=fianza;
     }
     public Double getAncho() {
         return this.ancho;
@@ -69,5 +74,9 @@ public class Plaza {
     }
     public void setDescripcion(String descripcion) {
         this.descripcion=descripcion;
+    }
+
+    public Collection<Horario> getHorarios() {
+        return this.horarios;
     }
 }
