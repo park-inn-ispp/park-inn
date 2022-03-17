@@ -15,7 +15,7 @@
 	<description>Park-Inn | Sistema de alquiler de parkings</description>
 	
 	<properties>
-		<java.version>1.11</java.version>
+		<java.version>11</java.version>
 
 		<jacoco.version>0.8.5</jacoco.version>
 		<spring-format.version>0.0.19</spring-format.version>
