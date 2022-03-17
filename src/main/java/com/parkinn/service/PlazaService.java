@@ -19,4 +19,21 @@ public class PlazaService {
         List<Plaza> plazas = repository.filter(max, inicio, fin, zona);
         return plazas;
     }
+
+    public List<Plaza> findAll(){
+        return repository.findAll();
+    }
+
+    public Plaza guardarPlaza(Plaza plaza){
+        Plaza savedPlaza = repository.save(plaza);
+        return savedPlaza;
+    }
+
+    public Plaza findById(Long id){
+        Plaza plaza = repository.findById(id).orElseThrow(RuntimeException::new);
+        return plaza;
+    }
+    public void deleteById(Long id){
+        repository.deleteById(id);
+    }
 }

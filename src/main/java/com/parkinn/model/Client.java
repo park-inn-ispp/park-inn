@@ -17,7 +17,7 @@ public class Client {
     private String email;
 
     @OneToMany(mappedBy = "administrador")
-    private List<Parking> garajes;
+    private List<Plaza> plazas;
 
     public Long getId() {
         return this.id;

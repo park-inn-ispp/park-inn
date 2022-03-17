@@ -24,6 +24,19 @@ public class Plaza {
     @OneToMany(mappedBy="plaza", cascade = CascadeType.ALL)
     private Collection<Horario> horarios;
 
+    @ManyToOne
+    @JoinColumn(name="user_id")
+    private Client administrador;
+
+    public Client getAdministrador() {
+        return this.administrador;
+    }
+
+    public void setAdministrador(Client administrador) {
+        this.administrador = administrador;
+    }
+    
+
     public Long getId() {
         return this.id;
     }
