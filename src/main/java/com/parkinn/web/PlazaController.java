@@ -42,7 +42,7 @@ public class PlazaController {
     @PostMapping
     public ResponseEntity createPlaza(@RequestBody Plaza plaza) throws URISyntaxException {
         Plaza savedPlaza = plazaService.guardarPlaza(plaza);
-        return ResponseEntity.created(new URI("/parkings/" + savedPlaza.getId())).body(savedPlaza);
+        return ResponseEntity.created(new URI("/plazas/" + savedPlaza.getId())).body(savedPlaza);
     }
 
     @PutMapping("/{id}")
