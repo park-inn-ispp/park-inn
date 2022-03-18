@@ -14,4 +14,8 @@ public interface PlazaRepository extends JpaRepository<Plaza, Long> {
     @Query(value = "SELECT DISTINCT p.* FROM PLAZAS p LEFT JOIN HORARIOS h ON h.plaza_id = p.id WHERE (:max is null or precio_hora<=:max) and ((:inicio is null or fecha_fin > :inicio) and (:fin is null or fecha_inicio < :fin)) and (:zona is null or direccion LIKE %:zona%)",
         nativeQuery = true)
     public List<Plaza> filter(@Param("max") Double max, @Param("inicio") LocalDateTime inicio, @Param("fin") LocalDateTime fin, @Param("zona") String zona);
+
+    @Query(value = "SELECT DISTINCT p.* FROM PLAZAS p WHERE (p.estaDisponible==true) and (:zona is null or direccion LIKE %:zona%)",
+        nativeQuery = true)
+    public List<Plaza> filterAvailable(@Param("zona") String zona);
 }

@@ -39,6 +39,11 @@ public class PlazaController {
         return plazaService.findAll();
     }
 
+    @GetMapping("/available")
+    public List<Plaza> getAvailablePlaces(@RequestParam(name="zona", required=true) String zona) {
+        return plazaService.findAvailable(zona);
+    }
+
     @PostMapping
     public ResponseEntity createPlaza(@RequestBody Plaza plaza) throws URISyntaxException {
         Plaza savedPlaza = plazaService.guardarPlaza(plaza);

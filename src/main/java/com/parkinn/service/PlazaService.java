@@ -24,6 +24,11 @@ public class PlazaService {
         return repository.findAll();
     }
 
+    public List<Plaza> findAvailable(String zona){
+        List<Plaza> availablePlace = this.repository.filterAvailable(zona);
+        return availablePlace;
+    }
+
     public Plaza guardarPlaza(Plaza plaza){
         Plaza savedPlaza = repository.save(plaza);
         return savedPlaza;
