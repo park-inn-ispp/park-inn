@@ -6,7 +6,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.parkinn.model.Plaza;
+import com.parkinn.model.Reserva;
 import com.parkinn.service.PlazaService;
+import com.parkinn.service.ReservaService;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +29,8 @@ public class PlazaController {
 
     @Autowired
     private PlazaService plazaService;
+    @Autowired
+    private ReservaService reservaService;
 
     @GetMapping()
     public List<Plaza> filtrarPlazas(@RequestParam(name = "maxPrecioHora", required=false) Double maxPrecioHora, @RequestParam(name = "fechaInicio", required=false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaInicio,
@@ -66,6 +70,12 @@ public class PlazaController {
     public ResponseEntity deletePlaza(@PathVariable Long id) {
         plazaService.deleteById(id);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{id}/reservar")
+    public ResponseEntity createReserva(@RequestBody Reserva reserva, @PathVariable Long id) throws URISyntaxException {
+        Reserva savedReserva = reservaService.guardarReserva(reserva);
+        return ResponseEntity.created(new URI("/reservas/" + savedReserva.getId())).body(savedReserva);
     }
 
 }
