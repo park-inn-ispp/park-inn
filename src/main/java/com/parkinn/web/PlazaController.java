@@ -3,7 +3,11 @@ package com.parkinn.web;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import javax.validation.Valid;
 
 import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
@@ -73,9 +77,19 @@ public class PlazaController {
     }
 
     @PostMapping("/{id}/reservar")
-    public ResponseEntity createReserva(@RequestBody Reserva reserva, @PathVariable Long id) throws URISyntaxException {
-        Reserva savedReserva = reservaService.guardarReserva(reserva);
-        return ResponseEntity.created(new URI("/reservas/" + savedReserva.getId())).body(savedReserva);
+    public ResponseEntity createReserva(@Valid @RequestBody Reserva reserva, @PathVariable Long id) throws URISyntaxException {
+        Map<String,Object> response = new HashMap<>();
+        response.put("reserva", reserva);
+        if(reserva.getFechaInicio().isAfter(reserva.getFechaFin())){
+            response.put("error","La fecha de inicio debe ser anterior a la fecha de fin");
+            return ResponseEntity.badRequest().body(response);
+        }else if(reserva.getFechaInicio().isBefore(LocalDateTime.now())){
+            response.put("error","No se pueden realizar reservas en el pasado");
+            return ResponseEntity.badRequest().body(response);
+        }else{
+            Reserva savedReserva = reservaService.guardarReserva(reserva);
+            return ResponseEntity.created(new URI("/reservas/" + savedReserva.getId())).body(savedReserva);
+        }
     }
 
 }

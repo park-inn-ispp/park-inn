@@ -8,6 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "reservas")
@@ -19,7 +20,9 @@ public class Reserva {
 
     private Estado estado;
     private Double precioTotal;
+    @NotNull
     private LocalDateTime fechaInicio;
+    @NotNull
     private LocalDateTime fechaFin;
     private LocalDateTime fechaSolicitud;
     private String comentarios;
