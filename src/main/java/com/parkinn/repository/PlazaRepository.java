@@ -1,6 +1,7 @@
 package com.parkinn.repository;
 
 import org.springframework.dao.DataAccessException;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,3 +21,4 @@ public interface PlazaRepository extends JpaRepository<Plaza, Long> {
    	public Plaza findByAddress(@Param("direccion")String direccion) throws DataAccessException;
    	
 }
+
