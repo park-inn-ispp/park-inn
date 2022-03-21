@@ -12,7 +12,8 @@ package com.parkinn.web;
 import com.parkinn.model.Horario;
 import com.parkinn.model.Plaza;
 	import com.parkinn.model.Reserva;
-	import com.parkinn.service.PlazaService;
+import com.parkinn.repository.HorarioRepository;
+import com.parkinn.service.PlazaService;
 	import com.parkinn.service.ReservaService;
 
 
@@ -33,7 +34,9 @@ import com.parkinn.model.Plaza;
 	@RequestMapping("/reservas")
 	public class ReservaController {
 
-	
+		@Autowired
+		private HorarioRepository horarioRepository;
+		
 	    @Autowired
 	    private ReservaService reservaService;
 
@@ -48,13 +51,13 @@ import com.parkinn.model.Plaza;
 	    }
 	    
 	    @GetMapping("/{id}/fechasNoDisponibles")
-	    public List<Horario> FechasReserva(@PathVariable Long id) throws URISyntaxException {
+	    public List<List<LocalDateTime>> horariosNoDisponibles(@PathVariable Long id) throws URISyntaxException {
 	    	return reservaService.horariosNoDisponibles(id);
 	    }
-	    
+	    /*
 	    @GetMapping("/{id}/disponibilidad")
 	    public List<Horario> horariosPlaza(@PathVariable Long id) throws URISyntaxException {
 	    	return reservaService.horariosDisponibles(id);
-	    }
+	    }*/
 	
 	}

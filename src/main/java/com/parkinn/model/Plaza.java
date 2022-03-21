@@ -24,9 +24,10 @@ public class Plaza {
     /*@OneToMany(mappedBy="plaza", cascade = CascadeType.ALL)
     private Collection<Horario> horarios;
 	*/
-    @OneToOne(mappedBy = "Plaza", cascade = CascadeType.ALL)
+    /*
+    @OneToOne(mappedBy = "plaza", cascade = CascadeType.ALL)
     private Horario horario;
-    
+    */
     @ManyToOne
     @JoinColumn(name="user_id")
     private Client administrador;
@@ -95,8 +96,8 @@ public class Plaza {
     public Collection<Horario> getHorarios() {
         return this.horarios;
     }*/
-    
+    /*
     public Horario getHorario() {
     	return this.horario;
-    }
+    }*/
 }

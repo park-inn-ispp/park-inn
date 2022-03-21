@@ -19,16 +19,18 @@ public class Horario {
     @JoinColumn(name = "plaza_id")
     private Plaza plaza;
 	*/
+    /*
     @OneToOne
     @JoinColumn(name = "plaza_id")
     private Plaza plaza;
-    
+    */
+    /*
     public Horario(LocalDateTime fechaInicio,LocalDateTime fechaFin) {
     	this.fechaInicio = fechaInicio;
     	this.fechaFin = fechaFin;
-    }
+    }*/
     
-    public LocalDateTime getFechaInicio() {
+	public LocalDateTime getFechaInicio() {
         return this.fechaInicio;
     }
     public void setFechaInicio(LocalDateTime fechaInicio) {

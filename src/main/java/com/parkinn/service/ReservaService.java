@@ -1,5 +1,6 @@
 package com.parkinn.service;
 
+import com.parkinn.repository.HorarioRepository;
 import com.parkinn.repository.ReservaRepository;
 
 import java.time.Duration;
@@ -20,7 +21,9 @@ public class ReservaService {
     
     @Autowired
     private ReservaRepository repository;
-
+    @Autowired
+    private HorarioRepository horarioRepository;
+    
     @Autowired
     private PlazaService plazaService;
     
@@ -43,7 +46,7 @@ public class ReservaService {
         return reservas;
     }
     
-
+    /*
     public List<Horario> horariosDisponibles(Long id){
        	Plaza plaza = plazaService.findById(id);
        	Horario horario = plaza.getHorario();
@@ -71,14 +74,16 @@ public class ReservaService {
        		return horarios;
        	}
        	    
-       }
+       }*/
     
-    public List<Horario> horariosNoDisponibles(Long id){
+    public List<List<LocalDateTime>> horariosNoDisponibles(Long id){
     List<Reserva> lr = repository.findByPlazaId(id);
-		List<Horario> horarios = new ArrayList<Horario>();
+		List<List<LocalDateTime>> horarios = new ArrayList<>();
 		if(!lr.isEmpty()) {
 			for(int i =0; i<lr.size(); i++) {
-       			Horario HorarioOcupado = new Horario(lr.get(i).getFechaFin(),lr.get(i+1).getFechaInicio());
+       			List<LocalDateTime> HorarioOcupado = new ArrayList<LocalDateTime>();
+       			HorarioOcupado.add(lr.get(i).getFechaInicio());
+       			HorarioOcupado.add(lr.get(i).getFechaFin());
        			horarios.add(HorarioOcupado);
 			}
 			return horarios;
