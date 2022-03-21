@@ -11,7 +11,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
 
 public interface ReservaRepository extends JpaRepository<Reserva, Long> {
@@ -20,7 +19,6 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
 	 public List<Reserva> findByPlazaId(@Param("plaza_id") Long id) throws DataAccessException;
 	   	
 	
-
 	 @Query(value = "SELECT DISTINCT r.* FROM Reservas r WHERE r.user_id LIKE :usuario_id", nativeQuery=true)
 	   	public List<Reserva> findByUserId(@Param("usuario_id")Long id) throws DataAccessException;
 } 
