@@ -45,5 +45,10 @@ package com.parkinn.web;
 	    public List<Reserva> ReservasPlaza(@PathVariable Long id){
 	    	return reservaService.findPlazaById(id);
 	    }
+	    
+	    @GetMapping("/{id}")
+	    public Reserva detallesReserva(@PathVariable Long id){
+	    	return reservaService.findById(id);
+	    }
 	
 	}
