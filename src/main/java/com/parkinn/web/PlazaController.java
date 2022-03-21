@@ -93,6 +93,7 @@ public class PlazaController {
             return ResponseEntity.created(new URI("/reservas/" + savedReserva.getId())).body(savedReserva);
         }
     }
+
     
     @GetMapping("/{id}")
     public Plaza infoPlazaYCliente(@PathVariable Long id){
