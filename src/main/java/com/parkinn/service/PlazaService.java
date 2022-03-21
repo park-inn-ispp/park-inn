@@ -33,6 +33,12 @@ public class PlazaService {
         Plaza plaza = repository.findById(id).orElseThrow(RuntimeException::new);
         return plaza;
     }
+    
+    public List<Plaza> findUserById(Long id){
+    	List<Plaza> plazas = repository.findByUserId(id);
+        return plazas;
+    }
+    
     public void deleteById(Long id){
         repository.deleteById(id);
     }

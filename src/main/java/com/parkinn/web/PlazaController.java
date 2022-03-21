@@ -98,4 +98,11 @@ public class PlazaController {
     public Plaza infoPlazaYCliente(@PathVariable Long id){
     	return plazaService.findById(id);
     }
+    
+    @GetMapping("/plazasDelUsuario/{id}")
+    public List<Plaza> PlazasCliente(@PathVariable Long id){
+    	return plazaService.findUserById(id);
+    }
+    
+    
 }
