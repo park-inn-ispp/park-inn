@@ -27,6 +27,11 @@ public class ReservaService {
         Reserva reserva = repository.save(r);
         return reserva;
     }
+    
+    public List<Reserva> findPlazaById(Long id){
+    	List<Reserva> reservas = repository.findByPlazaId(id);
+        return reservas;
+    }
 
     public List<Reserva> findByUserId(Long id){
         List<Reserva> reservas= repository.findByUserId(id);
