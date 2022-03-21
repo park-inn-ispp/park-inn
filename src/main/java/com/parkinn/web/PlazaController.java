@@ -3,11 +3,13 @@ package com.parkinn.web;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.validation.Valid;
+
 
 import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
@@ -22,10 +24,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 @RestController
@@ -105,5 +114,58 @@ public class PlazaController {
     	return plazaService.findUserById(id);
     }
     
+    
+    
+    public void toJson(List<String> array) throws JSONException{
+    	JSONObject featureCollection = new JSONObject();
+        featureCollection.put("type", "FeatureCollection");
+        JSONObject properties = new JSONObject();
+        properties.put("name", "ESPG:4326");
+        JSONObject crs = new JSONObject();
+        crs.put("type", "name");
+        crs.put("properties", properties);
+        featureCollection.put("crs", crs);
+
+        JSONArray features = new JSONArray();
+
+
+
+        // ciclo for
+        for (Plaza obj : plazaService.findAll()) {
+            JSONObject feature = new JSONObject();
+            feature.put("type", "Feature");
+            //JSONArray JSONArrayCoord = new JSONArray();
+            JSONObject geometry = new JSONObject();
+            JSONObject desc = new JSONObject();
+            JSONObject newFeature = new JSONObject();
+
+
+            //JSONArrayCoord.put(0, Double.parseDouble(obj.getLongitud()));
+            //JSONArrayCoord.put(1, Double.parseDouble(obj.getLatitud()));
+            JSONArray JSONArrayCoord = new JSONArray("[" + obj.getDireccion() + "]");
+
+            geometry.put("type", "Point");
+            geometry.put("coordinates", JSONArrayCoord);
+            feature.put("geometry", geometry);
+            // proper.put("properties", desc);
+            feature.put("properties", desc);
+            desc.put("name", obj.getDireccion());
+
+
+            features.put(feature);
+            featureCollection.put("features", features);
+
+            // System.out.println(featureCollection.toString());
+            // }
+
+        }
+        System.out.println(featureCollection.toString());
+	}
+    
+    
+    @GetMapping("/test")
+    public List<Plaza> getPlazasGeoJson() {
+        return plazaService.findAll();
+    }
     
 }

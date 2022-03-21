@@ -28,7 +28,12 @@ public class Plaza {
     @JoinColumn(name="user_id")
     private Client administrador;
 
-    public Client getAdministrador() {
+    public Plaza(String direccion) {
+    	super();
+    	this.direccion = direccion;
+    }
+
+	public Client getAdministrador() {
         return this.administrador;
     }
 

@@ -5,6 +5,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.jdbc.core.RowMapper;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,6 +23,8 @@ public interface PlazaRepository extends JpaRepository<Plaza, Long> {
     
     @Query(value = "SELECT DISTINCT p.* FROM Plazas p WHERE p.user_id LIKE :usuario_id", nativeQuery=true)
     public List<Plaza> findByUserId(@Param("usuario_id") Long id) throws DataAccessException;
-   	
+
+	public List<Plaza> query(String string, RowMapper<Plaza> rowMapper);
+
 }
 
