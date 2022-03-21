@@ -7,6 +7,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.parkinn.model.Estado;
 import com.parkinn.model.Horario;
@@ -44,6 +45,11 @@ public class ReservaService {
     public List<Reserva> findByUserId(Long id){
         List<Reserva> reservas= repository.findByUserId(id);
         return reservas;
+        
+    }
+    public Reserva findById(Long id) {
+    	Optional<Reserva> reserva = repository.findById(id);
+    	return reserva.orElse(null);
     }
     
     /*

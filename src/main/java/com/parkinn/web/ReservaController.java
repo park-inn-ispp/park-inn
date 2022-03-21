@@ -59,5 +59,8 @@ import com.parkinn.service.PlazaService;
 	    public List<Horario> horariosPlaza(@PathVariable Long id) throws URISyntaxException {
 	    	return reservaService.horariosDisponibles(id);
 	    }*/
-	
+	    @GetMapping("/{id}")
+	    public Reserva detallesReserva(@PathVariable Long id){
+	    	return reservaService.findById(id);
+	    }	
 	}
