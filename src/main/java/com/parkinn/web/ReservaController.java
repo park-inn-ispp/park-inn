@@ -9,9 +9,11 @@ package com.parkinn.web;
 
 	import javax.validation.Valid;
 
-	import com.parkinn.model.Plaza;
+import com.parkinn.model.Horario;
+import com.parkinn.model.Plaza;
 	import com.parkinn.model.Reserva;
-	import com.parkinn.service.PlazaService;
+import com.parkinn.repository.HorarioRepository;
+import com.parkinn.service.PlazaService;
 	import com.parkinn.service.ReservaService;
 
 
@@ -32,7 +34,9 @@ package com.parkinn.web;
 	@RequestMapping("/reservas")
 	public class ReservaController {
 
-	
+		@Autowired
+		private HorarioRepository horarioRepository;
+		
 	    @Autowired
 	    private ReservaService reservaService;
 
@@ -46,9 +50,17 @@ package com.parkinn.web;
 	    	return reservaService.findPlazaById(id);
 	    }
 	    
+	    @GetMapping("/{id}/fechasNoDisponibles")
+	    public List<List<LocalDateTime>> horariosNoDisponibles(@PathVariable Long id) throws URISyntaxException {
+	    	return reservaService.horariosNoDisponibles(id);
+	    }
+	    /*
+	    @GetMapping("/{id}/disponibilidad")
+	    public List<Horario> horariosPlaza(@PathVariable Long id) throws URISyntaxException {
+	    	return reservaService.horariosDisponibles(id);
+	    }*/
 	    @GetMapping("/{id}")
 	    public Reserva detallesReserva(@PathVariable Long id){
 	    	return reservaService.findById(id);
-	    }
-	
+	    }	
 	}
