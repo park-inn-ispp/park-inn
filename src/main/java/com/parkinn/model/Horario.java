@@ -14,10 +14,20 @@ public class Horario {
     private LocalDateTime fechaInicio;
     private LocalDateTime fechaFin;
 
+    /*
     @ManyToOne()
     @JoinColumn(name = "plaza_id")
     private Plaza plaza;
-
+	*/
+    @OneToOne
+    @JoinColumn(name = "plaza_id")
+    private Plaza plaza;
+    
+    public Horario(LocalDateTime fechaInicio,LocalDateTime fechaFin) {
+    	this.fechaInicio = fechaInicio;
+    	this.fechaFin = fechaFin;
+    }
+    
     public LocalDateTime getFechaInicio() {
         return this.fechaInicio;
     }

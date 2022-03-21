@@ -21,9 +21,12 @@ public class Plaza {
     private Boolean esAireLibre;
     private String descripcion;
 
-    @OneToMany(mappedBy="plaza", cascade = CascadeType.ALL)
+    /*@OneToMany(mappedBy="plaza", cascade = CascadeType.ALL)
     private Collection<Horario> horarios;
-
+	*/
+    @OneToOne(mappedBy = "Plaza", cascade = CascadeType.ALL)
+    private Horario horario;
+    
     @ManyToOne
     @JoinColumn(name="user_id")
     private Client administrador;
@@ -88,8 +91,12 @@ public class Plaza {
     public void setDescripcion(String descripcion) {
         this.descripcion=descripcion;
     }
-
+    /*
     public Collection<Horario> getHorarios() {
         return this.horarios;
+    }*/
+    
+    public Horario getHorario() {
+    	return this.horario;
     }
 }

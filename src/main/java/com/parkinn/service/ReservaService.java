@@ -4,9 +4,11 @@ import com.parkinn.repository.ReservaRepository;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.parkinn.model.Estado;
+import com.parkinn.model.Horario;
 import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
 
@@ -19,6 +21,9 @@ public class ReservaService {
     @Autowired
     private ReservaRepository repository;
 
+    @Autowired
+    private PlazaService plazaService;
+    
     public Reserva guardarReserva(Reserva r){
         r.setEstado(Estado.aceptada);
         r.setFechaSolicitud(LocalDateTime.now());
@@ -37,4 +42,49 @@ public class ReservaService {
         List<Reserva> reservas= repository.findByUserId(id);
         return reservas;
     }
-} 
+    
+
+    public List<Horario> horariosDisponibles(Long id){
+       	Plaza plaza = plazaService.findById(id);
+       	Horario horario = plaza.getHorario();
+       	List<Reserva> lr = repository.findByPlazaId(id);
+   		List<Horario> horarios = new ArrayList<Horario>();
+       	if(!lr.isEmpty()) {
+       		for(int i =0; i<lr.size(); i++) {
+           		if(horario.getFechaInicio()!=lr.get(i).getFechaInicio()) {
+           			Horario nuevoHorario = new Horario(horario.getFechaInicio(),lr.get(i).getFechaInicio());
+           			horarios.add(nuevoHorario);
+           		}
+           		else if(horario.getFechaFin()!=lr.get(i).getFechaFin() && lr.get(i).getFechaFin()!=lr.get(i+1).getFechaInicio()) {
+           			Horario nuevoHorario = new Horario(lr.get(i).getFechaFin(),lr.get(i+1).getFechaInicio());
+           			horarios.add(nuevoHorario);
+           		}
+           		else if(horario.getFechaFin()!=lr.get(i).getFechaFin()){
+           			Horario nuevoHorario = new Horario(lr.get(i).getFechaFin(),horario.getFechaFin());
+           			horarios.add(nuevoHorario);
+           		}
+           	}
+       		return horarios;
+       	}
+       	else {
+       		horarios.add(horario);
+       		return horarios;
+       	}
+       	    
+       }
+    
+    public List<Horario> horariosNoDisponibles(Long id){
+    List<Reserva> lr = repository.findByPlazaId(id);
+		List<Horario> horarios = new ArrayList<Horario>();
+		if(!lr.isEmpty()) {
+			for(int i =0; i<lr.size(); i++) {
+       			Horario HorarioOcupado = new Horario(lr.get(i).getFechaFin(),lr.get(i+1).getFechaInicio());
+       			horarios.add(HorarioOcupado);
+			}
+			return horarios;
+		}
+		else{
+			return horarios;
+		}
+    }
+}
