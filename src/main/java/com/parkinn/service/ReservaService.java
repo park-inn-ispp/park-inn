@@ -33,4 +33,8 @@ public class ReservaService {
         return reservas;
     }
 
-}
+    public List<Reserva> findByUserId(Long id){
+        List<Reserva> reservas= repository.findByUserId(id);
+        return reservas;
+    }
+} 
