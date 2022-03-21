@@ -14,6 +14,7 @@ import com.parkinn.model.Reserva;
 import com.parkinn.service.PlazaService;
 import com.parkinn.service.ReservaService;
 
+
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,6 +36,7 @@ public class PlazaController {
     private PlazaService plazaService;
     @Autowired
     private ReservaService reservaService;
+
 
     @GetMapping()
     public List<Plaza> filtrarPlazas(@RequestParam(name = "maxPrecioHora", required=false) Double maxPrecioHora, @RequestParam(name = "fechaInicio", required=false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaInicio,
@@ -92,4 +94,16 @@ public class PlazaController {
         }
     }
 
+    
+    @GetMapping("/{id}")
+    public Plaza infoPlazaYCliente(@PathVariable Long id){
+    	return plazaService.findById(id);
+    }
+    
+    @GetMapping("/plazasDelUsuario/{id}")
+    public List<Plaza> PlazasCliente(@PathVariable Long id){
+    	return plazaService.findUserById(id);
+    }
+    
+    
 }
