@@ -93,6 +93,9 @@ public class PlazaController {
         }else if(reserva.getFechaInicio().isBefore(LocalDateTime.now())){
             response.put("error","No se pueden realizar reservas en el pasado");
             return ResponseEntity.badRequest().body(response);
+        }else if(reservaService.reservaTieneColision(reserva)){
+            response.put("error","Este horario está ocupado por otra reserva");
+            return ResponseEntity.badRequest().body(response);
         }else{
             Reserva savedReserva = reservaService.guardarReserva(reserva);
             return ResponseEntity.created(new URI("/reservas/" + savedReserva.getId())).body(savedReserva);
