@@ -17,6 +17,8 @@ public class Plaza {
     private Double fianza;
     private Double ancho;
     private Double largo;
+    private String latitud;
+    private String longitud;
     private Boolean estaDisponible;
     private Boolean esAireLibre;
     private String descripcion;
@@ -100,4 +102,20 @@ public class Plaza {
     public Horario getHorario() {
     	return this.horario;
     }*/
+
+	public String getLatitud() {
+		return latitud;
+	}
+
+	public void setLatitud(String latitud) {
+		this.latitud = latitud;
+	}
+
+	public String getLongitud() {
+		return longitud;
+	}
+
+	public void setLongitud(String longitud) {
+		this.longitud = longitud;
+	}
 }
