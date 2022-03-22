@@ -1,10 +1,13 @@
 package com.parkinn.service;
 
 import com.parkinn.repository.PlazaRepository;
+import com.parkinn.model.Localizacion;
 import com.parkinn.model.Plaza;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -42,4 +45,17 @@ public class PlazaService {
     public void deleteById(Long id){
         repository.deleteById(id);
     }
+    
+    @Autowired
+    RestTemplate restTemplate;
+    public Localizacion getLocalizacion(String direccion){
+        ResponseEntity<Localizacion> response = restTemplate.getForEntity("https://geocode.maps.co/search?q=" + direccion, Localizacion.class);
+        Localizacion localizacion = response.getBody();
+     
+    return  localizacion;
+    }
+    
+    
+    
+    
 }

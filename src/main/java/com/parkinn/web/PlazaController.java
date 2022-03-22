@@ -9,6 +9,7 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import com.parkinn.model.Localizacion;
 import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
 import com.parkinn.service.PlazaService;
@@ -51,7 +52,11 @@ public class PlazaController {
 
     @PostMapping
     public ResponseEntity createPlaza(@RequestBody Plaza plaza) throws URISyntaxException {
-        Plaza savedPlaza = plazaService.guardarPlaza(plaza);
+        Localizacion localizacion = plazaService.getLocalizacion(plaza.getDireccion());
+        plaza.setLatitud(localizacion.getLat());
+        plaza.setLongitud(localizacion.getLon());
+    	    	
+    	Plaza savedPlaza = plazaService.guardarPlaza(plaza);
         return ResponseEntity.created(new URI("/plazas/" + savedPlaza.getId())).body(savedPlaza);
     }
 
