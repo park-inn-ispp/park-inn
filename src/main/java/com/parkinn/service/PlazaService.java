@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -17,7 +18,11 @@ public class PlazaService {
     
     @Autowired
     private PlazaRepository repository;
+   
+    @Autowired
+    RestTemplate restTemplate;
 
+    
     public List<Plaza> filtrarPlazas(Double max, LocalDateTime inicio, LocalDateTime fin, String zona){
         List<Plaza> plazas = repository.filter(max, inicio, fin, zona);
         return plazas;
@@ -46,12 +51,14 @@ public class PlazaService {
         repository.deleteById(id);
     }
     
-    @Autowired
-    RestTemplate restTemplate;
+    
     public Localizacion getLocalizacion(String direccion){
-        ResponseEntity<Localizacion> response = restTemplate.getForEntity("https://geocode.maps.co/search?q=" + direccion, Localizacion.class);
-        Localizacion localizacion = response.getBody();
-     
+        ResponseEntity<Localizacion[]> response = restTemplate.getForEntity("https://geocode.maps.co/search?q=" + direccion, Localizacion[].class);
+        Localizacion[] localizaciones = response.getBody();
+        List<Localizacion> l = Arrays.asList(localizaciones);
+        Localizacion localizacion = l.get(0);    
+        
+        
     return  localizacion;
     }
     
