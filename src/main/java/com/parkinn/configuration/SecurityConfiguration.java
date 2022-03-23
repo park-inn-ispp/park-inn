@@ -43,6 +43,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 				.antMatchers("/resources/**","/webjars/**","/h2-console/**").permitAll()
 				.antMatchers(HttpMethod.GET, "/","/oups").permitAll()
 				.antMatchers("/clients/{id}").permitAll()
+				.antMatchers("/clients/getbymail/*").permitAll()
 				.anyRequest().permitAll()
 				.and()
 				 	.formLogin()

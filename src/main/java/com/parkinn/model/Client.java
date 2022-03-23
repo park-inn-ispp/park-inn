@@ -66,6 +66,10 @@ public class Client {
         return Objects.equals(email, client.email) && Objects.equals(password, client.password);
     }
 
+    public Client orElseThrow(Object object) {
+        return null;
+    }
+
    
     
 
