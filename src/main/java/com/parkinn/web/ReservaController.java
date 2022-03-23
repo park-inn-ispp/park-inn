@@ -50,6 +50,10 @@ import com.parkinn.service.PlazaService;
 	    	return reservaService.findPlazaById(id);
 	    }
 	    
+		@GetMapping("/all")
+	    public List<Reserva> findAll(){
+	    	return reservaService.findAll();
+	    }
 	    @GetMapping("/{id}/fechasNoDisponibles")
 	    public List<List<LocalDateTime>> horariosNoDisponibles(@PathVariable Long id) throws URISyntaxException {
 	    	return reservaService.horariosNoDisponibles(id);
