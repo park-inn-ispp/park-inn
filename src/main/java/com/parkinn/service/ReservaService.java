@@ -28,6 +28,10 @@ public class ReservaService {
     @Autowired
     private PlazaService plazaService;
     
+	public List<Reserva> findAll(){
+        return repository.findAll();
+    }
+
     public Reserva guardarReserva(Reserva r){
         r.setEstado(Estado.aceptada);
         r.setFechaSolicitud(LocalDateTime.now());
