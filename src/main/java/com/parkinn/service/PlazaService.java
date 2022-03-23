@@ -52,7 +52,16 @@ public class PlazaService {
     }
     
     
-    public Localizacion getLocalizacion(String direccion){
+    public Localizacion getLocalizacion(String query){
+        String[] res = query.split(",");
+        String calle = res[0];
+        String numero = res[1];
+        String ciudad = res[2];
+        String provincia = res[3];
+        String cogigoPostal = res[4];
+        
+        String direccion = calle + "," + numero + "," + ciudad + "," + provincia;
+        
         ResponseEntity<Localizacion[]> response = restTemplate.getForEntity("https://geocode.maps.co/search?q=" + direccion, Localizacion[].class);
         Localizacion[] localizaciones = response.getBody();
         List<Localizacion> l = Arrays.asList(localizaciones);
