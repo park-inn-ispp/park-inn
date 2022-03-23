@@ -98,4 +98,14 @@ public class ReservaService {
 			return horarios;
 		}
     }
+
+	public Boolean reservaTieneColision(Reserva res){
+		List<List<LocalDateTime>> horarios = horariosNoDisponibles(res.getPlaza().getId());
+		for (List<LocalDateTime> h: horarios){
+			if(h.get(1).isAfter(res.getFechaInicio()) && h.get(0).isBefore(res.getFechaFin())){
+				return true;
+			}
+		}
+		return false;
+	}
 }
