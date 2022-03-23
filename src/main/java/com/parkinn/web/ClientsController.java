@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 import com.parkinn.model.Client;
+import com.parkinn.model.Status;
 import com.parkinn.repository.ClientRepository;
 
 import org.springframework.http.ResponseEntity;
@@ -60,5 +61,42 @@ public class ClientsController {
     public ResponseEntity deleteClient(@PathVariable Long id) {
         clientRepository.deleteById(id);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/login")
+    public Status loginClient(@RequestBody Client client) {
+        List<Client> clients = clientRepository.findAll();
+        for (Client other : clients) {
+            if (other.equals(client)) {
+                if(other.isLoggedIn()){
+                    return Status.USER_ALREADY_EXISTS;
+
+                }else{
+                    other.setLoggedIn(true);
+                    clientRepository.save(other);
+                    return Status.SUCCESS;
+                }
+               
+            }
+        }
+        return Status.FAILURE;
+    }
+    @PostMapping("/logout")
+    public Status logUserOut( @RequestBody Client client) {
+        List<Client> clients = clientRepository.findAll();
+        for (Client other : clients) {
+            if (other.equals(client)) {
+                if(!other.isLoggedIn()){
+                    return Status.USER_NOT_LOGGED;
+
+                }else{
+                    other.setLoggedIn(false);
+                    clientRepository.save(other);
+                    return Status.SUCCESS;
+                }
+               
+            }
+        }
+        return Status.FAILURE;
     }
 }
