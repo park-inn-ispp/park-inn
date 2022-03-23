@@ -3,8 +3,10 @@ package com.parkinn.web;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Objects;
 
 import com.parkinn.model.Client;
+import com.parkinn.model.Status;
 import com.parkinn.repository.ClientRepository;
 
 import org.springframework.http.ResponseEntity;
@@ -40,6 +42,12 @@ public class ClientsController {
         return clientRepository.findById(id).orElseThrow(RuntimeException::new);
     }
 
+    @GetMapping("/usuariopormail/{email}")
+    public Client getByEmail(@PathVariable String email) {
+        return clientRepository.findByEmail(email).orElseThrow(RuntimeException::new);
+    }
+
+
     @PostMapping
     public ResponseEntity createClient(@RequestBody Client client) throws URISyntaxException {
         Client savedClient = clientRepository.save(client);
@@ -60,5 +68,42 @@ public class ClientsController {
     public ResponseEntity deleteClient(@PathVariable Long id) {
         clientRepository.deleteById(id);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/login")
+    public Status loginClient(@RequestBody Client client) {
+        List<Client> clients = clientRepository.findAll();
+        for (Client other : clients) {
+            if (other.equals(client)) {
+                if(other.isLoggedIn()){
+                    return Status.USER_ALREADY_EXISTS;
+
+                }else{
+                    other.setLoggedIn(true);
+                    clientRepository.save(other);
+                    return Status.SUCCESS;
+                }
+               
+            }
+        }
+        return Status.FAILURE;
+    }
+    @PostMapping("/logout")
+    public Status logUserOut( @RequestBody Client client) {
+        List<Client> clients = clientRepository.findAll();
+        for (Client other : clients) {
+            if (Objects.equals(other.getEmail(), client.getEmail())) {
+                if(!other.isLoggedIn()){
+                    return Status.USER_NOT_LOGGED;
+
+                }else{
+                    other.setLoggedIn(false);
+                    clientRepository.save(other);
+                    return Status.SUCCESS;
+                }
+               
+            }
+        }
+        return Status.FAILURE;
     }
 }
