@@ -13,10 +13,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import java.util.Optional;
 import java.util.Collections;
 
+import com.parkinn.model.Client;
+import com.parkinn.model.Role;
 import com.parkinn.payload.LoginDto;
+import com.parkinn.payload.SignUpDto;
 import com.parkinn.repository.ClientRepository;
 import com.parkinn.repository.RoleRepository;
 
@@ -45,7 +48,15 @@ public class AuthController {
                 loginDto.getnameOrEmail(), loginDto.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
+
+
+        Client userlogged = clientRepository.findByNameOrEmail(loginDto.getnameOrEmail(), loginDto.getnameOrEmail()).get();
+        userlogged.setLoggedIn(true);
+        clientRepository.save(userlogged);
         return new ResponseEntity<>("User signed-in successfully!.", HttpStatus.OK);
     }
+
+
+   
     
 }
