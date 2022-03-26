@@ -3,6 +3,7 @@ package com.parkinn.web;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Objects;
 
 import com.parkinn.model.Client;
 import com.parkinn.model.Status;
@@ -40,6 +41,12 @@ public class ClientsController {
     public Client getClient(@PathVariable Long id) {
         return clientRepository.findById(id).orElseThrow(RuntimeException::new);
     }
+
+    @GetMapping("/usuariopormail/{email}")
+    public Client getByEmail(@PathVariable String email) {
+        return clientRepository.findByEmail(email).orElseThrow(RuntimeException::new);
+    }
+
 
     @PostMapping
     public ResponseEntity createClient(@RequestBody Client client) throws URISyntaxException {
@@ -85,7 +92,7 @@ public class ClientsController {
     public Status logUserOut( @RequestBody Client client) {
         List<Client> clients = clientRepository.findAll();
         for (Client other : clients) {
-            if (other.equals(client)) {
+            if (Objects.equals(other.getEmail(), client.getEmail())) {
                 if(!other.isLoggedIn()){
                     return Status.USER_NOT_LOGGED;
 

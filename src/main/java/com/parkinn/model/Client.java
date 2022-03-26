@@ -117,6 +117,10 @@ public class Client {
         this.roles = roles;
     }
 
+    public Client orElseThrow(Object object) {
+        return null;
+    }
+
    
     
 
