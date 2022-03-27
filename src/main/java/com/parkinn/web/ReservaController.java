@@ -58,6 +58,27 @@ import com.parkinn.service.PlazaService;
 	    public List<List<LocalDateTime>> horariosNoDisponibles(@PathVariable Long id) throws URISyntaxException {
 	    	return reservaService.horariosNoDisponibles(id);
 	    }
+	    @PutMapping("/{id}")
+	    public ResponseEntity updateReserva(@PathVariable Long id, @RequestBody Reserva reserva) {
+	        Reserva currentReserva = reservaService.findById(id);
+	        currentReserva.setEstado(reserva.getEstado());
+	        currentReserva.setPrecioTotal(reserva.getPrecioTotal());
+	        currentReserva.setFechaInicio(reserva.getFechaInicio());
+	        currentReserva.setFechaFin(reserva.getFechaFin());
+	        currentReserva.setFechaSolicitud(reserva.getFechaSolicitud());
+	        currentReserva.setComentarios(reserva.getComentarios());
+	        currentReserva.setIncidencias(reserva.getIncidencias());
+
+	        currentReserva = reservaService.guardarReserva(reserva);
+
+	        return ResponseEntity.ok(currentReserva);
+	    }
+
+	    @DeleteMapping("/{id}")
+	    public ResponseEntity deletePlaza(@PathVariable Long id) {
+	    	reservaService.deleteById(id);
+	        return ResponseEntity.ok().build();
+	    }
 	    /*
 	    @GetMapping("/{id}/disponibilidad")
 	    public List<Horario> horariosPlaza(@PathVariable Long id) throws URISyntaxException {

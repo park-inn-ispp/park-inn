@@ -56,6 +56,10 @@ public class ReservaService {
     	return reserva.orElse(null);
     }
     
+    public void deleteById(Long id){
+        repository.deleteById(id);
+    }
+    
     /*
     public List<Horario> horariosDisponibles(Long id){
        	Plaza plaza = plazaService.findById(id);

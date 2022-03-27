@@ -2,6 +2,7 @@ package com.parkinn.model;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import javax.persistence.*;
 
@@ -18,7 +19,11 @@ public class Client {
     private String email;
     private String password;
     private boolean loggedIn;
+    //private boolean eneabled;
 
+    //@OneToMany(cascade = CascadeType.ALL, mappedBy = "client")
+	//private Set<Authorities> authorities;
+    
     public String getPassword() {
         return this.password;
     }
@@ -69,6 +74,14 @@ public class Client {
     public Client orElseThrow(Object object) {
         return null;
     }
+
+	/*public boolean isEneabled() {
+		return eneabled;
+	}
+
+	public void setEneabled(boolean eneabled) {
+		this.eneabled = eneabled;
+	}*/
 
    
     

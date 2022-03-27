@@ -8,8 +8,11 @@ import java.util.Objects;
 import com.parkinn.model.Client;
 import com.parkinn.model.Status;
 import com.parkinn.repository.ClientRepository;
+import com.parkinn.service.AuthoritiesService;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,12 +30,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class ClientsController {
 
     private final ClientRepository clientRepository;
-
+    
+    //@Autowired
+	//private PasswordEncoder passwordEncoder;
+    
+    AuthoritiesService authoritiesService;
+    
     public ClientsController(ClientRepository clientRepository) {
         this.clientRepository = clientRepository;
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public List<Client> getClients() {
         return clientRepository.findAll();
     }
@@ -50,7 +58,10 @@ public class ClientsController {
 
     @PostMapping
     public ResponseEntity createClient(@RequestBody Client client) throws URISyntaxException {
+		//client.setEnabled(true);
+		//client.setPassword(passwordEncoder.encode(client.getPassword()));
         Client savedClient = clientRepository.save(client);
+		//authoritiesService.saveAuthorities(client.getEmail(), "client");
         return ResponseEntity.created(new URI("/clients/" + savedClient.getId())).body(savedClient);
     }
 
@@ -106,4 +117,6 @@ public class ClientsController {
         }
         return Status.FAILURE;
     }
+    
+    
 }
