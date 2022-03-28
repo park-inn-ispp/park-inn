@@ -76,7 +76,7 @@ public class PlazaController {
         currentPlaza.setFianza(plaza.getFianza());
         currentPlaza.setPrecioHora(plaza.getPrecioHora());
 
-        currentPlaza = plazaService.guardarPlaza(plaza);
+        currentPlaza = plazaService.guardarPlaza(currentPlaza);
 
         return ResponseEntity.ok(currentPlaza);
     }
