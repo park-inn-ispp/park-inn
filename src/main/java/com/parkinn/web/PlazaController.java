@@ -62,7 +62,11 @@ public class PlazaController {
 
     @PutMapping("/{id}")
     public ResponseEntity updatePlaza(@PathVariable Long id, @RequestBody Plaza plaza) {
-        Plaza currentPlaza = plazaService.findById(id);
+    	Localizacion localizacion = plazaService.getLocalizacion(plaza.getDireccion());
+        
+    	Plaza currentPlaza = plazaService.findById(id);
+    	currentPlaza.setLatitud(localizacion.getLat());
+        currentPlaza.setLongitud(localizacion.getLon());
         currentPlaza.setDireccion(plaza.getDireccion());
         currentPlaza.setDescripcion(plaza.getDescripcion());
         currentPlaza.setAncho(plaza.getAncho());
