@@ -29,6 +29,7 @@ import com.parkinn.service.PlazaService;
 	import org.springframework.beans.factory.annotation.Autowired;
 	import org.springframework.format.annotation.DateTimeFormat;
 	import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 	@RestController
 	@RequestMapping("/reservas")
@@ -49,7 +50,8 @@ import com.parkinn.service.PlazaService;
 	    public List<Reserva> ReservasPlaza(@PathVariable Long id){
 	    	return reservaService.findPlazaById(id);
 	    }
-	    
+		
+	    @PreAuthorize("hasRole('ROLE_ADMIN')")
 		@GetMapping("/all")
 	    public List<Reserva> findAll(){
 	    	return reservaService.findAll();
