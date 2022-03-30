@@ -58,6 +58,42 @@ public class AuthController {
     }
 
 
+    @PostMapping("/signup")
+    public ResponseEntity<?> registerUser(@RequestBody SignUpDto signUpDto){
+
+        // add check for name exists in a DB
+        if(clientRepository.existsByName(signUpDto.getName())){
+            return new ResponseEntity<>("Name is already taken!", HttpStatus.BAD_REQUEST);
+        }
+
+        // add check for email exists in DB
+        if(clientRepository.existsByEmail(signUpDto.getEmail())){
+            return new ResponseEntity<>("Email is already taken!", HttpStatus.BAD_REQUEST);
+        }
+
+        if(!signUpDto.getPassword().equals(signUpDto.getConfirm())){
+            return new ResponseEntity<>("Las contraseñas no coinciden", HttpStatus.BAD_REQUEST); 
+        }
+
+        // create user object
+        Client user = new Client();
+        user.setName(signUpDto.getName());
+        user.setEmail(signUpDto.getEmail());
+        user.setPassword(passwordEncoder.encode(signUpDto.getPassword()));
+        user.setLoggedIn(true);
+        user.setPhone(signUpDto.getPhone());
+        user.setSurname(signUpDto.getSurname());
+
+        Role roles = roleRepository.findByName("ROLE_USER").get();
+        user.setRoles(Collections.singleton(roles));
+
+        clientRepository.save(user);
+
+        return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
+
+    }
+
+
    
     
 }

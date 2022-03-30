@@ -27,6 +27,13 @@ public class Client {
     @Size(max = 120)
     private String password;
     private boolean loggedIn;
+    @NotBlank
+    @Size(max = 9, min = 9)
+    @Column(unique=true)
+    private String phone;
+    @NotBlank
+    @Size(max = 120)
+    private String surname;
 
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
@@ -119,6 +126,22 @@ public class Client {
 
     public Client orElseThrow(Object object) {
         return null;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
     }
 
    
