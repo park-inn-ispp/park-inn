@@ -6,6 +6,7 @@ import com.parkinn.repository.ReservaRepository;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,13 +14,19 @@ import com.parkinn.model.Estado;
 import com.parkinn.model.Horario;
 import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
+import com.parkinn.model.paypal.PayPalClasses;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 public class ReservaService {
     
+    @Autowired
+    RestTemplate restTemplate;
+	
     @Autowired
     private ReservaRepository repository;
     @Autowired
@@ -112,4 +119,20 @@ public class ReservaService {
 		}
 		return false;
 	}
+	
+
+	public PayPalClasses getPayPal(String query){
+      
+        ResponseEntity<PayPalClasses[]> response = restTemplate.getForEntity("https://api-m.sandbox.paypal.com/v2/checkout/orders/" + query, PayPalClasses[].class);
+        PayPalClasses[] paypal = response.getBody();
+        List<PayPalClasses> p = Arrays.asList(paypal);
+        PayPalClasses paypalRes = p.get(0);    
+        
+        
+    return  paypalRes;
+    }
+	
+	
+	
+	
 }

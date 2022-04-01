@@ -12,6 +12,9 @@ package com.parkinn.web;
 import com.parkinn.model.Horario;
 import com.parkinn.model.Plaza;
 	import com.parkinn.model.Reserva;
+import com.parkinn.model.paypal.Amount;
+import com.parkinn.model.paypal.PayPalClasses;
+import com.parkinn.model.paypal.PurchaseUnit;
 import com.parkinn.repository.HorarioRepository;
 import com.parkinn.service.PlazaService;
 	import com.parkinn.service.ReservaService;
@@ -68,5 +71,48 @@ import org.springframework.security.access.prepost.PreAuthorize;
 	    @GetMapping("/{id}")
 	    public Reserva detallesReserva(@PathVariable Long id){
 	    	return reservaService.findById(id);
-	    }	
+	    }
+	    
+
+	   
+		@PutMapping("/{paypal_order_id}")
+	    public ResponseEntity pagoReserva(@PathVariable String paypal_order_id, @RequestBody Reserva reserva) throws URISyntaxException {
+	    	Map<String,Object> response = new HashMap<>();
+	    	
+	    	List<Reserva> reservas = reservaService.findAll();
+	    	    	
+	    	if(reservas.stream().anyMatch(x->x.getPaypal_order_id()==paypal_order_id)) {
+	    		response.put("error","La transacción ya existía en la base de datos");
+				return ResponseEntity.badRequest().body(response);
+	    	}
+	    	PayPalClasses paypal = reservaService.getPayPal(paypal_order_id);
+			PurchaseUnit purchase = paypal.getPurchaseUnits().get(0);
+			Amount amount = purchase.getAmount();
+			
+			String value = amount.getValue();
+			String currencyCode = amount.getCurrencyCode();
+	    	
+			if(purchase == null) {
+				response.put("error","La transacción no existe");
+				return ResponseEntity.badRequest().body(response);
+			
+			}else if(currencyCode != "EUR") {
+				response.put("error","La moneda de la transacción debe ser el Euro");
+		        return ResponseEntity.badRequest().body(response);
+			
+			}else if(String.valueOf(reserva.getPrecioTotal()) != value ) {
+				response.put("error","El precio de la reserva no coincide con el valor de la transacción");
+		        return ResponseEntity.badRequest().body(response);
+			
+			}else {
+				reserva.setPaypal_order_id(paypal_order_id);
+				reserva = reservaService.guardarReserva(reserva);
+		        return ResponseEntity.ok(reserva);
+
+			}
+	    	
+	    }
+	    
+
+	    
 	}
