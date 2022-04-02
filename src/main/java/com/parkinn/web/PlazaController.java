@@ -12,6 +12,9 @@ import javax.validation.Valid;
 import com.parkinn.model.Localizacion;
 import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
+import com.parkinn.model.paypal.Amount;
+import com.parkinn.model.paypal.PayPalClasses;
+import com.parkinn.model.paypal.PurchaseUnit;
 import com.parkinn.service.PlazaService;
 import com.parkinn.service.ReservaService;
 
@@ -90,7 +93,35 @@ public class PlazaController {
     @PostMapping("/{id}/reservar")
     public ResponseEntity createReserva(@Valid @RequestBody Reserva reserva, @PathVariable Long id) throws URISyntaxException {
         Map<String,Object> response = new HashMap<>();
+        List<Reserva> reservas = reservaService.findAll();
         response.put("reserva", reserva);
+        
+        if(reservas.stream().anyMatch(x->x.getPaypal_order_id()==reserva.getPaypal_order_id())) {
+    		response.put("error","La transacción ya existía en la base de datos");
+			return ResponseEntity.badRequest().body(response);
+    	}
+        
+        PayPalClasses paypal = reservaService.getPayPal(reserva.getPaypal_order_id());
+		PurchaseUnit purchase = paypal.getPurchaseUnits().get(0);
+		Amount amount = purchase.getAmount();
+		
+		String value = amount.getValue();
+		String currencyCode = amount.getCurrencyCode();
+		
+		if(purchase == null) {
+			response.put("error","La transacción no existe");
+			return ResponseEntity.badRequest().body(response);
+		
+		}else if(currencyCode != "EUR") {
+			response.put("error","La moneda de la transacción debe ser el Euro");
+	        return ResponseEntity.badRequest().body(response);
+		
+		}else if(String.valueOf(reserva.getPrecioTotal()) != value ) {
+			response.put("error","El precio de la reserva no coincide con el valor de la transacción");
+	        return ResponseEntity.badRequest().body(response);
+		
+		}
+        
         if(reserva.getFechaInicio().isAfter(reserva.getFechaFin())){
             response.put("error","La fecha de inicio debe ser anterior a la fecha de fin");
             return ResponseEntity.badRequest().body(response);
@@ -104,6 +135,10 @@ public class PlazaController {
             Reserva savedReserva = reservaService.guardarReserva(reserva);
             return ResponseEntity.created(new URI("/reservas/" + savedReserva.getId())).body(savedReserva);
         }
+        
+    	
+    	
+    	    	
     }
 
     
