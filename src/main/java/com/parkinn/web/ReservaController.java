@@ -9,6 +9,7 @@ package com.parkinn.web;
 
 	import javax.validation.Valid;
 
+import com.parkinn.model.Estado;
 import com.parkinn.model.Horario;
 import com.parkinn.model.Plaza;
 	import com.parkinn.model.Reserva;
@@ -30,6 +31,7 @@ import com.parkinn.service.PlazaService;
 	import org.springframework.format.annotation.DateTimeFormat;
 	import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 	@RestController
 	@RequestMapping("/reservas")
@@ -68,5 +70,26 @@ import org.springframework.security.access.prepost.PreAuthorize;
 	    @GetMapping("/{id}")
 	    public Reserva detallesReserva(@PathVariable Long id){
 	    	return reservaService.findById(id);
-	    }	
+	    }
+
+		@GetMapping("/{id}/confirmar")
+	    public Object confirmarServicio(@PathVariable Long id){
+			Reserva r = reservaService.findById(id);
+			Map<String,Object> response = new HashMap<>();
+			Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+			if(user.equals(r.getUser().getEmail()) || user.equals(r.getPlaza().getAdministrador().getEmail())){
+				if(r.getFechaFin().isAfter(LocalDateTime.now())){
+					return reservaService.confirmarServicio(r, user);
+				}else{
+					response.put("reserva", r);
+					response.put("error","No puede confirmar esta reserva ya que todavía no ha finalizado");
+					return ResponseEntity.badRequest().body(response);
+				}
+			}else{
+				response.put("reserva", r);
+				response.put("error","No estás involucrado en esta reserva");
+				return ResponseEntity.badRequest().body(response);
+			}
+			
+	    }
 	}

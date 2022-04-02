@@ -112,4 +112,16 @@ public class ReservaService {
 		}
 		return false;
 	}
+
+	public Reserva confirmarServicio(Reserva r, Object user){
+		if(user.equals(r.getUser().getEmail()) && !r.getEstado().equals(Estado.confirmadaPropietario)){
+			r.setEstado(Estado.confirmadaUsuario);
+		}else if(user.equals(r.getPlaza().getAdministrador().getEmail()) && !r.getEstado().equals(Estado.confirmadaUsuario)){
+			r.setEstado(Estado.confirmadaPropietario);
+		}else{
+			r.setEstado(Estado.confirmadaAmbos);
+		}
+        Reserva reserva = repository.save(r);
+        return reserva;
+    }
 }
