@@ -33,10 +33,24 @@ public class ReservaService {
     }
 
     public Reserva guardarReserva(Reserva r){
-        r.setEstado(Estado.aceptada);
+        r.setEstado(Estado.pendiente);
         r.setFechaSolicitud(LocalDateTime.now());
         Double precio = Duration.between(r.getFechaInicio(), r.getFechaFin()).toHours() * r.getPlaza().getPrecioHora();
         r.setPrecioTotal(precio);
+        Reserva reserva = repository.save(r);
+        return reserva;
+    }
+
+	public Reserva aceptarReserva(Long id){
+		Reserva r = findById(id);
+        r.setEstado(Estado.aceptada);
+        Reserva reserva = repository.save(r);
+        return reserva;
+    }
+
+	public Reserva rechazarReserva(Long id){
+		Reserva r = findById(id);
+        r.setEstado(Estado.rechazada);
         Reserva reserva = repository.save(r);
         return reserva;
     }
@@ -120,7 +134,14 @@ public class ReservaService {
 			r.setEstado(Estado.confirmadaPropietario);
 		}else{
 			r.setEstado(Estado.confirmadaAmbos);
+			//Meter logica para devolver la fianza
 		}
+        Reserva reserva = repository.save(r);
+        return reserva;
+    }
+
+	public Reserva denegarServicio(Reserva r){
+		r.setEstado(Estado.denegada);
         Reserva reserva = repository.save(r);
         return reserva;
     }
