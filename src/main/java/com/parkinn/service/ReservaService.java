@@ -35,8 +35,8 @@ public class ReservaService {
     public Reserva guardarReserva(Reserva r){
         r.setEstado(Estado.pendiente);
         r.setFechaSolicitud(LocalDateTime.now());
-        Double precio = Duration.between(r.getFechaInicio(), r.getFechaFin()).toHours() * r.getPlaza().getPrecioHora();
-        r.setPrecioTotal(precio);
+        Double precio = Duration.between(r.getFechaInicio(), r.getFechaFin()).toMinutes() * r.getPlaza().getPrecioHora()/60;
+        r.setPrecioTotal(Math.round(precio*100.0)/100.0);
         Reserva reserva = repository.save(r);
         return reserva;
     }
