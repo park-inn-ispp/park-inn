@@ -1,7 +1,9 @@
 package com.parkinn.web;
 
 import java.net.URISyntaxException;
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,61 +40,64 @@ public class ReservaController {
 	@Autowired
 	private ReservaService reservaService;
 
-	@GetMapping("/usuario/{id}")
-	public List<Reserva> reservasUsuario(@PathVariable Long id){
-		return reservaService.findByUserId(id);
-	}
+
+	    @GetMapping("/usuario/{id}")
+	    public List<Reserva> reservasUsuario(@PathVariable Long id){
+	    	return reservaService.findByUserId(id);
+	    }
 	    
-	@GetMapping("/plaza/{id}")
-	public List<Reserva> reservasPlaza(@PathVariable Long id){
-		return reservaService.findPlazaById(id);
-	}
+	    @GetMapping("/plaza/{id}")
+	    public List<Reserva> ReservasPlaza(@PathVariable Long id){
+	    	return reservaService.findPlazaById(id);
+	    }
+		
+	    @PreAuthorize("hasRole('ROLE_ADMIN')")
+		@GetMapping("/all")
+	    public List<Reserva> findAll(){
+	    	return reservaService.findAll();
+	    }
+	    @GetMapping("/{id}/fechasNoDisponibles")
+	    public List<List<LocalDateTime>> horariosNoDisponibles(@PathVariable Long id) throws URISyntaxException {
+	    	return reservaService.horariosNoDisponibles(id);
+	    }
+	    /*
+	    @GetMapping("/{id}/disponibilidad")
+	    public List<Horario> horariosPlaza(@PathVariable Long id) throws URISyntaxException {
+	    	return reservaService.horariosDisponibles(id);
+	    }*/
+	    @GetMapping("/{id}")
+	    public Reserva detallesReserva(@PathVariable Long id){
+	    	return reservaService.findById(id);
+	    }	
+
+		@GetMapping("/{id}/aceptar")
+	    public Object aceptarReserva(@PathVariable Long id){
+			Reserva reserva = reservaService.findById(id);
+			if(reserva.getPlaza().getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+				return reservaService.aceptarReserva(id);
+			}else{
+				Map<String,Object> response = new HashMap<>();
+        		response.put("reserva", reserva);
+				response.put("error","Esta reserva no es sobre una plaza de tu propiedad");
+				return ResponseEntity.badRequest().body(response);
+			}
+	    }
+
+		@GetMapping("/{id}/rechazar")
+	    public Object rechazarReserva(@PathVariable Long id){
+			Reserva reserva = reservaService.findById(id);
+			if(reserva.getPlaza().getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+				return reservaService.rechazarReserva(id);
+			}else{
+				Map<String,Object> response = new HashMap<>();
+        		response.put("reserva", reserva);
+				response.put("error","Esta reserva no es sobre una plaza de tu propiedad");
+				return ResponseEntity.badRequest().body(response);
+			}
+	    }
 		
 
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
-	@GetMapping("/all")
-	public List<Reserva> findAll(){
-		return reservaService.findAll();
-	}
-	@GetMapping("/{id}/fechasNoDisponibles")
-	public List<List<LocalDateTime>> horariosNoDisponibles(@PathVariable Long id) throws URISyntaxException {
-		return reservaService.horariosNoDisponibles(id);
-	}
-	/*
-	@GetMapping("/{id}/disponibilidad")
-	public List<Horario> horariosPlaza(@PathVariable Long id) throws URISyntaxException {
-		return reservaService.horariosDisponibles(id);
-	}*/
-	@GetMapping("/{id}")
-	public Reserva detallesReserva(@PathVariable Long id){
-		return reservaService.findById(id);
-	}	
-  
-	@GetMapping("/{id}/aceptar")
-	public Object aceptarReserva(@PathVariable Long id){
-		Reserva reserva = reservaService.findById(id);
-		if(reserva.getPlaza().getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
-			return reservaService.aceptarReserva(id);
-		}else{
-			Map<String,Object> response = new HashMap<>();
-        	response.put("reserva", reserva);
-			response.put("error","Esta reserva no es sobre una plaza de tu propiedad");
-			return ResponseEntity.badRequest().body(response);
-		}
-	}
 
-	@GetMapping("/{id}/rechazar")
-	public Object rechazarReserva(@PathVariable Long id){
-		Reserva reserva = reservaService.findById(id);
-		if(reserva.getPlaza().getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
-			return reservaService.rechazarReserva(id);
-		}else{
-			Map<String,Object> response = new HashMap<>();
-    		response.put("reserva", reserva);
-			response.put("error","Esta reserva no es sobre una plaza de tu propiedad");
-			return ResponseEntity.badRequest().body(response);
-		}
-	}
 
 	@GetMapping("/{id}/confirmar")
     public Object confirmarServicio(@PathVariable Long id){
@@ -117,6 +122,36 @@ public class ReservaController {
 			return ResponseEntity.badRequest().body(response);
 		}
     }
+	
+	@GetMapping("/{id}/cancelar")
+    public Object cancelarReserva(@PathVariable Long id){
+		
+		Reserva reserva = reservaService.findById(id);
+		Map<String,Object> response = new HashMap<>();
+		response.put("reserva", reserva);
+		Long periodo = Duration.between(LocalDateTime.now(), reserva.getFechaInicio()).toMinutes();
+		
+		if(reserva.getPlaza().getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+			reservaService.cancelarReserva(id);
+			response.put("info", "El coste de la reserva le será devuelto al cliente");
+			return ResponseEntity.accepted().body(response);
+		}else if(!reserva.getUser().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+			response.put("error","No estás involucrado en esta reserva");
+			return ResponseEntity.badRequest().body(response);
+		}else if(!LocalDateTime.now().isBefore(reserva.getFechaInicio())){
+				response.put("error","Esta reserva no se puede cancelar, la reserva ya ha empezado");
+				return ResponseEntity.badRequest().body(response);
+		}else if(periodo<1440) {
+				response.put("info", "Se le devolverá el coste de la reserva pero no la fianza");
+				reservaService.cancelarReserva(id);
+				return ResponseEntity.accepted().body(response);
+		}else {
+					response.put("info", "Se le devolverá el coste de la reserva íntegro");
+					reservaService.cancelarReserva(id);
+					return ResponseEntity.accepted().body(response);
+				}
+		}
+    
 
 	@GetMapping("/{id}/denegar")
     public Object denegarServicio(@PathVariable Long id){
