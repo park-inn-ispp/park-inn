@@ -148,18 +148,16 @@ public class ReservaService {
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Content-Type", "application/json");
 		headers.set("Authorization", "Bearer A21AAJNZKOugw3p1gIoKwWs-ga-HnIe-Og2NqZuhl-8j4IAFL6pZ2BDuMpgVZOOxHdi8B2cP7cN5GwqLMnIZS2cLGrbE1cacA");
-		
+		System.out.println(headers);
 		HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
-		ResponseEntity<PayPalClasses[]> response = restTemplate.exchange("https://api-m.sandbox.paypal.com/v2/checkout/orders/" + query,HttpMethod.GET,entity, PayPalClasses[].class);
+		
+		ResponseEntity<PayPalClasses> response = restTemplate.exchange("https://api-m.sandbox.paypal.com/v2/checkout/orders/" + query,HttpMethod.GET,entity, PayPalClasses.class);
+
         
-		response.toString();
-        
-        PayPalClasses[] paypal = response.getBody();
-        List<PayPalClasses> p = Arrays.asList(paypal);
-        PayPalClasses paypalRes = p.get(0);    
+        PayPalClasses paypal = response.getBody();    
         
         
-    return  paypalRes;
+    return  paypal;
     }
 	
 	

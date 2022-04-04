@@ -94,9 +94,10 @@ public class PlazaController {
     public ResponseEntity createReserva(@Valid @RequestBody Reserva reserva, @PathVariable Long id) throws URISyntaxException {
         Map<String,Object> response = new HashMap<>();
         List<Reserva> reservas = reservaService.findAll();
+        System.out.println(reservas);
         response.put("reserva", reserva);
-        
-        if(reservas.stream().anyMatch(x->x.getPaypal_order_id()==reserva.getPaypal_order_id())) {
+    
+       if(reservas.stream().allMatch(x->x.getPaypal_order_id()!=reserva.getPaypal_order_id())) {
     		response.put("error","La transacción ya existía en la base de datos");
 			return ResponseEntity.badRequest().body(response);
     	}
@@ -108,16 +109,13 @@ public class PlazaController {
 		String value = amount.getValue();
 		String currencyCode = amount.getCurrencyCode();
 		
-		if(purchase == null) {
-			response.put("error","La transacción no existe");
-			return ResponseEntity.badRequest().body(response);
-		
-		}else if(currencyCode != "EUR") {
-			response.put("error","La moneda de la transacción debe ser el Euro");
+		if(!currencyCode.equals("EUR")) {
+			
+			response.put("error","La moneda de la transacción debe ser EUR y es " + currencyCode + ".");
 	        return ResponseEntity.badRequest().body(response);
 		
-		}else if(String.valueOf(reserva.getPrecioTotal()) != value ) {
-			response.put("error","El precio de la reserva no coincide con el valor de la transacción");
+		}else if(!reserva.getPrecioTotal().equals(Double.parseDouble(value)) ) {
+			response.put("error","El precio de la reserva es " + reserva.getPrecioTotal() + " y el de la transacción " + value);
 	        return ResponseEntity.badRequest().body(response);
 		
 		}
