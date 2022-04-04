@@ -33,9 +33,6 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 public class ReservaService {
-    
-	@Autowired
-    RestTemplate restTemplate;
 
     @Autowired
     RestTemplate restTemplate;
