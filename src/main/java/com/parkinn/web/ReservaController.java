@@ -83,4 +83,19 @@ import org.springframework.web.bind.annotation.RestController;
 				return ResponseEntity.badRequest().body(response);
 			}
 	    }
+		
+		@GetMapping("/{id}/cancelar")
+	    public Object cancelarReserva(@PathVariable Long id){
+			Reserva reserva = reservaService.findById(id);
+			if(reserva.getPlaza().getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+				return reservaService.cancelarReserva(id);
+			}else{
+				Map<String,Object> response = new HashMap<>();
+        		response.put("reserva", reserva);
+				response.put("error","Esta reserva no es sobre una plaza de tu propiedad");
+				return ResponseEntity.badRequest().body(response);
+			}
+	    }
+		
+		
 	}
