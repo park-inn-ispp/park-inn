@@ -36,7 +36,7 @@ public class ReservaController {
 	}
 	    
 	@GetMapping("/plaza/{id}")
-	public List<Reserva> ReservasPlaza(@PathVariable Long id){
+	public List<Reserva> reservasPlaza(@PathVariable Long id){
 		return reservaService.findPlazaById(id);
 	}
 		
@@ -95,9 +95,9 @@ public class ReservaController {
 				response.put("reserva", r);
 				response.put("error","No puede confirmar esta reserva ya que todavía no ha finalizado");
 				return ResponseEntity.badRequest().body(response);
-			}else if(r.getEstado().equals(Estado.denegada)){
+			}else if(r.getEstado().equals(Estado.denegada) || r.getEstado().equals(Estado.confirmadaAmbos)){
 				response.put("reserva", r);
-				response.put("error","Esta reserva ya ha sido denegada por de uno de sus participantes");
+				response.put("error","Esta reserva está en un estado final");
 				return ResponseEntity.badRequest().body(response);
 			}else{
 				return reservaService.confirmarServicio(r, user);
