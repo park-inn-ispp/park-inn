@@ -2,6 +2,7 @@ package com.parkinn.web;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -94,10 +95,9 @@ public class PlazaController {
     public ResponseEntity createReserva(@Valid @RequestBody Reserva reserva, @PathVariable Long id) throws URISyntaxException {
         Map<String,Object> response = new HashMap<>();
         List<Reserva> reservas = reservaService.findAll();
-        System.out.println(reservas);
         response.put("reserva", reserva);
     
-        for (Reserva r : reservas){
+       for (Reserva r : reservas){
             String paypal_order_BD= r.getPaypal_order_id();
             String paypal_order_Nuevo= reserva.getPaypal_order_id();
             
@@ -108,11 +108,13 @@ public class PlazaController {
         }
         
         PayPalClasses paypal = reservaService.getPayPal(reserva.getPaypal_order_id());
-		PurchaseUnit purchase = paypal.getPurchaseUnits().get(0);
+        PurchaseUnit purchase = paypal.getPurchaseUnits().get(0);
 		Amount amount = purchase.getAmount();
 		
 		String value = amount.getValue();
 		String currencyCode = amount.getCurrencyCode();
+		Double precio = Duration.between(reserva.getFechaInicio(), reserva.getFechaFin()).toMinutes() * reserva.getPlaza().getPrecioHora()/60;
+		reserva.setPrecioTotal(Math.round(precio*100.0)/100.0);
 		
 		if(!currencyCode.equals("EUR")) {
 			

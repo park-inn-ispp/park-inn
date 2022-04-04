@@ -18,6 +18,7 @@ import com.parkinn.model.Estado;
 import com.parkinn.model.Horario;
 import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
+import com.parkinn.model.paypal.PayPalAccesToken;
 import com.parkinn.model.paypal.PayPalClasses;
 
 import org.hibernate.validator.constraints.URL;
@@ -227,17 +228,24 @@ public class ReservaService {
 
 	public PayPalClasses getPayPal(String query) throws URISyntaxException{
         
+		HttpHeaders headers1 = new HttpHeaders();
+		headers1.set("Content-Type", "application/x-www-form-urlencoded");
+		headers1.set("Authorization", "Basic QWR1NGpVdFRrYUp4TkZxdWZoenRvTnAtQ1F1WldKTGt2VjVGRG5fYUlwa2hiV2xTdm5Qd1NxMlRORHNUNHZGWnQtX3VFbUZfcnRIODlNdms6RUxIYWZIQWMtMFpQclJXZVo1MFBqeFQ0TmtWNDg5UDNnZno3Q3RvWU9yLWVvQVQxekhzcVZuTlZrYm5WRkE4S21RdVFpQVNkSlU2ZzgxN3M=");
+		HttpEntity<String> entity1 = new HttpEntity<String>("parameters", headers1);
+		ResponseEntity<PayPalAccesToken> response1 = restTemplate.exchange("https://api-m.sandbox.paypal.com/v1/oauth2/token?grant_type=client_credentials",HttpMethod.POST,entity1, PayPalAccesToken.class);
+		String token = response1.getBody().getAccessToken();
+		
+		
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Content-Type", "application/json");
-		headers.set("Authorization", "Bearer A21AAJNZKOugw3p1gIoKwWs-ga-HnIe-Og2NqZuhl-8j4IAFL6pZ2BDuMpgVZOOxHdi8B2cP7cN5GwqLMnIZS2cLGrbE1cacA");
-		System.out.println(headers);
+		headers.set("Authorization", "Bearer " + token);
 		HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
 		
 		ResponseEntity<PayPalClasses> response = restTemplate.exchange("https://api-m.sandbox.paypal.com/v2/checkout/orders/" + query,HttpMethod.GET,entity, PayPalClasses.class);
 
-        
+
         PayPalClasses paypal = response.getBody();    
-        
+       
         
     return  paypal;
     }
