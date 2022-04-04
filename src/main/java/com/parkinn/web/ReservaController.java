@@ -100,7 +100,7 @@ public class ReservaController {
 		Map<String,Object> response = new HashMap<>();
 		Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		if(user.equals(r.getUser().getEmail()) || user.equals(r.getPlaza().getAdministrador().getEmail())){
-			if(r.getFechaFin().isBefore(LocalDateTime.now())){
+			if(r.getFechaFin().isAfter(LocalDateTime.now())){
 				response.put("reserva", r);
 				response.put("error","No puede confirmar esta reserva ya que todavía no ha finalizado");
 				return ResponseEntity.badRequest().body(response);
@@ -124,7 +124,7 @@ public class ReservaController {
 		Map<String,Object> response = new HashMap<>();
 		Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 		if(user.equals(r.getUser().getEmail()) || user.equals(r.getPlaza().getAdministrador().getEmail())){
-			if(r.getFechaFin().isAfter(LocalDateTime.now())){
+			if(r.getFechaFin().isBefore(LocalDateTime.now())){
 				return reservaService.denegarServicio(r);
 			}else{
 				response.put("reserva", r);
