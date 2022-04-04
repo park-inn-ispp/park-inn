@@ -72,6 +72,13 @@ public class ReservaService {
         Reserva reserva = repository.save(r);
         return reserva;
     }
+	
+	public Reserva cancelarReserva(Long id){
+		Reserva r = findById(id);
+        r.setEstado(Estado.cancelada);
+        Reserva reserva = repository.save(r);
+        return reserva;
+    }
     
     public List<Reserva> findPlazaById(Long id){
     	List<Reserva> reservas = repository.findByPlazaId(id);

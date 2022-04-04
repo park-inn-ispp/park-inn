@@ -1,7 +1,9 @@
 package com.parkinn.web;
 
 import java.net.URISyntaxException;
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -117,6 +119,36 @@ public class ReservaController {
 			return ResponseEntity.badRequest().body(response);
 		}
     }
+	
+	@GetMapping("/{id}/cancelar")
+    public Object cancelarReserva(@PathVariable Long id){
+		
+		Reserva reserva = reservaService.findById(id);
+		Map<String,Object> response = new HashMap<>();
+		response.put("reserva", reserva);
+		Long periodo = Duration.between(LocalDateTime.now(), reserva.getFechaInicio()).toMinutes();
+		
+		if(reserva.getPlaza().getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+			reservaService.cancelarReserva(id);
+			response.put("info", "El coste de la reserva le será devuelto al cliente");
+			return ResponseEntity.accepted().body(response);
+		}else if(!reserva.getUser().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+			response.put("error","No estás involucrado en esta reserva");
+			return ResponseEntity.badRequest().body(response);
+		}else if(!LocalDateTime.now().isBefore(reserva.getFechaInicio())){
+				response.put("error","Esta reserva no se puede cancelar, la reserva ya ha empezado");
+				return ResponseEntity.badRequest().body(response);
+		}else if(periodo<1440) {
+				response.put("info", "Se le devolverá el coste de la reserva pero no la fianza");
+				reservaService.cancelarReserva(id);
+				return ResponseEntity.accepted().body(response);
+		}else {
+					response.put("info", "Se le devolverá el coste de la reserva íntegro");
+					reservaService.cancelarReserva(id);
+					return ResponseEntity.accepted().body(response);
+				}
+		}
+    
 
 	@GetMapping("/{id}/denegar")
     public Object denegarServicio(@PathVariable Long id){
