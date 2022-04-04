@@ -15,6 +15,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({
     "reference_id",
     "amount",
+    "payee",
+    "shipping",
+    "payments"
 })
 @Generated("jsonschema2pojo")
 public class PurchaseUnit {
@@ -23,6 +26,12 @@ public class PurchaseUnit {
     private String referenceId;
     @JsonProperty("amount")
     private Amount amount;
+    @JsonProperty("payee")
+    private Payee payee;
+    @JsonProperty("shipping")
+    private Shipping__1 shipping;
+    @JsonProperty("payments")
+    private Payments payments;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -46,6 +55,35 @@ public class PurchaseUnit {
         this.amount = amount;
     }
 
+    @JsonProperty("payee")
+    public Payee getPayee() {
+        return payee;
+    }
+
+    @JsonProperty("payee")
+    public void setPayee(Payee payee) {
+        this.payee = payee;
+    }
+
+    @JsonProperty("shipping")
+    public Shipping__1 getShipping() {
+        return shipping;
+    }
+
+    @JsonProperty("shipping")
+    public void setShipping(Shipping__1 shipping) {
+        this.shipping = shipping;
+    }
+
+    @JsonProperty("payments")
+    public Payments getPayments() {
+        return payments;
+    }
+
+    @JsonProperty("payments")
+    public void setPayments(Payments payments) {
+        this.payments = payments;
+    }
 
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {

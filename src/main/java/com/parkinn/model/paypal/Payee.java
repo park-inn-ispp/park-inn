@@ -13,50 +13,37 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "currency_code",
-    "value",
-    "breakdown"
+    "email_address",
+    "merchant_id"
 })
 @Generated("jsonschema2pojo")
-public class Amount {
+public class Payee {
 
-    @JsonProperty("currency_code")
-    private String currencyCode;
-    @JsonProperty("value")
-    private String value;
-    @JsonProperty("breakdown")
-    private Breakdown breakdown;
+    @JsonProperty("email_address")
+    private String emailAddress;
+    @JsonProperty("merchant_id")
+    private String merchantId;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
-    @JsonProperty("currency_code")
-    public String getCurrencyCode() {
-        return currencyCode;
+    @JsonProperty("email_address")
+    public String getEmailAddress() {
+        return emailAddress;
     }
 
-    @JsonProperty("currency_code")
-    public void setCurrencyCode(String currencyCode) {
-        this.currencyCode = currencyCode;
+    @JsonProperty("email_address")
+    public void setEmailAddress(String emailAddress) {
+        this.emailAddress = emailAddress;
     }
 
-    @JsonProperty("value")
-    public String getValue() {
-        return value;
+    @JsonProperty("merchant_id")
+    public String getMerchantId() {
+        return merchantId;
     }
 
-    @JsonProperty("value")
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    @JsonProperty("breakdown")
-    public Breakdown getBreakdown() {
-        return breakdown;
-    }
-
-    @JsonProperty("breakdown")
-    public void setBreakdown(Breakdown breakdown) {
-        this.breakdown = breakdown;
+    @JsonProperty("merchant_id")
+    public void setMerchantId(String merchantId) {
+        this.merchantId = merchantId;
     }
 
     @JsonAnyGetter

@@ -13,50 +13,50 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "currency_code",
-    "value",
-    "breakdown"
+    "gross_amount",
+    "paypal_fee",
+    "net_amount"
 })
 @Generated("jsonschema2pojo")
-public class Amount {
+public class SellerReceivableBreakdown {
 
-    @JsonProperty("currency_code")
-    private String currencyCode;
-    @JsonProperty("value")
-    private String value;
-    @JsonProperty("breakdown")
-    private Breakdown breakdown;
+    @JsonProperty("gross_amount")
+    private GrossAmount grossAmount;
+    @JsonProperty("paypal_fee")
+    private PaypalFee paypalFee;
+    @JsonProperty("net_amount")
+    private NetAmount netAmount;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
-    @JsonProperty("currency_code")
-    public String getCurrencyCode() {
-        return currencyCode;
+    @JsonProperty("gross_amount")
+    public GrossAmount getGrossAmount() {
+        return grossAmount;
     }
 
-    @JsonProperty("currency_code")
-    public void setCurrencyCode(String currencyCode) {
-        this.currencyCode = currencyCode;
+    @JsonProperty("gross_amount")
+    public void setGrossAmount(GrossAmount grossAmount) {
+        this.grossAmount = grossAmount;
     }
 
-    @JsonProperty("value")
-    public String getValue() {
-        return value;
+    @JsonProperty("paypal_fee")
+    public PaypalFee getPaypalFee() {
+        return paypalFee;
     }
 
-    @JsonProperty("value")
-    public void setValue(String value) {
-        this.value = value;
+    @JsonProperty("paypal_fee")
+    public void setPaypalFee(PaypalFee paypalFee) {
+        this.paypalFee = paypalFee;
     }
 
-    @JsonProperty("breakdown")
-    public Breakdown getBreakdown() {
-        return breakdown;
+    @JsonProperty("net_amount")
+    public NetAmount getNetAmount() {
+        return netAmount;
     }
 
-    @JsonProperty("breakdown")
-    public void setBreakdown(Breakdown breakdown) {
-        this.breakdown = breakdown;
+    @JsonProperty("net_amount")
+    public void setNetAmount(NetAmount netAmount) {
+        this.netAmount = netAmount;
     }
 
     @JsonAnyGetter

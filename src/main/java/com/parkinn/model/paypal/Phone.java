@@ -13,50 +13,24 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "currency_code",
-    "value",
-    "breakdown"
+    "phone_number"
 })
 @Generated("jsonschema2pojo")
-public class Amount {
+public class Phone {
 
-    @JsonProperty("currency_code")
-    private String currencyCode;
-    @JsonProperty("value")
-    private String value;
-    @JsonProperty("breakdown")
-    private Breakdown breakdown;
+    @JsonProperty("phone_number")
+    private PhoneNumber phoneNumber;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
-    @JsonProperty("currency_code")
-    public String getCurrencyCode() {
-        return currencyCode;
+    @JsonProperty("phone_number")
+    public PhoneNumber getPhoneNumber() {
+        return phoneNumber;
     }
 
-    @JsonProperty("currency_code")
-    public void setCurrencyCode(String currencyCode) {
-        this.currencyCode = currencyCode;
-    }
-
-    @JsonProperty("value")
-    public String getValue() {
-        return value;
-    }
-
-    @JsonProperty("value")
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    @JsonProperty("breakdown")
-    public Breakdown getBreakdown() {
-        return breakdown;
-    }
-
-    @JsonProperty("breakdown")
-    public void setBreakdown(Breakdown breakdown) {
-        this.breakdown = breakdown;
+    @JsonProperty("phone_number")
+    public void setPhoneNumber(PhoneNumber phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     @JsonAnyGetter

@@ -14,18 +14,15 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
     "currency_code",
-    "value",
-    "breakdown"
+    "value"
 })
 @Generated("jsonschema2pojo")
-public class Amount {
+public class Handling {
 
     @JsonProperty("currency_code")
     private String currencyCode;
     @JsonProperty("value")
     private String value;
-    @JsonProperty("breakdown")
-    private Breakdown breakdown;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -47,16 +44,6 @@ public class Amount {
     @JsonProperty("value")
     public void setValue(String value) {
         this.value = value;
-    }
-
-    @JsonProperty("breakdown")
-    public Breakdown getBreakdown() {
-        return breakdown;
-    }
-
-    @JsonProperty("breakdown")
-    public void setBreakdown(Breakdown breakdown) {
-        this.breakdown = breakdown;
     }
 
     @JsonAnyGetter

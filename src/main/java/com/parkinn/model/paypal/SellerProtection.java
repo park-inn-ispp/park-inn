@@ -2,6 +2,7 @@
 package com.parkinn.model.paypal;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.annotation.Generated;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
@@ -13,50 +14,37 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "currency_code",
-    "value",
-    "breakdown"
+    "status",
+    "dispute_categories"
 })
 @Generated("jsonschema2pojo")
-public class Amount {
+public class SellerProtection {
 
-    @JsonProperty("currency_code")
-    private String currencyCode;
-    @JsonProperty("value")
-    private String value;
-    @JsonProperty("breakdown")
-    private Breakdown breakdown;
+    @JsonProperty("status")
+    private String status;
+    @JsonProperty("dispute_categories")
+    private List<String> disputeCategories = null;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
-    @JsonProperty("currency_code")
-    public String getCurrencyCode() {
-        return currencyCode;
+    @JsonProperty("status")
+    public String getStatus() {
+        return status;
     }
 
-    @JsonProperty("currency_code")
-    public void setCurrencyCode(String currencyCode) {
-        this.currencyCode = currencyCode;
+    @JsonProperty("status")
+    public void setStatus(String status) {
+        this.status = status;
     }
 
-    @JsonProperty("value")
-    public String getValue() {
-        return value;
+    @JsonProperty("dispute_categories")
+    public List<String> getDisputeCategories() {
+        return disputeCategories;
     }
 
-    @JsonProperty("value")
-    public void setValue(String value) {
-        this.value = value;
-    }
-
-    @JsonProperty("breakdown")
-    public Breakdown getBreakdown() {
-        return breakdown;
-    }
-
-    @JsonProperty("breakdown")
-    public void setBreakdown(Breakdown breakdown) {
-        this.breakdown = breakdown;
+    @JsonProperty("dispute_categories")
+    public void setDisputeCategories(List<String> disputeCategories) {
+        this.disputeCategories = disputeCategories;
     }
 
     @JsonAnyGetter

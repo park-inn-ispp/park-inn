@@ -16,26 +16,32 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "name",
     "email_address",
     "payer_id",
+    "phone",
+    "address"
 })
 @Generated("jsonschema2pojo")
 public class Payer {
 
     @JsonProperty("name")
-    private Name name;
+    private Name__1 name;
     @JsonProperty("email_address")
     private String emailAddress;
     @JsonProperty("payer_id")
     private String payerId;
+    @JsonProperty("phone")
+    private Phone phone;
+    @JsonProperty("address")
+    private Address__1 address;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
     @JsonProperty("name")
-    public Name getName() {
+    public Name__1 getName() {
         return name;
     }
 
     @JsonProperty("name")
-    public void setName(Name name) {
+    public void setName(Name__1 name) {
         this.name = name;
     }
 
@@ -57,6 +63,26 @@ public class Payer {
     @JsonProperty("payer_id")
     public void setPayerId(String payerId) {
         this.payerId = payerId;
+    }
+
+    @JsonProperty("phone")
+    public Phone getPhone() {
+        return phone;
+    }
+
+    @JsonProperty("phone")
+    public void setPhone(Phone phone) {
+        this.phone = phone;
+    }
+
+    @JsonProperty("address")
+    public Address__1 getAddress() {
+        return address;
+    }
+
+    @JsonProperty("address")
+    public void setAddress(Address__1 address) {
+        this.address = address;
     }
 
     @JsonAnyGetter

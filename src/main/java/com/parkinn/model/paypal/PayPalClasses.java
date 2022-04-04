@@ -11,6 +11,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
@@ -19,8 +22,10 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
     "status",
     "purchase_units",
     "payer",
-    "update_time"
+    "update_time",
+    "links"
 })
+
 @Generated("jsonschema2pojo")
 public class PayPalClasses {
 
@@ -36,6 +41,8 @@ public class PayPalClasses {
     private Payer payer;
     @JsonProperty("update_time")
     private String updateTime;
+    @JsonProperty("links")
+    private List<Link__1> links = null;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -99,6 +106,15 @@ public class PayPalClasses {
         this.updateTime = updateTime;
     }
 
+    @JsonProperty("links")
+    public List<Link__1> getLinks() {
+        return links;
+    }
+
+    @JsonProperty("links")
+    public void setLinks(List<Link__1> links) {
+        this.links = links;
+    }
 
     @JsonAnyGetter
     public Map<String, Object> getAdditionalProperties() {

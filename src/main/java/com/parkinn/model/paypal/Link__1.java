@@ -13,50 +13,50 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-    "currency_code",
-    "value",
-    "breakdown"
+    "href",
+    "rel",
+    "method"
 })
 @Generated("jsonschema2pojo")
-public class Amount {
+public class Link__1 {
 
-    @JsonProperty("currency_code")
-    private String currencyCode;
-    @JsonProperty("value")
-    private String value;
-    @JsonProperty("breakdown")
-    private Breakdown breakdown;
+    @JsonProperty("href")
+    private String href;
+    @JsonProperty("rel")
+    private String rel;
+    @JsonProperty("method")
+    private String method;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
-    @JsonProperty("currency_code")
-    public String getCurrencyCode() {
-        return currencyCode;
+    @JsonProperty("href")
+    public String getHref() {
+        return href;
     }
 
-    @JsonProperty("currency_code")
-    public void setCurrencyCode(String currencyCode) {
-        this.currencyCode = currencyCode;
+    @JsonProperty("href")
+    public void setHref(String href) {
+        this.href = href;
     }
 
-    @JsonProperty("value")
-    public String getValue() {
-        return value;
+    @JsonProperty("rel")
+    public String getRel() {
+        return rel;
     }
 
-    @JsonProperty("value")
-    public void setValue(String value) {
-        this.value = value;
+    @JsonProperty("rel")
+    public void setRel(String rel) {
+        this.rel = rel;
     }
 
-    @JsonProperty("breakdown")
-    public Breakdown getBreakdown() {
-        return breakdown;
+    @JsonProperty("method")
+    public String getMethod() {
+        return method;
     }
 
-    @JsonProperty("breakdown")
-    public void setBreakdown(Breakdown breakdown) {
-        this.breakdown = breakdown;
+    @JsonProperty("method")
+    public void setMethod(String method) {
+        this.method = method;
     }
 
     @JsonAnyGetter
