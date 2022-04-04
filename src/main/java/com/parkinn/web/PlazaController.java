@@ -97,7 +97,7 @@ public class PlazaController {
         System.out.println(reservas);
         response.put("reserva", reserva);
     
-       if(reservas.stream().allMatch(x->x.getPaypal_order_id()!=reserva.getPaypal_order_id())) {
+       if(!reservas.stream().allMatch(x->x.getPaypal_order_id()!=reserva.getPaypal_order_id())) {
     		response.put("error","La transacción ya existía en la base de datos");
 			return ResponseEntity.badRequest().body(response);
     	}
