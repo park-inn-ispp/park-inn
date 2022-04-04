@@ -6,8 +6,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.Valid;
+
 import com.parkinn.model.Estado;
+import com.parkinn.model.Horario;
+import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
+import com.parkinn.model.paypal.Amount;
+import com.parkinn.model.paypal.PayPalClasses;
+import com.parkinn.model.paypal.PurchaseUnit;
+
 import com.parkinn.repository.HorarioRepository;
 import com.parkinn.service.ReservaService;
 
@@ -40,6 +48,7 @@ public class ReservaController {
 		return reservaService.findPlazaById(id);
 	}
 		
+
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	@GetMapping("/all")
 	public List<Reserva> findAll(){
@@ -58,7 +67,7 @@ public class ReservaController {
 	public Reserva detallesReserva(@PathVariable Long id){
 		return reservaService.findById(id);
 	}	
-
+  
 	@GetMapping("/{id}/aceptar")
 	public Object aceptarReserva(@PathVariable Long id){
 		Reserva reserva = reservaService.findById(id);
@@ -122,6 +131,7 @@ public class ReservaController {
 				response.put("error","No puede denegar esta reserva ya que todavía no ha finalizado");
 				return ResponseEntity.badRequest().body(response);
 			}
+
 		}else{
 			response.put("reserva", r);
 			response.put("error","No estás involucrado en esta reserva");
