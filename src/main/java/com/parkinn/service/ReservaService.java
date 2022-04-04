@@ -3,9 +3,12 @@ package com.parkinn.service;
 import com.parkinn.repository.HorarioRepository;
 import com.parkinn.repository.ReservaRepository;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,13 +16,25 @@ import com.parkinn.model.Estado;
 import com.parkinn.model.Horario;
 import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
+import com.parkinn.model.paypal.PayPalClasses;
 
+import org.hibernate.validator.constraints.URL;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.RequestEntity;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 public class ReservaService {
     
+    @Autowired
+    RestTemplate restTemplate;
+	
     @Autowired
     private ReservaRepository repository;
     @Autowired
@@ -126,4 +141,26 @@ public class ReservaService {
 		}
 		return false;
 	}
+	
+
+	public PayPalClasses getPayPal(String query) throws URISyntaxException{
+        
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Content-Type", "application/json");
+		headers.set("Authorization", "Bearer A21AAJNZKOugw3p1gIoKwWs-ga-HnIe-Og2NqZuhl-8j4IAFL6pZ2BDuMpgVZOOxHdi8B2cP7cN5GwqLMnIZS2cLGrbE1cacA");
+		System.out.println(headers);
+		HttpEntity<String> entity = new HttpEntity<String>("parameters", headers);
+		
+		ResponseEntity<PayPalClasses> response = restTemplate.exchange("https://api-m.sandbox.paypal.com/v2/checkout/orders/" + query,HttpMethod.GET,entity, PayPalClasses.class);
+
+        
+        PayPalClasses paypal = response.getBody();    
+        
+        
+    return  paypal;
+    }
+	
+	
+	
+	
 }

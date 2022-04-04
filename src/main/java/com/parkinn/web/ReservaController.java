@@ -6,7 +6,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
+import javax.validation.Valid;
+
+import com.parkinn.model.Horario;
+import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
+import com.parkinn.model.paypal.Amount;
+import com.parkinn.model.paypal.PayPalClasses;
+import com.parkinn.model.paypal.PurchaseUnit;
+
 import com.parkinn.repository.HorarioRepository;
 import com.parkinn.service.ReservaService;
 
@@ -56,7 +65,12 @@ import org.springframework.web.bind.annotation.RestController;
 	    @GetMapping("/{id}")
 	    public Reserva detallesReserva(@PathVariable Long id){
 	    	return reservaService.findById(id);
-	    }	
+
+	    }
+	    
+
+
+	    	
 
 		@GetMapping("/{id}/aceptar")
 	    public Object aceptarReserva(@PathVariable Long id){
@@ -82,5 +96,6 @@ import org.springframework.web.bind.annotation.RestController;
 				response.put("error","Esta reserva no es sobre una plaza de tu propiedad");
 				return ResponseEntity.badRequest().body(response);
 			}
-	    }
+		}
+
 	}
