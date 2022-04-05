@@ -59,9 +59,18 @@ public class PlazaController {
        Localizacion localizacion = plazaService.getLocalizacion(plaza.getDireccion());
        plaza.setLatitud(localizacion.getLat());
        plaza.setLongitud(localizacion.getLon());
-    	    	
-    	Plaza savedPlaza = plazaService.guardarPlaza(plaza);
+
+       if(plazaService.comprobarPlazasIguales(plaza)){
+        Map<String,Object> response = new HashMap<>();
+        response.put("plaza", plaza);
+        response.put("error","Esta plaza ya existe");
+        return ResponseEntity.badRequest().body(response);
+       }else{
+        Plaza savedPlaza = plazaService.guardarPlaza(plaza);
         return ResponseEntity.created(new URI("/plazas/" + savedPlaza.getId())).body(savedPlaza);
+       }
+    	    	
+    	
     }
 
     @PutMapping("/{id}")

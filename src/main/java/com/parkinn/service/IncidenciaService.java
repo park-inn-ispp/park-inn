@@ -41,6 +41,7 @@ public class IncidenciaService {
 		return reserva.getEstado() == Estado.confirmadaAmbos;
 
 	}
+  
 	public boolean comprobarCliente(Incidencia r){
 		String creadorIncidenciaFromFront  = r.getUser().getEmail();
 		String creadorIncidenciaByToken  = SecurityContextHolder.getContext().getAuthentication().getName();
