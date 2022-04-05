@@ -3,7 +3,6 @@ package com.parkinn.service;
 import com.parkinn.repository.ClientRepository;
 import com.parkinn.repository.IncidenciaRepository;
 
-import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -13,7 +12,6 @@ import com.parkinn.model.Reserva;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -52,11 +50,8 @@ public class IncidenciaService {
 		}
 
 		//Compruebo que el usuario que realiza la incidencia o es el dueño o es el cliente.
-		if(creadorIncidenciaFromFront.equals(duenoPlaza) || creadorIncidenciaFromFront.equals(clientePlaza)){
-			return true;
-		}else{
-			return false;
-		}
+		
+		return creadorIncidenciaFromFront.equals(duenoPlaza) || creadorIncidenciaFromFront.equals(clientePlaza);
 	}
 
 
