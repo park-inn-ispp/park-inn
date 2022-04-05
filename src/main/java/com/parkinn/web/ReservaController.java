@@ -61,7 +61,6 @@ import org.springframework.web.bind.annotation.RestController;
 				return r;
 			}else{
 				Map<String,Object> response = new HashMap<>();
-        		response.put("reserva", r);
 				response.put("error","No estás involucrado en esta reserva");
 				return ResponseEntity.badRequest().body(r);
 			}

@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @RestController
 @RequestMapping("/plazas")
@@ -108,13 +109,27 @@ public class PlazaController {
 
     
     @GetMapping("/{id}")
-    public Plaza infoPlazaYCliente(@PathVariable Long id){
-    	return plazaService.findById(id);
+    public Object infoPlazaYCliente(@PathVariable Long id){
+        Plaza p = plazaService.findById(id);
+        if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains("ROLE_ADMIN") || p.getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+            return p;
+        }else{
+            Map<String,Object> response = new HashMap<>();
+			response.put("error","Esta plaza no es de tu propiedad");
+			return ResponseEntity.badRequest().body(response);
+        }
     }
     
     @GetMapping("/plazasDelUsuario/{id}")
-    public List<Plaza> PlazasCliente(@PathVariable Long id){
-    	return plazaService.findUserById(id);
+    public Object plazasCliente(@PathVariable Long id){
+        List<Plaza> p = plazaService.findUserById(id);
+        if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains("ROLE_ADMIN") || p.get(0).getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+            return p;
+        }else{
+            Map<String,Object> response = new HashMap<>();
+			response.put("error","Esta plaza no es de tu propiedad");
+			return ResponseEntity.badRequest().body(response);
+        }
     }
     
     
