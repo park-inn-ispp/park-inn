@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import com.parkinn.model.Estado;
 import com.parkinn.model.Reserva;
@@ -16,7 +15,6 @@ import com.parkinn.model.paypal.PayPalAccesToken;
 import com.parkinn.model.paypal.PayPalClasses;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -183,7 +181,7 @@ public class ReservaService {
         
     }
     public Reserva findById(Long id){
-        Reserva reserva = repository.findById(id).orElseThrow(RuntimeException::new);
+        Reserva reserva = repository.findById(id).orElse(null);
         return reserva;
     }
     

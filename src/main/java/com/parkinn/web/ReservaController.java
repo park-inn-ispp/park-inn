@@ -3,6 +3,7 @@ package com.parkinn.web;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,6 @@ import com.parkinn.service.PlazaService;
 import com.parkinn.service.ReservaService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -40,114 +40,163 @@ public class ReservaController {
 	private ClientRepository clientRepository;
 
 
-
-	    @GetMapping("/usuario/{id}")
-	    public Object reservasUsuario(@PathVariable Long id){
-	    	Client usuario = clientRepository.findById(id).orElseThrow(RuntimeException::new);
-	    	if(usuario.getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal()) || SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
-	    		return reservaService.findByUserId(id);
-	    	}
-	    	return new ResponseEntity<>("No puedes acceder a las reservas de otro usuario sin ser administrador", HttpStatus.FORBIDDEN);
-	    	}
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+	@GetMapping("/usuario/{id}")
+	public Object reservasUsuario(@PathVariable Long id){
+		Map<String,Object> response = new HashMap<>();
+		List<String> errores = new ArrayList<>();
+		Client usuario = clientRepository.findById(id).orElse(null);
+		if(usuario==null){
+			errores.add("No se encuentra al usuario");
+			response.put("errores",errores);
+			return ResponseEntity.badRequest().body(response);
+		}else if(usuario.getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal()) || SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
+			return reservaService.findByUserId(id);
+		}
+		errores.add("No puedes acceder a las reservas de otro usuario sin ser administrador");
+		response.put("errores",errores);
+		return ResponseEntity.badRequest().body(response);
+	}
 	    
-	    @GetMapping("/plaza/{id}")
-	    public Object ReservasPlaza(@PathVariable Long id){
-	    	Plaza plaza = plazaService.findById(id);
-	    	if(plaza.getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())  || SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
-	    		return reservaService.findPlazaById(id);
-	    	}
-	    	return new ResponseEntity<>("No puedes acceder a las reservas de una plaza que no es tuya sin ser administrador", HttpStatus.FORBIDDEN);
-	    	
-	    }
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+	@GetMapping("/plaza/{id}")
+	public Object reservasPlaza(@PathVariable Long id){
+		Map<String,Object> response = new HashMap<>();
+		List<String> errores = new ArrayList<>();
+		Plaza plaza = plazaService.findById(id);
+		if(plaza==null){
+			errores.add("No se encuentra la plaza");
+			response.put("errores",errores);
+			return ResponseEntity.badRequest().body(response);
+		}else if(plaza.getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())  || SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
+			return reservaService.findPlazaById(id);
+		}
+		errores.add("No puedes acceder a las reservas de una plaza que no es tuya sin ser administrador");
+		response.put("errores",errores);
+		return ResponseEntity.badRequest().body(response);
+	}
 		
-	    @PreAuthorize("hasRole('ROLE_ADMIN')")
-		@GetMapping("/all")
-	    public List<Reserva> findAll(){
-	    	return reservaService.findAll();
-	    }
-	    @GetMapping("/{id}/fechasNoDisponibles")
-	    public List<List<LocalDateTime>> horariosNoDisponibles(@PathVariable Long id) throws URISyntaxException {
-	    	return reservaService.horariosNoDisponibles(id);
-	    }
-	    /*
-	    @GetMapping("/{id}/disponibilidad")
-	    public List<Horario> horariosPlaza(@PathVariable Long id) throws URISyntaxException {
-	    	return reservaService.horariosDisponibles(id);
-	    }*/
-	    @GetMapping("/{id}")
-	    public Object detallesReserva(@PathVariable Long id){
-			Reserva r = reservaService.findById(id);
-			Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-			if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) || r.getUser().getEmail().equals(user) || r.getPlaza().getAdministrador().getEmail().equals(user)){
-				return r;
-			}else{
-				Map<String,Object> response = new HashMap<>();
-				response.put("error","No estás involucrado en esta reserva");
-				return ResponseEntity.badRequest().body(r);
-			}
-	    }	
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	@GetMapping("/all")
+	public List<Reserva> findAll(){
+		return reservaService.findAll();
+	}
 
-		@GetMapping("/{id}/aceptar")
-	    public Object aceptarReserva(@PathVariable Long id){
-			Reserva reserva = reservaService.findById(id);
-			if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) || reserva.getPlaza().getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
-				return reservaService.aceptarReserva(id);
-			}else{
-				Map<String,Object> response = new HashMap<>();
-        		response.put("reserva", reserva);
-				response.put("error","Esta reserva no es sobre una plaza de tu propiedad");
-				return ResponseEntity.badRequest().body(response);
-			}
-	    }
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+	@GetMapping("/{id}/fechasNoDisponibles")
+	public List<List<LocalDateTime>> horariosNoDisponibles(@PathVariable Long id) throws URISyntaxException {
+		return reservaService.horariosNoDisponibles(id);
+	}
 
-		@GetMapping("/{id}/rechazar")
-	    public Object rechazarReserva(@PathVariable Long id){
-			Reserva reserva = reservaService.findById(id);
-			if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ||reserva.getPlaza().getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
-				return reservaService.rechazarReserva(id);
-			}else{
-				Map<String,Object> response = new HashMap<>();
-        		response.put("reserva", reserva);
-				response.put("error","Esta reserva no es sobre una plaza de tu propiedad");
-				return ResponseEntity.badRequest().body(response);
-			}
-	    }
-		
+	/*
+	@GetMapping("/{id}/disponibilidad")
+	public List<Horario> horariosPlaza(@PathVariable Long id) throws URISyntaxException {
+		return reservaService.horariosDisponibles(id);
+	}*/
 
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+	@GetMapping("/{id}")
+	public Object detallesReserva(@PathVariable Long id){
+		Map<String,Object> response = new HashMap<>();
+		List<String> errores = new ArrayList<>();
+		Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		Reserva r = reservaService.findById(id);
+		if(r==null){
+			errores.add("No se encuentra la reserva");
+			response.put("errores",errores);
+			return ResponseEntity.badRequest().body(response);
+		}else if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) || r.getUser().getEmail().equals(user) || r.getPlaza().getAdministrador().getEmail().equals(user)){
+			return r;
+		}else{
+			errores.add("No estás involucrado en esta reserva");
+			response.put("errores",errores);
+			return ResponseEntity.badRequest().body(response);
+		}
+	}	
 
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+	@GetMapping("/{id}/aceptar")
+	public Object aceptarReserva(@PathVariable Long id){
+		Map<String,Object> response = new HashMap<>();
+		List<String> errores = new ArrayList<>();
+		Reserva reserva = reservaService.findById(id);
+		if(reserva==null){
+			errores.add("No se encuentra la reserva");
+			response.put("errores",errores);
+			return ResponseEntity.badRequest().body(response);
+		}else if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) || reserva.getPlaza().getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+			return reservaService.aceptarReserva(id);
+		}else{
+			errores.add("Esta reserva no es sobre una plaza de tu propiedad");
+			response.put("errores",errores);
+			return ResponseEntity.badRequest().body(response);
+		}
+	}
 
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+	@GetMapping("/{id}/rechazar")
+	public Object rechazarReserva(@PathVariable Long id){
+		Map<String,Object> response = new HashMap<>();
+		List<String> errores = new ArrayList<>();
+		Reserva reserva = reservaService.findById(id);
+		if(reserva==null){
+			errores.add("No se encuentra la reserva");
+			response.put("errores",errores);
+			return ResponseEntity.badRequest().body(response);
+		}else if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ||reserva.getPlaza().getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+			return reservaService.rechazarReserva(id);
+		}else{
+			errores.add("Esta reserva no es sobre una plaza de tu propiedad");
+			response.put("errores",errores);
+			return ResponseEntity.badRequest().body(response);
+		}
+	}
+
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
 	@GetMapping("/{id}/confirmar")
     public Object confirmarServicio(@PathVariable Long id){
-		Reserva r = reservaService.findById(id);
 		Map<String,Object> response = new HashMap<>();
+		List<String> errores = new ArrayList<>();
+		Reserva r = reservaService.findById(id);
 		Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		if(user.equals(r.getUser().getEmail()) || user.equals(r.getPlaza().getAdministrador().getEmail())){
+		if(r==null){
+			errores.add("No se encuentra la reserva");
+			response.put("errores",errores);
+			return ResponseEntity.badRequest().body(response);
+		}else if(user.equals(r.getUser().getEmail()) || user.equals(r.getPlaza().getAdministrador().getEmail())){
 			if(r.getFechaFin().isAfter(LocalDateTime.now())){
-				response.put("reserva", r);
-				response.put("error","No puede confirmar esta reserva ya que todavía no ha finalizado");
+				errores.add("No puede confirmar esta reserva ya que todavía no ha finalizado");
+				response.put("errores",errores);
 				return ResponseEntity.badRequest().body(response);
 			}else if(r.getEstado().equals(Estado.denegada) || r.getEstado().equals(Estado.confirmadaAmbos)){
-				response.put("reserva", r);
-				response.put("error","Esta reserva está en un estado final");
+				errores.add("Esta reserva está en un estado final");
+				response.put("errores",errores);
 				return ResponseEntity.badRequest().body(response);
 			}else{
 				return reservaService.confirmarServicio(r, user);
 			}
 		}else{
-			response.put("reserva", r);
-			response.put("error","No estás involucrado en esta reserva");
+			errores.add("No estás involucrado en esta reserva");
+			response.put("errores",errores);
 			return ResponseEntity.badRequest().body(response);
 		}
-    }
+	}
 	
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
 	@GetMapping("/{id}/cancelar")
     public Object cancelarReserva(@PathVariable Long id){
-		
-		Reserva reserva = reservaService.findById(id);
 		Map<String,Object> response = new HashMap<>();
+		List<String> errores = new ArrayList<>();
+		Reserva reserva = reservaService.findById(id);
+		if(reserva==null){
+			errores.add("No se encuentra la reserva");
+			response.put("errores",errores);
+			return ResponseEntity.badRequest().body(response);
+		}
 		response.put("reserva", reserva);
 		if(reserva.getEstado().equals(Estado.cancelada) || reserva.getEstado().equals(Estado.rechazada) || reserva.getEstado().equals(Estado.denegada)) {
-			response.put("error", "No se puede cancelar una reserva que ya no está en proceso");
+			errores.add("No se puede cancelar una reserva que ya no está en proceso");
+			response.put("errores",errores);
 			return ResponseEntity.badRequest().body(response);
 		}
 		
@@ -156,36 +205,43 @@ public class ReservaController {
 		if(reserva.getPlaza().getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
 			return reservaService.devolverTodo(reserva);
 		}else if(!reserva.getUser().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
-			response.put("error","No estás involucrado en esta reserva");
+			errores.add("No estás involucrado en esta reserva");
+			response.put("errores",errores);
 			return ResponseEntity.badRequest().body(response);
 		}else if(!LocalDateTime.now().isBefore(reserva.getFechaInicio())){
-				response.put("error","Esta reserva no se puede cancelar, la reserva ya ha empezado");
-				return ResponseEntity.badRequest().body(response);
+			errores.add("Esta reserva no se puede cancelar, la reserva ya ha empezado");
+			response.put("errores",errores);
+			return ResponseEntity.badRequest().body(response);
 		}else if(periodo<1440) {
 				return reservaService.devolverSinFianza(reserva);
 		}else {
 			return reservaService.devolverTodo(reserva);
-				}
 		}
+	}
     
-
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
 	@GetMapping("/{id}/denegar")
     public Object denegarServicio(@PathVariable Long id){
-		Reserva r = reservaService.findById(id);
 		Map<String,Object> response = new HashMap<>();
+		List<String> errores = new ArrayList<>();
+		Reserva r = reservaService.findById(id);
 		Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-		if(user.equals(r.getUser().getEmail()) || user.equals(r.getPlaza().getAdministrador().getEmail())){
+		if(r==null){
+			errores.add("No se encuentra la reserva");
+			response.put("errores",errores);
+			return ResponseEntity.badRequest().body(response);
+		}else if(user.equals(r.getUser().getEmail()) || user.equals(r.getPlaza().getAdministrador().getEmail())){
 			if(r.getFechaFin().isBefore(LocalDateTime.now())){
 				return reservaService.denegarServicio(r);
 			}else{
-				response.put("reserva", r);
-				response.put("error","No puede denegar esta reserva ya que todavía no ha finalizado");
+				errores.add("No puede denegar esta reserva ya que todavía no ha finalizado");
+				response.put("errores",errores);
 				return ResponseEntity.badRequest().body(response);
 			}
 
 		}else{
-			response.put("reserva", r);
-			response.put("error","No estás involucrado en esta reserva");
+			errores.add("No estás involucrado en esta reserva");
+			response.put("errores",errores);
 			return ResponseEntity.badRequest().body(response);
 		}
     }
