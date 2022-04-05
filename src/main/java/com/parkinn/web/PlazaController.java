@@ -81,28 +81,53 @@ public class PlazaController {
     @PutMapping("/{id}")
     public ResponseEntity updatePlaza(@PathVariable Long id, @RequestBody Plaza plaza) {
     	Localizacion localizacion = plazaService.getLocalizacion(plaza.getDireccion());
-        
     	Plaza currentPlaza = plazaService.findById(id);
-    	currentPlaza.setLatitud(localizacion.getLat());
-        currentPlaza.setLongitud(localizacion.getLon());
-        currentPlaza.setDireccion(plaza.getDireccion());
-        currentPlaza.setDescripcion(plaza.getDescripcion());
-        currentPlaza.setAncho(plaza.getAncho());
-        currentPlaza.setLargo(plaza.getLargo());
-        currentPlaza.setEstaDisponible(plaza.getEstaDisponible());
-        currentPlaza.setEsAireLibre(plaza.getEsAireLibre());
-        currentPlaza.setFianza(plaza.getFianza());
-        currentPlaza.setPrecioHora(plaza.getPrecioHora());
+    	List<String> errores = new ArrayList<String>();
+    	if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ||currentPlaza.getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+    		currentPlaza.setLatitud(localizacion.getLat());
+            currentPlaza.setLongitud(localizacion.getLon());
+            currentPlaza.setDireccion(plaza.getDireccion());
+            currentPlaza.setDescripcion(plaza.getDescripcion());
+            currentPlaza.setAncho(plaza.getAncho());
+            currentPlaza.setLargo(plaza.getLargo());
+            currentPlaza.setEstaDisponible(plaza.getEstaDisponible());
+            currentPlaza.setEsAireLibre(plaza.getEsAireLibre());
+            currentPlaza.setFianza(plaza.getFianza());
+            currentPlaza.setPrecioHora(plaza.getPrecioHora());
 
-        currentPlaza = plazaService.guardarPlaza(currentPlaza);
+            currentPlaza = plazaService.guardarPlaza(currentPlaza);
+            return ResponseEntity.ok(currentPlaza);
 
-        return ResponseEntity.ok(currentPlaza);
+    	}else{
+            Map<String,Object> response = new HashMap<>();
+  			errores.add("Esta plaza no es de tu propiedad");            
+            response.put("error", errores);
+  			return ResponseEntity.badRequest().body(response);
+        }
+    	
+    	
+    	
+    	
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity deletePlaza(@PathVariable Long id) {
-        plazaService.deleteById(id);
-        return ResponseEntity.ok().build();
+    	Plaza currentPlaza = plazaService.findById(id);
+        List<String> errores = new ArrayList<String>();
+    	if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ||currentPlaza.getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+    		 plazaService.deleteById(id);
+    	     return ResponseEntity.ok().build();
+
+    	}else{
+            Map<String,Object> response = new HashMap<>();
+  			errores.add("Esta plaza no es de tu propiedad");            
+            response.put("error", errores);
+  			return ResponseEntity.badRequest().body(response);
+        }
+        
+        
+        
+        
     }
 
     @PostMapping("/{id}/reservar")
