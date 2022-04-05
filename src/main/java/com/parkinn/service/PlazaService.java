@@ -38,7 +38,7 @@ public class PlazaService {
     }
 
     public Plaza findById(Long id){
-        Plaza plaza = repository.findById(id).orElseThrow(RuntimeException::new);
+        Plaza plaza = repository.findById(id).orElse(null);
         return plaza;
     }
     

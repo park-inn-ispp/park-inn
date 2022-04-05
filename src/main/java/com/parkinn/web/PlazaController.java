@@ -111,10 +111,13 @@ public class PlazaController {
     @GetMapping("/{id}")
     public Object infoPlazaYCliente(@PathVariable Long id){
         Plaza p = plazaService.findById(id);
-        if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains("ROLE_ADMIN") || p.getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+        Map<String,Object> response = new HashMap<>();
+        if(p==null){
+			response.put("error","Esta plaza no existe");
+			return ResponseEntity.badRequest().body(response);
+        }else if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains("ROLE_ADMIN") || p.getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
             return p;
         }else{
-            Map<String,Object> response = new HashMap<>();
 			response.put("error","Esta plaza no es de tu propiedad");
 			return ResponseEntity.badRequest().body(response);
         }
