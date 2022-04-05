@@ -69,7 +69,7 @@ public class ClientsController {
         clientRepository.deleteById(id);
         return ResponseEntity.ok().build();
     }
-
+    
     @PostMapping("/login")
     public Status loginClient(@RequestBody Client client) {
         List<Client> clients = clientRepository.findAll();

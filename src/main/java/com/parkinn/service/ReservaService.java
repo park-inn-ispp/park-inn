@@ -101,7 +101,7 @@ public class ReservaService {
 
 		Map<String,Object> item = new HashMap<>();
 		Map<String,Object> amount = new HashMap<>();
-		amount.put("value", r.getPrecioTotal() - r.getPlaza().getFianza());
+		amount.put("value", Math.round((r.getPrecioTotal() - r.getPlaza().getFianza())*100.0)/100.0);
 		amount.put("currency","EUR");
 
 		item.put("amount", amount);
@@ -154,7 +154,7 @@ public class ReservaService {
 
 			Map<String,Object> item = new HashMap<>();
 			Map<String,Object> amount = new HashMap<>();
-			amount.put("value", r.getPrecioTotal());
+			amount.put("value", Math.round((r.getPrecioTotal())*100.0)/100.0);
 			amount.put("currency","EUR");
 
 			item.put("amount", amount);
@@ -286,7 +286,7 @@ public class ReservaService {
 
 			Map<String,Object> item = new HashMap<>();
 			Map<String,Object> amount = new HashMap<>();
-			amount.put("value", r.getPlaza().getFianza());
+			amount.put("value", Math.round((r.getPlaza().getFianza())*100.0)/100.0);
 			amount.put("currency","EUR");
 
 			item.put("amount", amount);
@@ -312,7 +312,7 @@ public class ReservaService {
 
 			Map<String,Object> item_p = new HashMap<>();
 			Map<String,Object> amount_p = new HashMap<>();
-			amount_p.put("value", r.getPrecioTotal() - r.getPlaza().getFianza() - 0.1*r.getPrecioTotal());//Poner la comisión como atributo
+			amount_p.put("value", Math.round((r.getPrecioTotal() - r.getPlaza().getFianza() - 0.1*r.getPrecioTotal())*100.0)/100.0);//Poner la comisión como atributo
 			amount_p.put("currency","EUR");
 
 			item_p.put("amount", amount_p);
