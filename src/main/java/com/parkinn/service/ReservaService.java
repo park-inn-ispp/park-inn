@@ -53,8 +53,6 @@ public class ReservaService {
     public Reserva guardarReserva(Reserva r){
         r.setEstado(Estado.pendiente);
         r.setFechaSolicitud(LocalDateTime.now());
-        Double precio = Duration.between(r.getFechaInicio(), r.getFechaFin()).toMinutes() * r.getPlaza().getPrecioHora()/60;
-        r.setPrecioTotal(r.getPlaza().getFianza() + Math.round(precio*100.0)/100.0);
         Reserva reserva = repository.save(r);
         return reserva;
     }
@@ -79,6 +77,113 @@ public class ReservaService {
         Reserva reserva = repository.save(r);
         return reserva;
     }
+	
+	public Object devolverSinFianza(Reserva r){
+		
+		HttpHeaders headers1 = new HttpHeaders();
+		headers1.set("Content-Type", "application/x-www-form-urlencoded");
+		headers1.set("Authorization", "Basic QWR1NGpVdFRrYUp4TkZxdWZoenRvTnAtQ1F1WldKTGt2VjVGRG5fYUlwa2hiV2xTdm5Qd1NxMlRORHNUNHZGWnQtX3VFbUZfcnRIODlNdms6RUxIYWZIQWMtMFpQclJXZVo1MFBqeFQ0TmtWNDg5UDNnZno3Q3RvWU9yLWVvQVQxekhzcVZuTlZrYm5WRkE4S21RdVFpQVNkSlU2ZzgxN3M=");
+		HttpEntity<String> entity1 = new HttpEntity<String>("parameters", headers1);
+		ResponseEntity<PayPalAccesToken> response1 = restTemplate.exchange("https://api-m.sandbox.paypal.com/v1/oauth2/token?grant_type=client_credentials",HttpMethod.POST,entity1, PayPalAccesToken.class);
+		String token = response1.getBody().getAccessToken();
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Content-Type", "application/json");
+		headers.set("Authorization", "Bearer " + token);
+
+		//--------------- Devolver todo ---------------
+		Map<String,Object> body = new HashMap<>();
+		Map<String,Object> senderHeader = new HashMap<>();
+		//senderHeader.put("sender_batch_id", "");
+		senderHeader.put("recipient_type", "EMAIL");
+		senderHeader.put("email_subject", "Devolución del importe sin la fianza de la reserva");
+		senderHeader.put("email_message", "Se te devuele el importe sin la fianza de la reserva de park-inn");
+
+		Map<String,Object> item = new HashMap<>();
+		Map<String,Object> amount = new HashMap<>();
+		amount.put("value", r.getPrecioTotal() - r.getPlaza().getFianza());
+		amount.put("currency","EUR");
+
+		item.put("amount", amount);
+		//item.put("sender_item_id", "");
+		item.put("recipient_wallet", "PAYPAL");
+		item.put("receiver", "sb-ah4x115239563@personal.example.com");//r.getUser().getEmail()
+
+		List<Map<String,Object>> items = new ArrayList<>();
+		items.add(item);
+
+		body.put("sender_batch_header", senderHeader);
+		body.put("items", items);
+		HttpEntity<Object> entity = new HttpEntity<>(body, headers);
+		ResponseEntity<Object> response = restTemplate.exchange("https://api-m.sandbox.paypal.com/v1/payments/payouts", HttpMethod.POST, entity, Object.class);
+	
+		if(!response.getStatusCode().is2xxSuccessful()){
+			Map<String,Object> res = new HashMap<>();
+			res.put("error","Ha ocurrido un error inesperado con la devolución");
+			return ResponseEntity.badRequest().body(res);
+		} else {
+			r.setEstado(Estado.cancelada);
+	        repository.save(r);
+		Map<String,Object> res = new HashMap<>();
+		res.put("info","Reserva cancelada con éxito. Se ha devuelto el importe total sin la fianza al cliente");
+		return ResponseEntity.accepted().body(res);
+		}
+		
+}
+	
+	public Object devolverTodo(Reserva r){
+			
+			HttpHeaders headers1 = new HttpHeaders();
+			headers1.set("Content-Type", "application/x-www-form-urlencoded");
+			headers1.set("Authorization", "Basic QWR1NGpVdFRrYUp4TkZxdWZoenRvTnAtQ1F1WldKTGt2VjVGRG5fYUlwa2hiV2xTdm5Qd1NxMlRORHNUNHZGWnQtX3VFbUZfcnRIODlNdms6RUxIYWZIQWMtMFpQclJXZVo1MFBqeFQ0TmtWNDg5UDNnZno3Q3RvWU9yLWVvQVQxekhzcVZuTlZrYm5WRkE4S21RdVFpQVNkSlU2ZzgxN3M=");
+			HttpEntity<String> entity1 = new HttpEntity<String>("parameters", headers1);
+			ResponseEntity<PayPalAccesToken> response1 = restTemplate.exchange("https://api-m.sandbox.paypal.com/v1/oauth2/token?grant_type=client_credentials",HttpMethod.POST,entity1, PayPalAccesToken.class);
+			String token = response1.getBody().getAccessToken();
+
+			HttpHeaders headers = new HttpHeaders();
+			headers.set("Content-Type", "application/json");
+			headers.set("Authorization", "Bearer " + token);
+
+			//--------------- Devolver todo ---------------
+			Map<String,Object> body = new HashMap<>();
+			Map<String,Object> senderHeader = new HashMap<>();
+			//senderHeader.put("sender_batch_id", "");
+			senderHeader.put("recipient_type", "EMAIL");
+			senderHeader.put("email_subject", "Devolución total del importe de la reserva");
+			senderHeader.put("email_message", "Se te devuele el importe de la reserva de park-inn");
+
+			Map<String,Object> item = new HashMap<>();
+			Map<String,Object> amount = new HashMap<>();
+			amount.put("value", r.getPrecioTotal());
+			amount.put("currency","EUR");
+
+			item.put("amount", amount);
+			//item.put("sender_item_id", "");
+			item.put("recipient_wallet", "PAYPAL");
+			item.put("receiver", "sb-ah4x115239563@personal.example.com");//r.getUser().getEmail()
+
+			List<Map<String,Object>> items = new ArrayList<>();
+			items.add(item);
+
+			body.put("sender_batch_header", senderHeader);
+			body.put("items", items);
+			HttpEntity<Object> entity = new HttpEntity<>(body, headers);
+			ResponseEntity<Object> response = restTemplate.exchange("https://api-m.sandbox.paypal.com/v1/payments/payouts", HttpMethod.POST, entity, Object.class);
+		
+			if(!response.getStatusCode().is2xxSuccessful()){
+				Map<String,Object> res = new HashMap<>();
+				res.put("error","Ha ocurrido un error inesperado con la devolución");
+				return ResponseEntity.badRequest().body(res);
+			} else {
+				r.setEstado(Estado.cancelada);
+		        repository.save(r);
+			Map<String,Object> res = new HashMap<>();
+			res.put("info","Reserva cancelada con éxito. Se ha devuelto el importe total al cliente");
+			return ResponseEntity.accepted().body(res);
+			}
+			
+	}
+		
 	
     public List<Reserva> findPlazaById(Long id){
     	List<Reserva> reservas = repository.findByPlazaId(id);
@@ -159,10 +264,17 @@ public class ReservaService {
 			r.setEstado(Estado.confirmadaPropietario);
 		}else{
 			r.setEstado(Estado.confirmadaAmbos);
+			
+			HttpHeaders headers1 = new HttpHeaders();
+			headers1.set("Content-Type", "application/x-www-form-urlencoded");
+			headers1.set("Authorization", "Basic QWR1NGpVdFRrYUp4TkZxdWZoenRvTnAtQ1F1WldKTGt2VjVGRG5fYUlwa2hiV2xTdm5Qd1NxMlRORHNUNHZGWnQtX3VFbUZfcnRIODlNdms6RUxIYWZIQWMtMFpQclJXZVo1MFBqeFQ0TmtWNDg5UDNnZno3Q3RvWU9yLWVvQVQxekhzcVZuTlZrYm5WRkE4S21RdVFpQVNkSlU2ZzgxN3M=");
+			HttpEntity<String> entity1 = new HttpEntity<String>("parameters", headers1);
+			ResponseEntity<PayPalAccesToken> response1 = restTemplate.exchange("https://api-m.sandbox.paypal.com/v1/oauth2/token?grant_type=client_credentials",HttpMethod.POST,entity1, PayPalAccesToken.class);
+			String token = response1.getBody().getAccessToken();
 
 			HttpHeaders headers = new HttpHeaders();
 			headers.set("Content-Type", "application/json");
-			headers.set("Authorization", "Bearer A21AAJNZKOugw3p1gIoKwWs-ga-HnIe-Og2NqZuhl-8j4IAFL6pZ2BDuMpgVZOOxHdi8B2cP7cN5GwqLMnIZS2cLGrbE1cacA");
+			headers.set("Authorization", "Bearer " + token);
 
 			//--------------- Devolver fianza ---------------
 			Map<String,Object> body = new HashMap<>();

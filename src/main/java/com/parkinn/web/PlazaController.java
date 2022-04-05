@@ -114,6 +114,7 @@ public class PlazaController {
 		String value = amount.getValue();
 		String currencyCode = amount.getCurrencyCode();
 		Double precio = Duration.between(reserva.getFechaInicio(), reserva.getFechaFin()).toMinutes() * reserva.getPlaza().getPrecioHora()/60;
+		precio = precio + reserva.getPlaza().getFianza();
 		reserva.setPrecioTotal(Math.round(precio*100.0)/100.0);
 		
 		if(!currencyCode.equals("EUR")) {
