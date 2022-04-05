@@ -2,7 +2,9 @@ package com.parkinn.web;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.parkinn.model.EstadoIncidencia;
 import com.parkinn.model.Incidencia;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 	    @Autowired
 	    private IncidenciaService incidenciaService;
 
+		@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
 	    @GetMapping("/{id}")
 	    public Incidencia findById(@PathVariable Long id){
 	    	return incidenciaService.findIncidenciaById(id);
@@ -37,12 +40,22 @@ import org.springframework.web.bind.annotation.RestController;
 	    	return incidenciaService.findAll();
 	    }
 	  
-		@PreAuthorize("hasRole('ROLE_USER')")
+		@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
 		@PostMapping
 		public ResponseEntity guardarIncidencia(@RequestBody Incidencia incidencia) throws URISyntaxException {
-			System.out.println(incidencia.toString());
-			Incidencia savedIncidencia = incidenciaService.guardarIncidencia(incidencia);
-			return ResponseEntity.created(new URI("/incidencias/" + savedIncidencia.getId())).body(savedIncidencia);
+			Map<String,Object> response = new HashMap<>();
+        	response.put("incidencia", incidencia);
+			if(incidencia.getUser().getEmail() == null || incidencia.getUser() == null){
+				response.put("error","La incidencia no tiene ningún usuario asociado");
+				return ResponseEntity.badRequest().body(response);
+			}else if(incidencia.getReserva() == null || incidencia.getReserva().getId() == null ){
+				response.put("error","La incidencia no tiene ninguna reserva asociada");
+				return ResponseEntity.badRequest().body(response);
+			}else{
+				Incidencia savedIncidencia = incidenciaService.guardarIncidencia(incidencia);
+				return ResponseEntity.created(new URI("/incidencias/" + savedIncidencia.getId())).body(savedIncidencia);
+			}
+			
 		}
 
 		@PreAuthorize("hasRole('ROLE_ADMIN')")

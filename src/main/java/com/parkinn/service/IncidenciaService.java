@@ -37,8 +37,14 @@ public class IncidenciaService {
 
     public Incidencia guardarIncidencia(Incidencia r){
         r.setFecha(LocalDateTime.now());
-		r.setUser(clientRepository.findByEmail(r.getUser().getEmail()).get());
-		r.setReserva(reservaService.findById(r.getReserva().getId()));
+		String email = (r.getUser() == null) ? "sinmail" : r.getUser().getEmail();
+		Long idReserva = (r.getReserva() == null) ? -1 : r.getReserva().getId();
+		if(!email.equals("sinmail")){
+			r.setUser(clientRepository.findByEmail(email).get());
+		}
+		if(idReserva != -1){
+			r.setReserva(reservaService.findById(idReserva));
+		}
         Incidencia incidencia = repository.save(r);
         return incidencia;
     }
