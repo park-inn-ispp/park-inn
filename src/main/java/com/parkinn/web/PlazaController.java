@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -45,18 +46,20 @@ public class PlazaController {
     @Autowired
     private ReservaService reservaService;
 
-
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @GetMapping()
     public List<Plaza> filtrarPlazas(@RequestParam(name = "maxPrecioHora", required=false) Double maxPrecioHora, @RequestParam(name = "fechaInicio", required=false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaInicio,
         @RequestParam(name = "fechaFin", required=false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaFin, @RequestParam(name = "zona", required=false) String zona) {
         return plazaService.filtrarPlazas(maxPrecioHora, fechaInicio, fechaFin, zona);
     }
-
+    
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @GetMapping("/all")
-    public List<Plaza> getPlazas() {
+    public Object getPlazas() {
         return plazaService.findAll();
     }
-
+    
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @PostMapping
     public ResponseEntity createPlaza(@RequestBody Plaza plaza) throws URISyntaxException {
        Localizacion localizacion = plazaService.getLocalizacion(plaza.getDireccion());
@@ -78,6 +81,7 @@ public class PlazaController {
     	
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @PutMapping("/{id}")
     public ResponseEntity updatePlaza(@PathVariable Long id, @RequestBody Plaza plaza) {
     	Localizacion localizacion = plazaService.getLocalizacion(plaza.getDireccion());
@@ -105,11 +109,9 @@ public class PlazaController {
   			return ResponseEntity.badRequest().body(response);
         }
     	
-    	
-    	
-    	
     }
-
+    
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @DeleteMapping("/{id}")
     public ResponseEntity deletePlaza(@PathVariable Long id) {
     	Plaza currentPlaza = plazaService.findById(id);
@@ -125,15 +127,14 @@ public class PlazaController {
   			return ResponseEntity.badRequest().body(response);
         }
         
-        
-        
-        
     }
-
+    
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @PostMapping("/{id}/reservar")
     public ResponseEntity createReserva(@Valid @RequestBody Reserva reserva, @PathVariable Long id) throws URISyntaxException {
         Map<String,Object> response = new HashMap<>();
         List<Reserva> reservas = reservaService.findAll();
+        List<String> errores = new ArrayList<String>();
         response.put("reserva", reserva);
     
        for (Reserva r : reservas){
@@ -141,7 +142,8 @@ public class PlazaController {
             String paypal_order_Nuevo= reserva.getPaypal_order_id();
             
             if(paypal_order_Nuevo.equals(paypal_order_BD)){
-                response.put("error","La transacción ya existía en la base de datos");
+                errores.add("La transacción ya existía en la base de datos");
+                response.put("errores", errores);
                 return ResponseEntity.badRequest().body(response);
             }
         }
@@ -158,23 +160,28 @@ public class PlazaController {
 		
 		if(!currencyCode.equals("EUR")) {
 			
-			response.put("error","La moneda de la transacción debe ser EUR y es " + currencyCode + ".");
-	        return ResponseEntity.badRequest().body(response);
+			errores.add("La moneda de la transacción debe ser EUR y es " + currencyCode + ".");
+	        response.put("errores", errores);
+			return ResponseEntity.badRequest().body(response);
 		
 		}else if(!reserva.getPrecioTotal().equals(Double.parseDouble(value)) ) {
-			response.put("error","El precio de la reserva es " + reserva.getPrecioTotal() + " y el de la transacción " + value);
-	        return ResponseEntity.badRequest().body(response);
+			errores.add("El precio de la reserva es " + reserva.getPrecioTotal() + " y el de la transacción " + value);
+	        response.put("errores", errores);
+			return ResponseEntity.badRequest().body(response);
 		
 		}
         
         if(reserva.getFechaInicio().isAfter(reserva.getFechaFin())){
-            response.put("error","La fecha de inicio debe ser anterior a la fecha de fin");
+            errores.add("La fecha de inicio debe ser anterior a la fecha de fin");
+            response.put("errores", errores);
             return ResponseEntity.badRequest().body(response);
         }else if(reserva.getFechaInicio().isBefore(LocalDateTime.now())){
-            response.put("error","No se pueden realizar reservas en el pasado");
+            errores.add("No se pueden realizar reservas en el pasado");
+            response.put("errores", errores);
             return ResponseEntity.badRequest().body(response);
         }else if(reservaService.reservaTieneColision(reserva)){
-            response.put("error","Este horario está ocupado por otra reserva");
+            errores.add("Este horario está ocupado por otra reserva");
+            response.put("errores", errores);
             return ResponseEntity.badRequest().body(response);
         }else{
             Reserva savedReserva = reservaService.guardarReserva(reserva);
@@ -186,13 +193,15 @@ public class PlazaController {
     	    	
     }
 
-    
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @GetMapping("/{id}")
     public Object infoPlazaYCliente(@PathVariable Long id){
         Plaza p = plazaService.findById(id);
+        List<String> errores = new ArrayList<String>();
         Map<String,Object> response = new HashMap<>();
         if(p==null){
-			response.put("error","Esta plaza no existe");
+			errores.add("Esta plaza no existe");
+			response.put("errores", errores);
 			return ResponseEntity.badRequest().body(response);
         }else{
             return p;
@@ -200,18 +209,18 @@ public class PlazaController {
         }
     }
     
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @GetMapping("/plazasDelUsuario/{id}")
     public Object plazasCliente(@PathVariable Long id){
         List<Plaza> p = plazaService.findUserById(id);
+        List<String> errores = new ArrayList<String>();
         if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) || p.get(0).getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
             return p;
         }else{
             Map<String,Object> response = new HashMap<>();
-			response.put("error","Esta plaza no es de tu propiedad");
+            errores.add("Esta plaza no es de tu propiedad");
+            response.put("errores", errores);
 			return ResponseEntity.badRequest().body(response);
         }
     }
-    
-    
-    
-}
+   	}
