@@ -30,8 +30,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 		@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
 	    @GetMapping("/{id}")
-	    public Incidencia findById(@PathVariable Long id){
-	    	return incidenciaService.findIncidenciaById(id);
+	    public ResponseEntity<Map<String, Object>> findById(@PathVariable Long id){
+			Incidencia incidencia = incidenciaService.findIncidenciaById(id);
+	    	Map<String,Object> response = new HashMap<>();
+			if(incidencia == null){
+				response.put("error","La incidencia no existe");
+				return ResponseEntity.badRequest().body(response);
+			}else{
+				response.put("incidencia", incidencia);
+				return ResponseEntity.ok(response);
+
+			}
 	    }
 		
 	    @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -66,11 +75,19 @@ import org.springframework.web.bind.annotation.RestController;
 		public ResponseEntity cerrarIncidencia(@PathVariable Long id) {
 			
 			Incidencia incidenciaActual = incidenciaService.findIncidenciaById(id);
-			incidenciaActual.setEstado(EstadoIncidencia.resuelta);
+			Incidencia incidencia = incidenciaService.findIncidenciaById(id);
+	    	Map<String,Object> response = new HashMap<>();
+			if(incidencia == null){
+				response.put("error","La incidencia no existe");
+				return ResponseEntity.badRequest().body(response);
+			}else{
+				incidenciaActual.setEstado(EstadoIncidencia.resuelta);
+				incidenciaActual = incidenciaService.guardarIncidencia(incidenciaActual);
+
+				return ResponseEntity.ok(incidenciaActual);
+
+			}	
 	
-			incidenciaActual = incidenciaService.guardarIncidencia(incidenciaActual);
-	
-			return ResponseEntity.ok(incidenciaActual);
 		}
 
 	

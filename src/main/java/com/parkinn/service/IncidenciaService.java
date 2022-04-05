@@ -32,8 +32,8 @@ public class IncidenciaService {
     }
 
 	  public Incidencia findIncidenciaById(Long id){
-    	Optional<Incidencia> incidencias = repository.findById(id);
-        return incidencias.get();
+    	Incidencia incidencias = repository.findById(id).orElse(null);
+        return incidencias;
     }
 
 	public boolean comprobarCliente(Incidencia r){
