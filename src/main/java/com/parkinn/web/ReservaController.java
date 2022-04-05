@@ -7,9 +7,11 @@ import java.time.Period;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
+import com.parkinn.model.Client;
 import com.parkinn.model.Estado;
 import com.parkinn.model.Horario;
 import com.parkinn.model.Plaza;
@@ -17,11 +19,13 @@ import com.parkinn.model.Reserva;
 import com.parkinn.model.paypal.Amount;
 import com.parkinn.model.paypal.PayPalClasses;
 import com.parkinn.model.paypal.PurchaseUnit;
-
+import com.parkinn.repository.ClientRepository;
 import com.parkinn.repository.HorarioRepository;
+import com.parkinn.service.PlazaService;
 import com.parkinn.service.ReservaService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -39,16 +43,32 @@ public class ReservaController {
 		
 	@Autowired
 	private ReservaService reservaService;
+	
+	@Autowired
+	private PlazaService plazaService;
+	
+	@Autowired
+	private ClientRepository clientRepository;
+
 
 
 	    @GetMapping("/usuario/{id}")
-	    public List<Reserva> reservasUsuario(@PathVariable Long id){
-	    	return reservaService.findByUserId(id);
-	    }
+	    public Object reservasUsuario(@PathVariable Long id){
+	    	Client usuario = clientRepository.findById(id).orElseThrow(RuntimeException::new);
+	    	if(usuario.getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal()) || SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains("ROLE_ADMIN")) {
+	    		return reservaService.findByUserId(id);
+	    	}
+	    	return new ResponseEntity<>("No puedes acceder a las reservas de otro usuario sin ser administrador", HttpStatus.FORBIDDEN);
+	    	}
 	    
 	    @GetMapping("/plaza/{id}")
-	    public List<Reserva> ReservasPlaza(@PathVariable Long id){
-	    	return reservaService.findPlazaById(id);
+	    public Object ReservasPlaza(@PathVariable Long id){
+	    	Plaza plaza = plazaService.findById(id);
+	    	if(plaza.getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())  || SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains("ROLE_ADMIN")) {
+	    		return reservaService.findPlazaById(id);
+	    	}
+	    	return new ResponseEntity<>("No puedes acceder a las reservas de una plaza que no es tuya sin ser administrador", HttpStatus.FORBIDDEN);
+	    	
 	    }
 		
 	    @PreAuthorize("hasRole('ROLE_ADMIN')")
