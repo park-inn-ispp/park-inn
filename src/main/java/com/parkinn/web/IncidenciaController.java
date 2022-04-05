@@ -63,6 +63,9 @@ import org.springframework.web.bind.annotation.RestController;
 			}else if(!incidenciaService.comprobarCliente(incidencia)){
 				response.put("error","El usuario no es ni el dueño de la plaza ni el cliente de la reserva");
 				return ResponseEntity.badRequest().body(response);
+			}else if(incidenciaService.comprobarConfirmacion(incidencia)){
+				response.put("error","La reserva ya ha sido confirmada por ambos");
+				return ResponseEntity.badRequest().body(response);
 			}else{
 				Incidencia savedIncidencia = incidenciaService.guardarIncidencia(incidencia);
 				return ResponseEntity.created(new URI("/incidencias/" + savedIncidencia.getId())).body(savedIncidencia);
