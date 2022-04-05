@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 @RestController
@@ -165,18 +166,16 @@ public class PlazaController {
         if(p==null){
 			response.put("error","Esta plaza no existe");
 			return ResponseEntity.badRequest().body(response);
-        }else if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains("ROLE_ADMIN") || p.getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
-            return p;
         }else{
-			response.put("error","Esta plaza no es de tu propiedad");
-			return ResponseEntity.badRequest().body(response);
+            return p;
+
         }
     }
     
     @GetMapping("/plazasDelUsuario/{id}")
     public Object plazasCliente(@PathVariable Long id){
         List<Plaza> p = plazaService.findUserById(id);
-        if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains("ROLE_ADMIN") || p.get(0).getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+        if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) || p.get(0).getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
             return p;
         }else{
             Map<String,Object> response = new HashMap<>();
