@@ -37,6 +37,11 @@ public class PlazaService {
         return savedPlaza;
     }
 
+    public boolean comprobarPlazasIguales(Plaza plaza){
+        List<Plaza> plazaExiste =  repository.findByDireccionAndAdministrador(plaza.getDireccion(),plaza.getAdministrador());
+        return plazaExiste.size() != 0;
+    }
+
     public Plaza findById(Long id){
         Plaza plaza = repository.findById(id).orElseThrow(RuntimeException::new);
         return plaza;
