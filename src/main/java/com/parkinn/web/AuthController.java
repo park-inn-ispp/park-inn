@@ -62,17 +62,21 @@ public class AuthController {
     public ResponseEntity<?> registerUser(@RequestBody SignUpDto signUpDto){
 
         // add check for name exists in a DB
-        if(clientRepository.existsByName(signUpDto.getName())){
-            return new ResponseEntity<>("Name is already taken!", HttpStatus.BAD_REQUEST);
+        if(clientRepository.existsByName(signUpDto.getName()) && clientRepository.existsBySurname(signUpDto.getSurname())){
+            return new ResponseEntity<>("Ya hay una persona registrada con ese nombre y esos apellidos", HttpStatus.BAD_REQUEST);
         }
 
         // add check for email exists in DB
         if(clientRepository.existsByEmail(signUpDto.getEmail())){
-            return new ResponseEntity<>("Email is already taken!", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Este email ya está registrado", HttpStatus.BAD_REQUEST);
         }
 
         if(!signUpDto.getPassword().equals(signUpDto.getConfirm())){
             return new ResponseEntity<>("Las contraseñas no coinciden", HttpStatus.BAD_REQUEST); 
+        }
+
+        if(!signUpDto.getPhone().startsWith("6")){
+            return new ResponseEntity<>("El número de teléfono ha de empezar por 6", HttpStatus.BAD_REQUEST); 
         }
 
         // create user object
@@ -89,7 +93,7 @@ public class AuthController {
 
         clientRepository.save(user);
 
-        return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
+        return new ResponseEntity<>("Usuario registrado correctamente", HttpStatus.OK);
 
     }
 
