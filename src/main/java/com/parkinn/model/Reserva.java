@@ -28,7 +28,6 @@ public class Reserva {
     private LocalDateTime fechaFin;
     private LocalDateTime fechaSolicitud;
     private String comentarios;
-    private String incidencias;
 
     @ManyToOne
     @JoinColumn(name="plaza_id")
@@ -44,14 +43,6 @@ public class Reserva {
 
     public Estado getEstado() {
         return estado;
-    }
-
-    public String getIncidencias() {
-        return incidencias;
-    }
-
-    public void setIncidencias(String incidencias) {
-        this.incidencias = incidencias;
     }
 
     public String getComentarios() {
