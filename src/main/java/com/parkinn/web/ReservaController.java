@@ -56,7 +56,7 @@ public class ReservaController {
 	    @GetMapping("/usuario/{id}")
 	    public Object reservasUsuario(@PathVariable Long id){
 	    	Client usuario = clientRepository.findById(id).orElseThrow(RuntimeException::new);
-	    	if(usuario.getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal()) || SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains("ROLE_ADMIN")) {
+	    	if(usuario.getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal()) || SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
 	    		return reservaService.findByUserId(id);
 	    	}
 	    	return new ResponseEntity<>("No puedes acceder a las reservas de otro usuario sin ser administrador", HttpStatus.FORBIDDEN);
@@ -65,7 +65,7 @@ public class ReservaController {
 	    @GetMapping("/plaza/{id}")
 	    public Object ReservasPlaza(@PathVariable Long id){
 	    	Plaza plaza = plazaService.findById(id);
-	    	if(plaza.getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())  || SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains("ROLE_ADMIN")) {
+	    	if(plaza.getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())  || SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
 	    		return reservaService.findPlazaById(id);
 	    	}
 	    	return new ResponseEntity<>("No puedes acceder a las reservas de una plaza que no es tuya sin ser administrador", HttpStatus.FORBIDDEN);
