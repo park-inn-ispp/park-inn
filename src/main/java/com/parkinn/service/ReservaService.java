@@ -1,33 +1,24 @@
 package com.parkinn.service;
 
-import com.parkinn.repository.HorarioRepository;
 import com.parkinn.repository.ReservaRepository;
 
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import com.parkinn.model.Estado;
-import com.parkinn.model.Horario;
-import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
 import com.parkinn.model.paypal.PayPalAccesToken;
 import com.parkinn.model.paypal.PayPalClasses;
 
-import org.hibernate.validator.constraints.URL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -40,12 +31,7 @@ public class ReservaService {
 	
     @Autowired
     private ReservaRepository repository;
-    @Autowired
-    private HorarioRepository horarioRepository;
-    
-    @Autowired
-    private PlazaService plazaService;
-    
+   
 	public List<Reserva> findAll(){
         return repository.findAll();
     }
