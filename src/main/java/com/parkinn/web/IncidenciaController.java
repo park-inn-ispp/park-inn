@@ -51,6 +51,9 @@ import org.springframework.web.bind.annotation.RestController;
 			}else if(incidencia.getReserva() == null || incidencia.getReserva().getId() == null ){
 				response.put("error","La incidencia no tiene ninguna reserva asociada");
 				return ResponseEntity.badRequest().body(response);
+			}else if(!incidenciaService.comprobarCliente(incidencia)){
+				response.put("error","El usuario no es ni el dueño de la plaza ni el cliente de la reserva");
+				return ResponseEntity.badRequest().body(response);
 			}else{
 				Incidencia savedIncidencia = incidenciaService.guardarIncidencia(incidencia);
 				return ResponseEntity.created(new URI("/incidencias/" + savedIncidencia.getId())).body(savedIncidencia);
