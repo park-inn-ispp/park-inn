@@ -3,24 +3,15 @@ package com.parkinn.web;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.Period;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-
-import javax.validation.Valid;
 
 import com.parkinn.model.Client;
 import com.parkinn.model.Estado;
-import com.parkinn.model.Horario;
 import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
-import com.parkinn.model.paypal.Amount;
-import com.parkinn.model.paypal.PayPalClasses;
-import com.parkinn.model.paypal.PurchaseUnit;
 import com.parkinn.repository.ClientRepository;
-import com.parkinn.repository.HorarioRepository;
 import com.parkinn.service.PlazaService;
 import com.parkinn.service.ReservaService;
 
@@ -39,9 +30,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/reservas")
 public class ReservaController {
 
-	@Autowired
-	private HorarioRepository horarioRepository;
-		
 	@Autowired
 	private ReservaService reservaService;
 	
