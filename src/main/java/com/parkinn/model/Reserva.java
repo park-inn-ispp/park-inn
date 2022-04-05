@@ -18,6 +18,8 @@ public class Reserva {
     @GeneratedValue
     private Long id;
 
+    private String paypal_order_id;
+   
     private Estado estado;
     private Double precioTotal;
     @NotNull
@@ -102,4 +104,13 @@ public class Reserva {
     public void setPlaza(Plaza plaza) {
         this.plaza = plaza;
     }
+    
+    public String getPaypal_order_id() {
+		return paypal_order_id;
+	}
+
+	public void setPaypal_order_id(String paypal_order_id) {
+		this.paypal_order_id = paypal_order_id;
+	}
+
 }
