@@ -16,6 +16,7 @@ import com.parkinn.model.paypal.PayPalAccesToken;
 import com.parkinn.model.paypal.PayPalClasses;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -181,9 +182,9 @@ public class ReservaService {
         return reservas;
         
     }
-    public Reserva findById(Long id) {
-    	Optional<Reserva> reserva = repository.findById(id);
-    	return reserva.orElse(null);
+    public Reserva findById(Long id){
+        Reserva reserva = repository.findById(id).orElseThrow(RuntimeException::new);
+        return reserva;
     }
     
     /*

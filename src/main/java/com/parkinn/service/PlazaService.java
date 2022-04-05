@@ -47,6 +47,7 @@ public class PlazaService {
         return plaza;
     }
     
+    
     public List<Plaza> findUserById(Long id){
     	List<Plaza> plazas = repository.findByUserId(id);
         return plazas;
