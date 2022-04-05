@@ -129,12 +129,15 @@ public class ReservaController {
 		Reserva reserva = reservaService.findById(id);
 		Map<String,Object> response = new HashMap<>();
 		response.put("reserva", reserva);
+		if(reserva.getEstado().equals(Estado.cancelada) || reserva.getEstado().equals(Estado.rechazada) || reserva.getEstado().equals(Estado.denegada)) {
+			response.put("error", "No se puede cancelar una reserva que ya no está en proceso");
+			return ResponseEntity.badRequest().body(response);
+		}
+		
 		Long periodo = Duration.between(LocalDateTime.now(), reserva.getFechaInicio()).toMinutes();
 		
 		if(reserva.getPlaza().getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
-			reservaService.cancelarReserva(id);
-			response.put("info", "El coste de la reserva le será devuelto al cliente");
-			return ResponseEntity.accepted().body(response);
+			return reservaService.devolverTodo(reserva);
 		}else if(!reserva.getUser().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
 			response.put("error","No estás involucrado en esta reserva");
 			return ResponseEntity.badRequest().body(response);
@@ -142,13 +145,9 @@ public class ReservaController {
 				response.put("error","Esta reserva no se puede cancelar, la reserva ya ha empezado");
 				return ResponseEntity.badRequest().body(response);
 		}else if(periodo<1440) {
-				response.put("info", "Se le devolverá el coste de la reserva pero no la fianza");
-				reservaService.cancelarReserva(id);
-				return ResponseEntity.accepted().body(response);
+				return reservaService.devolverSinFianza(reserva);
 		}else {
-					response.put("info", "Se le devolverá el coste de la reserva íntegro");
-					reservaService.cancelarReserva(id);
-					return ResponseEntity.accepted().body(response);
+			return reservaService.devolverTodo(reserva);
 				}
 		}
     
