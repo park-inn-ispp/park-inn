@@ -54,14 +54,23 @@ import org.springframework.web.bind.annotation.RestController;
 	    	return reservaService.horariosDisponibles(id);
 	    }*/
 	    @GetMapping("/{id}")
-	    public Reserva detallesReserva(@PathVariable Long id){
-	    	return reservaService.findById(id);
+	    public Object detallesReserva(@PathVariable Long id){
+			Reserva r = reservaService.findById(id);
+			Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+			if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains("ROLE_ADMIN") || r.getUser().getEmail().equals(user) || r.getPlaza().getAdministrador().getEmail().equals(user)){
+				return r;
+			}else{
+				Map<String,Object> response = new HashMap<>();
+        		response.put("reserva", r);
+				response.put("error","No estás involucrado en esta reserva");
+				return ResponseEntity.badRequest().body(r);
+			}
 	    }	
 
 		@GetMapping("/{id}/aceptar")
 	    public Object aceptarReserva(@PathVariable Long id){
 			Reserva reserva = reservaService.findById(id);
-			if(reserva.getPlaza().getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+			if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains("ROLE_ADMIN") || reserva.getPlaza().getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
 				return reservaService.aceptarReserva(id);
 			}else{
 				Map<String,Object> response = new HashMap<>();
@@ -74,7 +83,7 @@ import org.springframework.web.bind.annotation.RestController;
 		@GetMapping("/{id}/rechazar")
 	    public Object rechazarReserva(@PathVariable Long id){
 			Reserva reserva = reservaService.findById(id);
-			if(reserva.getPlaza().getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+			if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains("ROLE_ADMIN") ||reserva.getPlaza().getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
 				return reservaService.rechazarReserva(id);
 			}else{
 				Map<String,Object> response = new HashMap<>();
