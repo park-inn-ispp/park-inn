@@ -101,6 +101,12 @@ public class AuthController {
             return ResponseEntity.badRequest().body(response);
         }
 
+        if(!(signUpDto.getPhone().startsWith("6") || signUpDto.getPhone().startsWith("7"))){
+            errores.add("El primer dígito del número de teléfono ha de ser 6 o 7");
+            response.put("errores", errores);
+            return ResponseEntity.badRequest().body(response);
+        }
+
         
 
         // create user object
