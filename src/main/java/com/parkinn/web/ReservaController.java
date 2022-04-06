@@ -202,7 +202,7 @@ public class ReservaController {
 		
 		Long periodo = Duration.between(LocalDateTime.now(), reserva.getFechaInicio()).toMinutes();
 		
-		if(reserva.getPlaza().getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+		if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) || reserva.getPlaza().getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
 			return reservaService.devolverTodo(reserva);
 		}else if(!reserva.getUser().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
 			errores.add("No estás involucrado en esta reserva");
