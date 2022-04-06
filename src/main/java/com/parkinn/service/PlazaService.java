@@ -3,6 +3,7 @@ package com.parkinn.service;
 import com.parkinn.repository.PlazaRepository;
 import com.parkinn.model.Localizacion;
 import com.parkinn.model.Plaza;
+import com.parkinn.model.Client;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -37,8 +38,8 @@ public class PlazaService {
         return savedPlaza;
     }
 
-    public boolean comprobarPlazasIguales(Plaza plaza){
-        List<Plaza> plazaExiste =  repository.findByDireccionAndAdministrador(plaza.getDireccion(),plaza.getAdministrador());
+    public boolean comprobarPlazasIguales(String direccion,Client administrador){
+        List<Plaza> plazaExiste =  repository.findByDireccionAndAdministrador(direccion,administrador);
         return plazaExiste.size() != 0;
     }
 
