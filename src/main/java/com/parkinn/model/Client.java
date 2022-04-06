@@ -15,7 +15,7 @@ public class Client {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @NotBlank
-    @Size(max = 20)
+    @Size(max = 50)
     private String name;
     @NotBlank
     @Size(max = 50)
