@@ -17,6 +17,6 @@
 | ------------- | ------------- | -------------  | -------------  | -------------  | -------------  | -------------  |
 | 15/03         |:smile:        |:smile:   |:smile:    | :smile:        | :smile:        | 😄        |
 | 22/03         |😐            | 😃      |😨         | 😐            | 😐            | 😟            |
-| 29/03         |:neutral_face: |:neutral_face:  |           |                |                |                |
+| 29/03         |:neutral_face: |:neutral_face:  |     😨      |       😐         |     😐           |      😐          |
 | 5/04          |:smiley:       |:smiley:| :neutral_face:          |   :smiley:             |      :smiley:          |    :neutral_face:            |
 ...
