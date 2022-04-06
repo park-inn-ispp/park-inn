@@ -128,14 +128,38 @@ public class PlazaController {
         }
         
     }
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+    @PostMapping("/{id}/validateReservaAntesPago")
+    public ResponseEntity validateReservaAntesPago(@Valid @RequestBody Reserva reserva, @PathVariable Long id) throws URISyntaxException {
+        Map<String,Object> response = new HashMap<>();
+        response.put("reserva", reserva);
+
+        List<String> errores = reservaService.erroresNuevaReservaAntesDelPago(reserva);
+       
+        if(errores.isEmpty()){
+            return ResponseEntity.ok().build();
+        }else{
+            response.put("errores", errores);
+            return ResponseEntity.badRequest().body(response);
+        }        
+    	    	
+    }
     
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
-    @PostMapping("/{id}/reservar")
+    @PostMapping("/{id}/reservar") //Tras realizar el pago
     public ResponseEntity createReserva(@Valid @RequestBody Reserva reserva, @PathVariable Long id) throws URISyntaxException {
         Map<String,Object> response = new HashMap<>();
         List<Reserva> reservas = reservaService.findAll();
-        List<String> errores = new ArrayList<String>();
         response.put("reserva", reserva);
+        
+        List<String> errores = reservaService.erroresNuevaReservaAntesDelPago(reserva); 
+        
+       
+       if(!errores.isEmpty()){ //Alguien ha reservado lo mismo que tú justo antes de que pagaras o la fecha inicio ya es pasado
+            response.put("errores", errores);
+            return ResponseEntity.badRequest().body(response);
+       }
     
        for (Reserva r : reservas){
             String paypal_order_BD= r.getPaypal_order_id();
@@ -169,28 +193,10 @@ public class PlazaController {
 	        response.put("errores", errores);
 			return ResponseEntity.badRequest().body(response);
 		
-		}
-        
-        if(reserva.getFechaInicio().isAfter(reserva.getFechaFin())){
-            errores.add("La fecha de inicio debe ser anterior a la fecha de fin");
-            response.put("errores", errores);
-            return ResponseEntity.badRequest().body(response);
-        }else if(reserva.getFechaInicio().isBefore(LocalDateTime.now())){
-            errores.add("No se pueden realizar reservas en el pasado");
-            response.put("errores", errores);
-            return ResponseEntity.badRequest().body(response);
-        }else if(reservaService.reservaTieneColision(reserva)){
-            errores.add("Este horario está ocupado por otra reserva");
-            response.put("errores", errores);
-            return ResponseEntity.badRequest().body(response);
-        }else{
+		}else{
             Reserva savedReserva = reservaService.guardarReserva(reserva);
             return ResponseEntity.created(new URI("/reservas/" + savedReserva.getId())).body(savedReserva);
         }
-        
-    	
-    	
-    	    	
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")

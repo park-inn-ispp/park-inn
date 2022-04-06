@@ -241,6 +241,21 @@ public class ReservaService {
 		}
 		return false;
 	}
+	public List<String> erroresNuevaReservaAntesDelPago(Reserva reserva){
+		List<String> errores = new ArrayList<String>();
+		if(reserva.getFechaInicio().isAfter(reserva.getFechaFin())){
+            errores.add("La fecha de inicio debe ser anterior a la fecha de fin");
+            
+        }else if(reserva.getFechaInicio().isBefore(LocalDateTime.now())){
+            errores.add("No se pueden realizar reservas en el pasado");
+         
+        }else if(reservaTieneColision(reserva)){
+            errores.add("Este horario está ocupado por otra reserva");
+           
+        }
+		return errores;
+	}
+
   
 	public Object confirmarServicio(Reserva r, Object user){
 		if(user.equals(r.getUser().getEmail()) && !r.getEstado().equals(Estado.confirmadaPropietario)){
