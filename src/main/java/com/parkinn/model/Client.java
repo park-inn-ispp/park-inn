@@ -25,7 +25,6 @@ public class Client {
     @NotBlank
     @Size(max = 120)
     private String password;
-    private boolean loggedIn;
     @NotBlank
     @Size(max = 9, min = 9)
     @Column(unique=true)
@@ -48,14 +47,6 @@ public class Client {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public boolean isLoggedIn() {
-        return this.loggedIn;
-    }
-
-    public void setLoggedIn(boolean loggedIn) {
-        this.loggedIn = loggedIn;
     }
 
     @OneToMany(mappedBy = "administrador")
