@@ -11,10 +11,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.parkinn.model.Client;
 import com.parkinn.payload.LoginDto;
 import com.parkinn.payload.SecurityConstants;
-import com.parkinn.repository.RoleRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,7 +26,6 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Autowired 
     private AuthenticationManager authenticationManager;
 
-    private RoleRepository roleRepository;
 
     public JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;

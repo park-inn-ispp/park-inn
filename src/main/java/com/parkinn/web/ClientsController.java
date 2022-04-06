@@ -3,13 +3,12 @@ package com.parkinn.web;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
-import java.util.Objects;
 
 import com.parkinn.model.Client;
-import com.parkinn.model.Status;
 import com.parkinn.repository.ClientRepository;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,16 +29,19 @@ public class ClientsController {
         this.clientRepository = clientRepository;
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @GetMapping
     public List<Client> getClients() {
         return clientRepository.findAll();
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @GetMapping("/{id}")
     public Client getClient(@PathVariable Long id) {
         return clientRepository.findById(id).orElseThrow(RuntimeException::new);
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @GetMapping("/usuariopormail/{email}")
     public Client getByEmail(@PathVariable String email) {
         return clientRepository.findByEmail(email).orElseThrow(RuntimeException::new);
@@ -62,46 +64,10 @@ public class ClientsController {
         return ResponseEntity.ok(currentClient);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity deleteClient(@PathVariable Long id) {
         clientRepository.deleteById(id);
         return ResponseEntity.ok().build();
-    }
-    
-    @PostMapping("/login")
-    public Status loginClient(@RequestBody Client client) {
-        List<Client> clients = clientRepository.findAll();
-        for (Client other : clients) {
-            if (other.equals(client)) {
-                if(other.isLoggedIn()){
-                    return Status.USER_ALREADY_EXISTS;
-
-                }else{
-                    other.setLoggedIn(true);
-                    clientRepository.save(other);
-                    return Status.SUCCESS;
-                }
-               
-            }
-        }
-        return Status.FAILURE;
-    }
-    @PostMapping("/logout")
-    public Status logUserOut( @RequestBody Client client) {
-        List<Client> clients = clientRepository.findAll();
-        for (Client other : clients) {
-            if (Objects.equals(other.getEmail(), client.getEmail())) {
-                if(!other.isLoggedIn()){
-                    return Status.USER_NOT_LOGGED;
-
-                }else{
-                    other.setLoggedIn(false);
-                    clientRepository.save(other);
-                    return Status.SUCCESS;
-                }
-               
-            }
-        }
-        return Status.FAILURE;
     }
 }

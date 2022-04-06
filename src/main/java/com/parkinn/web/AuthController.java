@@ -65,7 +65,6 @@ public class AuthController {
             return ResponseEntity.badRequest().body(response);
         }
 
-        userlogged.setLoggedIn(true);
         clientRepository.save(userlogged);
         return new ResponseEntity<>("User signed-in successfully!.", HttpStatus.OK);
     }
@@ -114,7 +113,6 @@ public class AuthController {
         user.setName(signUpDto.getName());
         user.setEmail(signUpDto.getEmail());
         user.setPassword(passwordEncoder.encode(signUpDto.getPassword()));
-        user.setLoggedIn(true);
         user.setPhone(signUpDto.getPhone());
         user.setSurname(signUpDto.getSurname());
 

@@ -237,8 +237,7 @@ public class PlazaController {
         Plaza p = plazaService.findById(id);
         List<String> errores = new ArrayList<String>();
         Map<String,Object> response = new HashMap<>();
-
-        if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ||p.getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+        
         
         if(p==null){
 			errores.add("Esta plaza no existe");
@@ -248,11 +247,6 @@ public class PlazaController {
             return p;
 
         }
-    }else{
-            errores.add("No puedes visualizar ni editar una plaza que no es de tu propiedad");            
-            response.put("errores", errores);
-  			return ResponseEntity.badRequest().body(response);
-    }
     }
     
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
