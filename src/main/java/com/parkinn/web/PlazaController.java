@@ -259,11 +259,15 @@ public class PlazaController {
     @GetMapping("/plazasDelUsuario/{id}")
     public Object plazasCliente(@PathVariable Long id){
         List<Plaza> p = plazaService.findUserById(id);
+        Map<String,Object> response = new HashMap<>();
         List<String> errores = new ArrayList<String>();
-        if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) || p.get(0).getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+        if(p.isEmpty()){
+            errores.add("Este usuario no tiene ninguna plaza");
+            response.put("errores", errores);
+			return ResponseEntity.badRequest().body(response);
+        }else if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) || p.get(0).getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
             return p;
         }else{
-            Map<String,Object> response = new HashMap<>();
             errores.add("Esta plaza no es de tu propiedad");
             response.put("errores", errores);
 			return ResponseEntity.badRequest().body(response);
