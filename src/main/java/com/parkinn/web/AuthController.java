@@ -1,6 +1,15 @@
 package com.parkinn.web;
 
 
+import java.util.Collections;
+
+import com.parkinn.model.Client;
+import com.parkinn.model.Role;
+import com.parkinn.payload.LoginDto;
+import com.parkinn.payload.SignUpDto;
+import com.parkinn.repository.ClientRepository;
+import com.parkinn.repository.RoleRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,17 +23,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.parkinn.model.Client;
-import com.parkinn.model.Role;
-import com.parkinn.payload.LoginDto;
-import com.parkinn.payload.SignUpDto;
-import com.parkinn.repository.ClientRepository;
-import com.parkinn.repository.RoleRepository;
+
 
 
 
@@ -116,9 +119,5 @@ public class AuthController {
 
         return new ResponseEntity<>("Usuario registrado correctamente", HttpStatus.OK);
 
-    }
-
-
-   
-    
+    }    
 }

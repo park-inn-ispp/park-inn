@@ -2,6 +2,7 @@ package com.parkinn.web;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,9 +33,11 @@ import org.springframework.web.bind.annotation.RestController;
 	    @GetMapping("/{id}")
 	    public ResponseEntity<Map<String, Object>> findById(@PathVariable Long id){
 			Incidencia incidencia = incidenciaService.findIncidenciaById(id);
+			List<String> errores = new ArrayList<>();
 	    	Map<String,Object> response = new HashMap<>();
 			if(incidencia == null){
-				response.put("error","La incidencia no existe");
+				errores.add("La incidencia no existe");
+				response.put("errores",errores);
 				return ResponseEntity.badRequest().body(response);
 			}else{
 				response.put("incidencia", incidencia);
@@ -54,16 +57,30 @@ import org.springframework.web.bind.annotation.RestController;
 		public ResponseEntity guardarIncidencia(@RequestBody Incidencia incidencia) throws URISyntaxException {
 			Map<String,Object> response = new HashMap<>();
         	response.put("incidencia", incidencia);
+			List<String> errores = new ArrayList<>();
+
 			if(incidencia.getUser().getEmail() == null || incidencia.getUser() == null){
-				response.put("error","La incidencia no tiene ningún usuario asociado");
+				errores.add("La incidencia no tiene ningún usuario asociado");
+			}
+			if(incidencia.getReserva() == null || incidencia.getReserva().getId() == null ){
+				errores.add("La incidencia no tiene ninguna reserva asociada");
+			}
+			if((incidencia.getReserva() == null && incidencia.getReserva().getId() == null)){
+				
+				if(!incidenciaService.comprobarCliente(incidencia)){
+					errores.add("El usuario no es ni el dueño de la plaza ni el cliente de la reserva");
+				}
+				if(incidenciaService.comprobarConfirmacion(incidencia)){
+					errores.add("La reserva ya ha sido confirmada por ambos");
+				}
+			}
+			
+
+			if(errores.size() != 0){
+				response.put("errores",errores);
 				return ResponseEntity.badRequest().body(response);
-			}else if(incidencia.getReserva() == null || incidencia.getReserva().getId() == null ){
-				response.put("error","La incidencia no tiene ninguna reserva asociada");
-				return ResponseEntity.badRequest().body(response);
-			}else if(!incidenciaService.comprobarCliente(incidencia)){
-				response.put("error","El usuario no es ni el dueño de la plaza ni el cliente de la reserva");
-				return ResponseEntity.badRequest().body(response);
-			}else{
+			}
+			else{
 				Incidencia savedIncidencia = incidenciaService.guardarIncidencia(incidencia);
 				return ResponseEntity.created(new URI("/incidencias/" + savedIncidencia.getId())).body(savedIncidencia);
 			}
@@ -77,8 +94,11 @@ import org.springframework.web.bind.annotation.RestController;
 			Incidencia incidenciaActual = incidenciaService.findIncidenciaById(id);
 			Incidencia incidencia = incidenciaService.findIncidenciaById(id);
 	    	Map<String,Object> response = new HashMap<>();
+			List<String> errores = new ArrayList<>();
+
 			if(incidencia == null){
-				response.put("error","La incidencia no existe");
+				errores.add("La incidencia no existe");
+				response.put("errores",errores);
 				return ResponseEntity.badRequest().body(response);
 			}else{
 				incidenciaActual.setEstado(EstadoIncidencia.resuelta);

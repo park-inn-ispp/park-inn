@@ -1,33 +1,23 @@
 package com.parkinn.service;
 
-import com.parkinn.repository.HorarioRepository;
 import com.parkinn.repository.ReservaRepository;
 
-import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import com.parkinn.model.Estado;
-import com.parkinn.model.Horario;
-import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
 import com.parkinn.model.paypal.PayPalAccesToken;
 import com.parkinn.model.paypal.PayPalClasses;
 
-import org.hibernate.validator.constraints.URL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -40,12 +30,7 @@ public class ReservaService {
 	
     @Autowired
     private ReservaRepository repository;
-    @Autowired
-    private HorarioRepository horarioRepository;
-    
-    @Autowired
-    private PlazaService plazaService;
-    
+   
 	public List<Reserva> findAll(){
         return repository.findAll();
     }
@@ -101,7 +86,7 @@ public class ReservaService {
 
 		Map<String,Object> item = new HashMap<>();
 		Map<String,Object> amount = new HashMap<>();
-		amount.put("value", r.getPrecioTotal() - r.getPlaza().getFianza());
+		amount.put("value", Math.round((r.getPrecioTotal() - r.getPlaza().getFianza())*100.0)/100.0);
 		amount.put("currency","EUR");
 
 		item.put("amount", amount);
@@ -154,7 +139,7 @@ public class ReservaService {
 
 			Map<String,Object> item = new HashMap<>();
 			Map<String,Object> amount = new HashMap<>();
-			amount.put("value", r.getPrecioTotal());
+			amount.put("value", Math.round((r.getPrecioTotal())*100.0)/100.0);
 			amount.put("currency","EUR");
 
 			item.put("amount", amount);
@@ -195,9 +180,9 @@ public class ReservaService {
         return reservas;
         
     }
-    public Reserva findById(Long id) {
-    	Optional<Reserva> reserva = repository.findById(id);
-    	return reserva.orElse(null);
+    public Reserva findById(Long id){
+        Reserva reserva = repository.findById(id).orElse(null);
+        return reserva;
     }
     
     /*
@@ -256,6 +241,21 @@ public class ReservaService {
 		}
 		return false;
 	}
+	public List<String> erroresNuevaReservaAntesDelPago(Reserva reserva){
+		List<String> errores = new ArrayList<String>();
+		if(reserva.getFechaInicio().isAfter(reserva.getFechaFin())){
+            errores.add("La fecha de inicio debe ser anterior a la fecha de fin");
+            
+        }else if(reserva.getFechaInicio().isBefore(LocalDateTime.now())){
+            errores.add("No se pueden realizar reservas en el pasado");
+         
+        }else if(reservaTieneColision(reserva)){
+            errores.add("Este horario está ocupado por otra reserva");
+           
+        }
+		return errores;
+	}
+
   
 	public Object confirmarServicio(Reserva r, Object user){
 		if(user.equals(r.getUser().getEmail()) && !r.getEstado().equals(Estado.confirmadaPropietario)){
@@ -286,7 +286,7 @@ public class ReservaService {
 
 			Map<String,Object> item = new HashMap<>();
 			Map<String,Object> amount = new HashMap<>();
-			amount.put("value", r.getPlaza().getFianza());
+			amount.put("value", Math.round((r.getPlaza().getFianza())*100.0)/100.0);
 			amount.put("currency","EUR");
 
 			item.put("amount", amount);
@@ -312,7 +312,7 @@ public class ReservaService {
 
 			Map<String,Object> item_p = new HashMap<>();
 			Map<String,Object> amount_p = new HashMap<>();
-			amount_p.put("value", r.getPrecioTotal() - r.getPlaza().getFianza() - 0.1*r.getPrecioTotal());//Poner la comisión como atributo
+			amount_p.put("value", Math.round((r.getPrecioTotal() - r.getPlaza().getFianza() - 0.1*r.getPrecioTotal())*100.0)/100.0);//Poner la comisión como atributo
 			amount_p.put("currency","EUR");
 
 			item_p.put("amount", amount_p);
