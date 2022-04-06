@@ -3,6 +3,7 @@ package com.parkinn.service;
 import com.parkinn.repository.PlazaRepository;
 import com.parkinn.model.Localizacion;
 import com.parkinn.model.Plaza;
+import com.parkinn.model.Client;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -37,10 +38,30 @@ public class PlazaService {
         return savedPlaza;
     }
 
+    public boolean comprobarPlazasIguales(String direccion,Client administrador){
+        List<Plaza> plazaExiste =  repository.findByDireccionAndAdministrador(direccion,administrador);
+        return plazaExiste.size() != 0;
+    }
+    public boolean comprobarPlazasIgualesEditar(String direccion,Client administrador,Long idPlazaEditando){
+        List<Plaza> plazaExiste =  repository.findByDireccionAndAdministrador(direccion,administrador);
+        if(plazaExiste.size()==0){
+            return false;
+        } else if(plazaExiste.size()==1){
+            if(plazaExiste.get(0).getId().equals(idPlazaEditando)){
+                return false;
+            }else{
+                return true;
+            }
+        }else{
+            return true;
+        }
+    }
+
     public Plaza findById(Long id){
-        Plaza plaza = repository.findById(id).orElseThrow(RuntimeException::new);
+        Plaza plaza = repository.findById(id).orElse(null);
         return plaza;
     }
+    
     
     public List<Plaza> findUserById(Long id){
     	List<Plaza> plazas = repository.findByUserId(id);

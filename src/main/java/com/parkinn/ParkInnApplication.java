@@ -16,7 +16,12 @@ public class ParkInnApplication {
 	
 	public static void main(String[] args) {
 		SpringApplication.run(ParkInnApplication.class, args);
-		
+
+	}
 	}
 
-}
+
+
+		
+	
+
