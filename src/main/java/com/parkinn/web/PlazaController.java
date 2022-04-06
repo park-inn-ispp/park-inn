@@ -110,9 +110,9 @@ public class PlazaController {
                 return ResponseEntity.badRequest().body(response);
             }
 
-            if(plazaService.comprobarPlazasIguales(plaza.getDireccion(),currentPlaza.getAdministrador())){
+            if(plazaService.comprobarPlazasIgualesEditar(plaza.getDireccion(),currentPlaza.getAdministrador(),id)){
         
-                errores.add("Esta plaza ya existe. Intenta añadir una plaza con una dirección diferente");
+                errores.add("Esta plaza ya existe en tu colección. Intenta añadir una plaza con una dirección diferente");
                 response.put("plaza", plaza);
                 response.put("errores",errores);
                 return ResponseEntity.badRequest().body(response);
@@ -247,6 +247,32 @@ public class PlazaController {
             return p;
 
         }
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+    @GetMapping("/{id}/formularioEditar")
+    public Object infoPlazaYClienteFormularioEditar(@PathVariable Long id){
+        Plaza p = plazaService.findById(id);
+        List<String> errores = new ArrayList<String>();
+        Map<String,Object> response = new HashMap<>();
+        
+        if(p==null){
+            errores.add("Esta plaza no existe");
+            response.put("errores", errores);
+            return ResponseEntity.badRequest().body(response);
+        }
+
+
+        if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ||p.getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+        
+                return p;
+
+            
+         }else{
+            errores.add("No puedes visualizar ni editar una plaza que no es de tu propiedad");            
+            response.put("errores", errores);
+  			return ResponseEntity.badRequest().body(response);
+    }
     }
     
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
