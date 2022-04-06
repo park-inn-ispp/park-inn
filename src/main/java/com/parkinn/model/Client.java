@@ -16,7 +16,6 @@ public class Client {
     private Long id;
     @NotBlank
     @Size(max = 20)
-
     private String name;
     @NotBlank
     @Size(max = 50)

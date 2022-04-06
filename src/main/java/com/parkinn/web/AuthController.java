@@ -22,6 +22,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+
 
 
 
@@ -43,14 +49,22 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
 
     @PostMapping("/signin")
-    public ResponseEntity<String> authenticateUser(@RequestBody LoginDto loginDto){
+    public ResponseEntity<?> authenticateUser(@RequestBody LoginDto loginDto){
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginDto.getnameOrEmail(), loginDto.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-
+        Map<String,Object> response = new HashMap<>();
+        List<String> errores = new ArrayList<>();
         Client userlogged = clientRepository.findByNameOrEmail(loginDto.getnameOrEmail(), loginDto.getnameOrEmail()).get();
+
+        if(userlogged == null){
+            errores.add("Este usuario no está registrado. Primero debes registrarte");
+            response.put("errores", errores);
+            return ResponseEntity.badRequest().body(response);
+        }
+
         userlogged.setLoggedIn(true);
         clientRepository.save(userlogged);
         return new ResponseEntity<>("User signed-in successfully!.", HttpStatus.OK);
@@ -59,24 +73,35 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@RequestBody SignUpDto signUpDto){
-
-        // add check for name exists in a DB
-        if(clientRepository.existsByName(signUpDto.getName()) && clientRepository.existsBySurname(signUpDto.getSurname())){
-            return new ResponseEntity<>("Ya hay una persona registrada con ese nombre y esos apellidos", HttpStatus.BAD_REQUEST);
-        }
+        Map<String,Object> response = new HashMap<>();
+        List<String> errores = new ArrayList<>();
 
         // add check for email exists in DB
         if(clientRepository.existsByEmail(signUpDto.getEmail())){
-            return new ResponseEntity<>("Este email ya está registrado", HttpStatus.BAD_REQUEST);
+            errores.add("Este email ya está registrado");
+            response.put("errores", errores);
+            return ResponseEntity.badRequest().body(response);
         }
 
         if(!signUpDto.getPassword().equals(signUpDto.getConfirm())){
-            return new ResponseEntity<>("Las contraseñas no coinciden", HttpStatus.BAD_REQUEST); 
+            errores.add("Las contraseñas no coinciden");
+            response.put("errores", errores);
+            return ResponseEntity.badRequest().body(response);
         }
 
-        if(!signUpDto.getPhone().startsWith("6")){
-            return new ResponseEntity<>("El número de teléfono ha de empezar por 6", HttpStatus.BAD_REQUEST); 
+        if(clientRepository.existsByPhone(signUpDto.getPhone()) == true){
+            errores.add("Este número de teléfono ya está registrado");
+            response.put("errores", errores);
+            return ResponseEntity.badRequest().body(response);
         }
+
+        if(signUpDto.getPhone().length() != 9){
+            errores.add("El número de teléfono ha de tener 9 digitos");
+            response.put("errores", errores);
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        
 
         // create user object
         Client user = new Client();
@@ -94,9 +119,5 @@ public class AuthController {
 
         return new ResponseEntity<>("Usuario registrado correctamente", HttpStatus.OK);
 
-    }
-
-
-   
-    
+    }    
 }

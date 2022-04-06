@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
+
 import com.parkinn.model.Client;
 
 public interface ClientRepository extends JpaRepository<Client, Long> {
@@ -15,5 +16,6 @@ public interface ClientRepository extends JpaRepository<Client, Long> {
     Boolean existsByName(String name);
     Boolean existsByEmail(String email);
     Boolean existsBySurname(String surname);
+    Boolean existsByPhone(String phone);
 
 }
