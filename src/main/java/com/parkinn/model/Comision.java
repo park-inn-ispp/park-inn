@@ -1,0 +1,45 @@
+package com.parkinn.model;
+
+import javax.persistence.*;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+
+
+@Entity
+@Table(name = "comision")
+public class Comision {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @NotBlank
+    @Min(0)
+    @Max(1)
+    private float porcentaje;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public float getPorcentaje() {
+        return porcentaje;
+    }
+
+    public void setPorcentaje(float porcentaje) {
+        this.porcentaje = porcentaje;
+    }
+
+    @Override
+    public String toString() {
+        return "Comision [id=" + id + ", porcentaje=" + porcentaje + "]";
+    }
+
+    
+
+}

@@ -54,7 +54,7 @@ public class AuthController {
                 loginDto.getnameOrEmail(), loginDto.getPassword()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
+        
         Map<String,Object> response = new HashMap<>();
         List<String> errores = new ArrayList<>();
         Client userlogged = clientRepository.findByNameOrEmail(loginDto.getnameOrEmail(), loginDto.getnameOrEmail()).get();
@@ -115,6 +115,8 @@ public class AuthController {
         user.setPassword(passwordEncoder.encode(signUpDto.getPassword()));
         user.setPhone(signUpDto.getPhone());
         user.setSurname(signUpDto.getSurname());
+
+        
 
         Role roles = roleRepository.findByName("ROLE_USER").get();
         user.setRoles(Collections.singleton(roles));

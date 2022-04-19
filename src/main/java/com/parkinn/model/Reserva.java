@@ -28,6 +28,7 @@ public class Reserva {
     private LocalDateTime fechaFin;
     private LocalDateTime fechaSolicitud;
     private String comentarios;
+    private Float comision;
 
     @ManyToOne
     @JoinColumn(name="plaza_id")
@@ -39,6 +40,14 @@ public class Reserva {
 
     public Long getId() {
         return id;
+    }
+
+    public Float getComision() {
+        return comision;
+    }
+
+    public void setComision(Float comision) {
+        this.comision = comision;
     }
 
     public Estado getEstado() {

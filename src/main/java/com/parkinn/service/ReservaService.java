@@ -1,5 +1,6 @@
 package com.parkinn.service;
 
+import com.parkinn.repository.ComisionRepository;
 import com.parkinn.repository.ReservaRepository;
 
 import java.net.URISyntaxException;
@@ -30,6 +31,7 @@ public class ReservaService {
 	
     @Autowired
     private ReservaRepository repository;
+	private ComisionRepository comisionRepository;
    
 	public List<Reserva> findAll(){
         return repository.findAll();
@@ -38,6 +40,7 @@ public class ReservaService {
     public Reserva guardarReserva(Reserva r){
         r.setEstado(Estado.pendiente);
         r.setFechaSolicitud(LocalDateTime.now());
+		r.setComision(comisionRepository.getById((long) 1).getPorcentaje());
         Reserva reserva = repository.save(r);
         return reserva;
     }
@@ -312,7 +315,7 @@ public class ReservaService {
 
 			Map<String,Object> item_p = new HashMap<>();
 			Map<String,Object> amount_p = new HashMap<>();
-			amount_p.put("value", Math.round((r.getPrecioTotal() - r.getPlaza().getFianza() - 0.1*r.getPrecioTotal())*100.0)/100.0);//Poner la comisión como atributo
+			amount_p.put("value", Math.round((r.getPrecioTotal() - r.getPlaza().getFianza() - r.getComision()*r.getPrecioTotal())*100.0)/100.0);
 			amount_p.put("currency","EUR");
 
 			item_p.put("amount", amount_p);

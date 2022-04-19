@@ -72,48 +72,48 @@ public class ClientsController {
         return ResponseEntity.ok().build();
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
-    @GetMapping("/perfil")
-    public ResponseEntity consultarPerfil() {
+    // @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+    // @GetMapping("/perfil")
+    // public ResponseEntity consultarPerfil() {
 
-        Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    //     Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        Client cliente = null;
+    //     Client cliente = null;
 
-        List<Client> todos = clientRepository.findAll();
+    //     List<Client> todos = clientRepository.findAll();
         
-        for(int i = 0; i < todos.size(); i++){
+    //     for(int i = 0; i < todos.size(); i++){
 
-            if(todos.get(i).getEmail().equals(user)){
+    //         if(todos.get(i).getEmail().equals(user)){
 
-                cliente = todos.get(i);
-            }
-        }
+    //             cliente = todos.get(i);
+    //         }
+    //     }
 
-        return ResponseEntity.ok(cliente);
+    //     return ResponseEntity.ok(cliente);
          
-    }
+    // }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
-    @GetMapping("/perfil")
-    public ResponseEntity Perfil() {
+    // @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+    // @GetMapping("/perfil")
+    // public ResponseEntity Perfil() {
 
-        Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    //     Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        Client cliente = null;
+    //     Client cliente = null;
 
-        List<Client> todos = clientRepository.findAll();
+    //     List<Client> todos = clientRepository.findAll();
         
-        for(int i = 0; i < todos.size(); i++){
+    //     for(int i = 0; i < todos.size(); i++){
 
-            if(todos.get(i).getEmail().equals(user)){
+    //         if(todos.get(i).getEmail().equals(user)){
 
-                cliente = todos.get(i);
-            }
-        }
+    //             cliente = todos.get(i);
+    //         }
+    //     }
 
-        return ResponseEntity.ok(cliente);
+    //     return ResponseEntity.ok(cliente);
          
-    }
+    // }
 
 }
