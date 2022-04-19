@@ -64,7 +64,7 @@ public class AuthController {
             response.put("errores", errores);
             return ResponseEntity.badRequest().body(response);
         }
-
+        
         clientRepository.save(userlogged);
         return new ResponseEntity<>("User signed-in successfully!.", HttpStatus.OK);
     }
