@@ -17,6 +17,7 @@ import com.parkinn.model.Reserva;
 import com.parkinn.model.paypal.Amount;
 import com.parkinn.model.paypal.PayPalClasses;
 import com.parkinn.model.paypal.PurchaseUnit;
+import com.parkinn.service.MailService;
 import com.parkinn.service.PlazaService;
 import com.parkinn.service.ReservaService;
 
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -45,6 +47,8 @@ public class PlazaController {
     private PlazaService plazaService;
     @Autowired
     private ReservaService reservaService;
+    @Autowired
+    private MailService mailService;
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @GetMapping()
@@ -226,6 +230,16 @@ public class PlazaController {
 			return ResponseEntity.badRequest().body(response);
 		
 		}else{
+			try {
+			String subject = "Nueva solicitud de reserva ";
+			String text = "Tiene una nueva solicitud de reserva para una de sus plazas.\nGestionela desde aquí: http://localhost:3000/mis-reservas\n\nGracias, el equipo de ParkInn.";
+			mailService.sendEmail(reserva.getPlaza().getAdministrador().getEmail(), subject, text);
+			}catch(MailException m) {
+				errores.add("No se ha podido enviar el correo electrónico");
+	            response.put("reserva", reserva);
+	            response.put("errores",errores);
+	            return ResponseEntity.badRequest().body(response);
+			}
             Reserva savedReserva = reservaService.guardarReserva(reserva);
             return ResponseEntity.created(new URI("/reservas/" + savedReserva.getId())).body(savedReserva);
         }

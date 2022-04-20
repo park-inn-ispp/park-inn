@@ -1,5 +1,6 @@
 package com.parkinn.service;
 
+import com.parkinn.repository.ClientRepository;
 import com.parkinn.repository.ReservaRepository;
 
 import java.net.URISyntaxException;
@@ -9,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.parkinn.model.Client;
 import com.parkinn.model.Estado;
 import com.parkinn.model.Reserva;
 import com.parkinn.model.paypal.PayPalAccesToken;
@@ -19,6 +21,12 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -30,12 +38,19 @@ public class ReservaService {
 	
     @Autowired
     private ReservaRepository repository;
+    
+    @Autowired
+    private MailService mailService;
    
+    
 	public List<Reserva> findAll(){
         return repository.findAll();
     }
+	
+	
 
     public Reserva guardarReserva(Reserva r){
+
         r.setEstado(Estado.pendiente);
         r.setFechaSolicitud(LocalDateTime.now());
         Reserva reserva = repository.save(r);
@@ -259,10 +274,19 @@ public class ReservaService {
   
 	public Object confirmarServicio(Reserva r, Object user){
 		if(user.equals(r.getUser().getEmail()) && !r.getEstado().equals(Estado.confirmadaPropietario)){
+			String subject = "Servicio confirmado por parte del cliente";
+			String text = "El cliente indicado que la reserva ha sido exitosa.\nPorfavor, si desea confirmarlo o poner una incidencia haga clic en el siguiente enlace: http://localhost:3000/reservas/"+r.getId()+"\n\nGracias, el equipo de ParkInn.";
+			mailService.sendEmail(r.getPlaza().getAdministrador().getEmail(), subject, text);
 			r.setEstado(Estado.confirmadaUsuario);
 		}else if(user.equals(r.getPlaza().getAdministrador().getEmail()) && !r.getEstado().equals(Estado.confirmadaUsuario)){
+			String subject = "Servicio confirmado por parte del propietario";
+			String text = "El propietario de la plaza ha indicado que la reserva ha sido exitosa.\nPorfavor, si desea confirmarlo o poner una incidencia haga clic en el siguiente enlace: http://localhost:3000/reservas/"+r.getId()+"\n\nGracias, el equipo de ParkInn.";
+			mailService.sendEmail(r.getUser().getEmail(), subject, text);
 			r.setEstado(Estado.confirmadaPropietario);
 		}else{
+			String subject = "Servicio confirmado";
+			String text = "Se ha confirmado que la reserva ha sido exitosa.\n¡Esperamos volver a verte!\n\nGracias, el equipo de ParkInn.";
+			mailService.sendEmail(r.getUser().getEmail(), subject, text);
 			r.setEstado(Estado.confirmadaAmbos);
 			
 			HttpHeaders headers1 = new HttpHeaders();

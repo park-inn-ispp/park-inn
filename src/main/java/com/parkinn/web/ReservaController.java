@@ -13,11 +13,13 @@ import com.parkinn.model.Estado;
 import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
 import com.parkinn.repository.ClientRepository;
+import com.parkinn.service.MailService;
 import com.parkinn.service.PlazaService;
 import com.parkinn.service.ReservaService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -38,6 +40,9 @@ public class ReservaController {
 	
 	@Autowired
 	private ClientRepository clientRepository;
+	
+    @Autowired
+    private MailService mailService;
 
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
@@ -125,6 +130,16 @@ public class ReservaController {
 			response.put("errores",errores);
 			return ResponseEntity.badRequest().body(response);
 		}else if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) || reserva.getPlaza().getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+			try {
+				String subject = "Reserva aceptada";
+				String text = "¡Enhorabuena! Su reserva ha sido aceptada.\nHaga clic en el siguiente enlace para ver los detalles: http://localhost:3000/reservas/"+reserva.getId()+"\n\nGracias, el equipo de ParkInn.";
+				mailService.sendEmail(reserva.getUser().getEmail(), subject, text);
+				}catch(MailException m) {
+					errores.add("No se ha podido enviar el correo electrónico");
+		            response.put("reserva", reserva);
+		            response.put("errores",errores);
+		            return ResponseEntity.badRequest().body(response);
+				}
 			return reservaService.aceptarReserva(id);
 		}else{
 			errores.add("Esta reserva no es sobre una plaza de tu propiedad");
@@ -144,6 +159,16 @@ public class ReservaController {
 			response.put("errores",errores);
 			return ResponseEntity.badRequest().body(response);
 		}else if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ||reserva.getPlaza().getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+			try {
+				String subject = "Reserva rechazada";
+				String text = "¡Lo sentimos! Su solicitud reserva ha sido rechazada por el propietario.\nHaga clic en el siguiente enlace para ver los detalles: http://localhost:3000/reservas/"+reserva.getId()+"\n\nGracias, el equipo de ParkInn.";
+				mailService.sendEmail(reserva.getUser().getEmail(), subject, text);
+				}catch(MailException m) {
+					errores.add("No se ha podido enviar el correo electrónico");
+		            response.put("reserva", reserva);
+		            response.put("errores",errores);
+		            return ResponseEntity.badRequest().body(response);
+				}
 			return reservaService.rechazarReserva(id);
 		}else{
 			errores.add("Esta reserva no es sobre una plaza de tu propiedad");
