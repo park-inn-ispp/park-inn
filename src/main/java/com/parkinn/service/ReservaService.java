@@ -32,6 +32,8 @@ import org.springframework.web.client.RestTemplate;
 
 @Service
 public class ReservaService {
+	
+	final static String URL_CORREO = "https://park-inn-ispp-fe.herokuapp.com";
 
     @Autowired
     RestTemplate restTemplate;
@@ -275,7 +277,7 @@ public class ReservaService {
 		if(user.equals(r.getUser().getEmail()) && !r.getEstado().equals(Estado.confirmadaPropietario)){
 			try {
 				String subject = "Servicio confirmado por parte del cliente";
-				String text = "El cliente ha indicado que la reserva ha sido exitosa.\nPorfavor, si desea confirmarlo o poner una incidencia haga clic en el siguiente enlace: http://localhost:3000/reservas/"+r.getId()+"\n\nGracias, el equipo de ParkInn.";
+				String text = "El cliente ha indicado que la reserva ha sido exitosa.\nPorfavor, si desea confirmarlo o poner una incidencia haga clic en el siguiente enlace: "+URL_CORREO+"/reservas/"+r.getId()+"\n\nGracias, el equipo de ParkInn.";
 				mailService.sendEmail(r.getPlaza().getAdministrador().getEmail(), subject, text);
 			}catch(MailException e) {
 				r.setEstado(Estado.confirmadaUsuario);
@@ -284,7 +286,7 @@ public class ReservaService {
 		}else if(user.equals(r.getPlaza().getAdministrador().getEmail()) && !r.getEstado().equals(Estado.confirmadaUsuario)){
 			try {
 				String subject = "Servicio confirmado por parte del propietario";
-				String text = "El propietario de la plaza ha indicado que la reserva ha sido exitosa.\nPorfavor, si desea confirmarlo o poner una incidencia haga clic en el siguiente enlace: http://localhost:3000/reservas/"+r.getId()+"\n\nGracias, el equipo de ParkInn.";
+				String text = "El propietario de la plaza ha indicado que la reserva ha sido exitosa.\nPorfavor, si desea confirmarlo o poner una incidencia haga clic en el siguiente enlace: "+URL_CORREO+"/reservas/"+r.getId()+"\n\nGracias, el equipo de ParkInn.";
 				mailService.sendEmail(r.getUser().getEmail(), subject, text);
 			}catch (MailException e) {
 				r.setEstado(Estado.confirmadaPropietario);
