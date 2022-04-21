@@ -135,10 +135,7 @@ public class ReservaController {
 				String text = "¡Enhorabuena! Su reserva ha sido aceptada.\nHaga clic en el siguiente enlace para ver los detalles: http://localhost:3000/reservas/"+reserva.getId()+"\n\nGracias, el equipo de ParkInn.";
 				mailService.sendEmail(reserva.getUser().getEmail(), subject, text);
 				}catch(MailException m) {
-					errores.add("No se ha podido enviar el correo electrónico");
-		            response.put("reserva", reserva);
-		            response.put("errores",errores);
-		            return ResponseEntity.badRequest().body(response);
+					return reservaService.aceptarReserva(id);
 				}
 			return reservaService.aceptarReserva(id);
 		}else{
@@ -164,10 +161,7 @@ public class ReservaController {
 				String text = "¡Lo sentimos! Su solicitud reserva ha sido rechazada por el propietario.\nHaga clic en el siguiente enlace para ver los detalles: http://localhost:3000/reservas/"+reserva.getId()+"\n\nGracias, el equipo de ParkInn.";
 				mailService.sendEmail(reserva.getUser().getEmail(), subject, text);
 				}catch(MailException m) {
-					errores.add("No se ha podido enviar el correo electrónico");
-		            response.put("reserva", reserva);
-		            response.put("errores",errores);
-		            return ResponseEntity.badRequest().body(response);
+					return reservaService.rechazarReserva(id);
 				}
 			return reservaService.rechazarReserva(id);
 		}else{
@@ -228,6 +222,21 @@ public class ReservaController {
 		Long periodo = Duration.between(LocalDateTime.now(), reserva.getFechaInicio()).toMinutes();
 		
 		if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) || reserva.getPlaza().getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+			try {
+				String subject = "Reserva cancelada";
+				String text = "La reserva se ha cancelado correctamente.\nSe le reembolsará al cliente el importe íntegro pagado por el alquiler de la plaza.\n\nGracias, el equipo de ParkInn.";
+				mailService.sendEmail(reserva.getPlaza().getAdministrador().getEmail(), subject, text);
+			}catch (MailException e) {
+				return reservaService.devolverTodo(reserva);
+			}
+			try {
+				String subject = "Reserva cancelada por propietario";
+				String text = "Le informamos que el propietario de la plaza ha cancelado su reserva de la plaza http://localhost:3000/reservas/plaza/"+reserva.getPlaza().getId()+".\nSe le reembolsará el importe íntegro.\n\nGracias, el equipo de ParkInn.";
+				mailService.sendEmail(reserva.getUser().getEmail(), subject, text);
+			}catch (MailException e) {
+				return reservaService.devolverTodo(reserva);
+			}
+			
 			return reservaService.devolverTodo(reserva);
 		}else if(!reserva.getUser().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
 			errores.add("No estás involucrado en esta reserva");
@@ -238,8 +247,36 @@ public class ReservaController {
 			response.put("errores",errores);
 			return ResponseEntity.badRequest().body(response);
 		}else if(periodo<1440) {
+			try {
+				String subject = "Reserva cancelada";
+				String text = "La reserva se ha cancelado con menos de 24 horas de antelación.\nSe le reembolsará el importe pagado por la plaza sin la fianza.\n\nGracias, el equipo de ParkInn.";
+				mailService.sendEmail(reserva.getUser().getEmail(), subject, text);
+			}catch (MailException e) {
+				return reservaService.devolverSinFianza(reserva);
+			}
+			try {
+				String subject = "Reserva de una de sus plazas cancelada";
+				String text = "Le informamos que "+reserva.getUser().getName()+" "+reserva.getUser().getSurname()+" ha cancelado su reserva de la plaza http://localhost:3000/mis-reservas-de-mis-plazas/plaza/"+reserva.getPlaza().getId()+".\nComo se ha cancelado con menos de 24 horas de antelación, se le reembolsará el importe de la plaza, la fianza se le devolverá a usted segun la política de cancelaciones de la empresa.\n\nGracias, el equipo de ParkInn.";
+				mailService.sendEmail(reserva.getPlaza().getAdministrador().getEmail(), subject, text);
+			}catch (MailException e) {
+				return reservaService.devolverSinFianza(reserva);
+			}
 				return reservaService.devolverSinFianza(reserva);
 		}else {
+			try {
+				String subject = "Reserva cancelada";
+				String text = "La reserva se ha cancelado correctamente.\nSe le reembolsará el importe integro pagado por el alquiler de la plaza.\n\nGracias, el equipo de ParkInn.";
+				mailService.sendEmail(reserva.getUser().getEmail(), subject, text);
+			}catch (MailException e) {
+				return reservaService.devolverTodo(reserva);
+			}
+			try {
+				String subject = "Reserva de una de sus plazas cancelada";
+				String text = "Le informamos que "+reserva.getUser().getName()+" "+reserva.getUser().getSurname()+" ha cancelado su reserva de la plaza http://localhost:3000/mis-reservas-de-mis-plazas/plaza/"+reserva.getPlaza().getId()+".\nComo se ha cancelado con más de 24 horas de antelación, se le reembolsará el importe integro pagado por el alquiler de la plaza siguiendo la política de devoluciones de la empresa.\n\nGracias, el equipo de ParkInn.";
+				mailService.sendEmail(reserva.getPlaza().getAdministrador().getEmail(), subject, text);
+			}catch (MailException e) {
+				return reservaService.devolverTodo(reserva);
+			}
 			return reservaService.devolverTodo(reserva);
 		}
 	}

@@ -232,13 +232,11 @@ public class PlazaController {
 		}else{
 			try {
 			String subject = "Nueva solicitud de reserva ";
-			String text = "Tiene una nueva solicitud de reserva para una de sus plazas.\nGestionela desde aquí: http://localhost:3000/mis-reservas\n\nGracias, el equipo de ParkInn.";
+			String text = "Tiene una nueva solicitud de reserva para una de sus plazas.\nGestionela desde aquí: http://localhost:3000/mis-reservas-de-mis-plazas/plaza/"+reserva.getPlaza().getId()+"\n\nGracias, el equipo de ParkInn.";
 			mailService.sendEmail(reserva.getPlaza().getAdministrador().getEmail(), subject, text);
 			}catch(MailException m) {
-				errores.add("No se ha podido enviar el correo electrónico");
-	            response.put("reserva", reserva);
-	            response.put("errores",errores);
-	            return ResponseEntity.badRequest().body(response);
+	            Reserva savedReserva = reservaService.guardarReserva(reserva);
+	            return ResponseEntity.created(new URI("/reservas/" + savedReserva.getId())).body(savedReserva);
 			}
             Reserva savedReserva = reservaService.guardarReserva(reserva);
             return ResponseEntity.created(new URI("/reservas/" + savedReserva.getId())).body(savedReserva);
