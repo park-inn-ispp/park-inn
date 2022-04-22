@@ -43,6 +43,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 @RequestMapping("/plazas")
 public class PlazaController {
 
+	final static String URL_CORREO = "https://park-inn-ispp-fe.herokuapp.com";
+
+	
     @Autowired
     private PlazaService plazaService;
     @Autowired
@@ -232,7 +235,7 @@ public class PlazaController {
 		}else{
 			try {
 			String subject = "Nueva solicitud de reserva ";
-			String text = "Tiene una nueva solicitud de reserva para una de sus plazas.\nGestionela desde aquí: http://localhost:3000/mis-reservas-de-mis-plazas/plaza/"+reserva.getPlaza().getId()+"\n\nGracias, el equipo de ParkInn.";
+			String text = "Tiene una nueva solicitud de reserva para una de sus plazas.\nGestionela desde aquí: "+URL_CORREO+"/mis-reservas-de-mis-plazas/plaza/"+reserva.getPlaza().getId()+"\n\nGracias, el equipo de ParkInn.";
 			mailService.sendEmail(reserva.getPlaza().getAdministrador().getEmail(), subject, text);
 			}catch(MailException m) {
 	            Reserva savedReserva = reservaService.guardarReserva(reserva);
