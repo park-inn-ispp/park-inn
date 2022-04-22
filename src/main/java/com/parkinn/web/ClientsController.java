@@ -2,13 +2,19 @@ package com.parkinn.web;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import com.parkinn.model.Client;
 import com.parkinn.repository.ClientRepository;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,6 +65,8 @@ public class ClientsController {
         Client currentClient = clientRepository.findById(id).orElseThrow(RuntimeException::new);
         currentClient.setName(client.getName());
         currentClient.setEmail(client.getEmail());
+        currentClient.setPhone(client.getPhone());
+        currentClient.setSurname(client.getSurname());
         currentClient = clientRepository.save(client);
 
         return ResponseEntity.ok(currentClient);
@@ -71,48 +79,49 @@ public class ClientsController {
         return ResponseEntity.ok().build();
     }
 
-    // @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
-    // @GetMapping("/perfil")
-    // public ResponseEntity consultarPerfil() {
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+    @GetMapping("/{id}/perfil")
+    public ResponseEntity consultarPerfil(@PathVariable Long id) {
 
-    //     Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-    //     Client cliente = null;
+    Client cliente = null;
 
-    //     List<Client> todos = clientRepository.findAll();
+    List<Client> todos = clientRepository.findAll();
         
-    //     for(int i = 0; i < todos.size(); i++){
+    for(int i = 0; i < todos.size(); i++){
 
-    //         if(todos.get(i).getEmail().equals(user)){
+    if(todos.get(i).getEmail().equals(user)){
 
-    //             cliente = todos.get(i);
-    //         }
-    //     }
+    cliente = todos.get(i);
+    }
+    }
 
-    //     return ResponseEntity.ok(cliente);
-         
-    // }
+    
+    return ResponseEntity.ok(cliente);
+}
 
-    // @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
-    // @GetMapping("/perfil")
-    // public ResponseEntity Perfil() {
+@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+    @GetMapping("/{id}/perfil1")
+    public Object consultarPerfil1(@PathVariable Long id) {
+        Map<String,Object> response = new HashMap<>();
+        List<String> errores = new ArrayList<String>();
+        Optional<Client> cliente = clientRepository.findById(id);
+        if(!cliente.isPresent()){
+            errores.add("Este usuario no existe");
+            response.put("errores", errores);
+			return ResponseEntity.badRequest().body(response);
+        }else if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) || cliente.get().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+            return cliente;
+        }else{
+            errores.add("No tienes acceso a este perfil");
+            response.put("errores", errores);
+			return ResponseEntity.badRequest().body(response);
+        }
+        }
 
-    //     Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-    //     Client cliente = null;
-
-    //     List<Client> todos = clientRepository.findAll();
-        
-    //     for(int i = 0; i < todos.size(); i++){
-
-    //         if(todos.get(i).getEmail().equals(user)){
-
-    //             cliente = todos.get(i);
-    //         }
-    //     }
-
-    //     return ResponseEntity.ok(cliente);
-         
-    // }
 
 }
+         
+
+
