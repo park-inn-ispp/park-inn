@@ -1,8 +1,10 @@
 package com.parkinn.service;
 
+import com.parkinn.repository.ComisionRepository;
 import com.parkinn.repository.ReservaRepository;
 
 import java.net.URISyntaxException;
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,9 +35,13 @@ public class ReservaService {
 	
     @Autowired
     private ReservaRepository repository;
+
+	private ComisionRepository comisionRepository;
+
     
     @Autowired
     private MailService mailService;
+
    
     
 	public List<Reserva> findAll(){
@@ -49,6 +55,7 @@ public class ReservaService {
 
         r.setEstado(Estado.pendiente);
         r.setFechaSolicitud(LocalDateTime.now());
+		r.setComision(comisionRepository.getById((long) 1).getPorcentaje());
         Reserva reserva = repository.save(r);
         return reserva;
     }
@@ -98,6 +105,7 @@ public class ReservaService {
 		Map<String,Object> item = new HashMap<>();
 		Map<String,Object> amount = new HashMap<>();
 		amount.put("value", Math.round((r.getPrecioTotal() - r.getPlaza().getFianza())*100.0)/100.0);
+		System.out.println(Math.round((r.getPrecioTotal() - r.getPlaza().getFianza())*100.0)/100.0);
 		amount.put("currency","EUR");
 
 		item.put("amount", amount);
@@ -296,7 +304,8 @@ public class ReservaService {
 				r.setEstado(Estado.confirmadaAmbos);
 			}
 			r.setEstado(Estado.confirmadaAmbos);
-			
+			DecimalFormat df = new DecimalFormat("#.00");
+			df.setMaximumFractionDigits(2);
 			HttpHeaders headers1 = new HttpHeaders();
 			headers1.set("Content-Type", "application/x-www-form-urlencoded");
 			headers1.set("Authorization", "Basic QWR1NGpVdFRrYUp4TkZxdWZoenRvTnAtQ1F1WldKTGt2VjVGRG5fYUlwa2hiV2xTdm5Qd1NxMlRORHNUNHZGWnQtX3VFbUZfcnRIODlNdms6RUxIYWZIQWMtMFpQclJXZVo1MFBqeFQ0TmtWNDg5UDNnZno3Q3RvWU9yLWVvQVQxekhzcVZuTlZrYm5WRkE4S21RdVFpQVNkSlU2ZzgxN3M=");
@@ -318,7 +327,9 @@ public class ReservaService {
 
 			Map<String,Object> item = new HashMap<>();
 			Map<String,Object> amount = new HashMap<>();
-			amount.put("value", Math.round((r.getPlaza().getFianza())*100.0)/100.0);
+			Integer am = 15;
+			//amount.put("value", (double)Math.round((r.getPlaza().getFianza()) * 100d) / 100d);
+			amount.put("value", am);
 			amount.put("currency","EUR");
 
 			item.put("amount", amount);
@@ -344,7 +355,11 @@ public class ReservaService {
 
 			Map<String,Object> item_p = new HashMap<>();
 			Map<String,Object> amount_p = new HashMap<>();
-			amount_p.put("value", Math.round((r.getPrecioTotal() - r.getPlaza().getFianza() - 0.1*r.getPrecioTotal())*100.0)/100.0);//Poner la comisión como atributo
+
+			amount_p.put("value", Math.round((r.getPrecioTotal() - r.getPlaza().getFianza() - r.getComision()*r.getPrecioTotal())*100.0)/100.0);
+
+			//amount_p.put("value", Math.round((r.getPrecioTotal() - r.getPlaza().getFianza() - 0.1*r.getPrecioTotal())*100.0)/100.0);//Poner la comisión como atributo
+		
 			amount_p.put("currency","EUR");
 
 			item_p.put("amount", amount_p);
