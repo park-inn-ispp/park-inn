@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import com.parkinn.model.Comision;
 import com.parkinn.repository.ComisionRepository;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/comision")
 public class ComisionController {
 
+
+
     private final ComisionRepository comisionRepository;
 
     public ComisionController(ComisionRepository comisionRepository) {
@@ -29,12 +31,10 @@ public class ComisionController {
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
-	    @PostMapping("/editar")
-	    public ResponseEntity editar(@RequestBody Comision comision){
+	    @PutMapping("/{id}/editar")
+	    public ResponseEntity editar(@PathVariable Long id, @RequestBody Comision comision){
             List<String> errores = new ArrayList<>();
             Map<String,Object> response = new HashMap<>();
-            Comision comision1 = comisionRepository.findById((long) 1).orElse(null);
-            System.out.println(comision1);
 			if(comision.getPorcentaje() < 0){
 				errores.add("El Porcentaje no puede ser negativo");
 				response.put("errores",errores);
@@ -46,10 +46,13 @@ public class ComisionController {
 			}else{
 
                 
-                comision1.setPorcentaje(comision.getPorcentaje());
-                comision1 = comisionRepository.save(comision1);
+                Comision currentComision = comisionRepository.findById(id).orElseThrow(RuntimeException::new);
+                currentComision.setPorcentaje(comision.getPorcentaje());
+                currentComision = comisionRepository.save(comision);
+            
+                return ResponseEntity.ok(currentComision);
+                
             }
-            return ResponseEntity.ok(comision1);
 	    }
     
 }

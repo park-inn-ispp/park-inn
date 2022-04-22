@@ -11,10 +11,8 @@ import javax.validation.constraints.NotBlank;
 public class Comision {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
     @Min(0)
     @Max(1)
     private float porcentaje;
