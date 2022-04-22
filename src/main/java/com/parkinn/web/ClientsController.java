@@ -60,17 +60,17 @@ public class ClientsController {
         return ResponseEntity.created(new URI("/clients/" + savedClient.getId())).body(savedClient);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity updateClient(@PathVariable Long id, @RequestBody Client client) {
-        Client currentClient = clientRepository.findById(id).orElseThrow(RuntimeException::new);
-        currentClient.setName(client.getName());
-        currentClient.setEmail(client.getEmail());
-        currentClient.setPhone(client.getPhone());
-        currentClient.setSurname(client.getSurname());
-        currentClient = clientRepository.save(client);
+    // @PutMapping("/{id}/edit")
+    // public ResponseEntity updateClient(@PathVariable Long id, @RequestBody Client client) {
+    //     Client currentClient = clientRepository.findById(id).orElseThrow(RuntimeException::new);
+    //     currentClient.setName(client.getName());
+    //     currentClient.setEmail(client.getEmail());
+    //     currentClient.setPhone(client.getPhone());
+    //     currentClient.setSurname(client.getSurname());
+    //     currentClient = clientRepository.save(client);
 
-        return ResponseEntity.ok(currentClient);
-    }
+    //     return ResponseEntity.ok(currentClient);
+    // }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
@@ -79,31 +79,9 @@ public class ClientsController {
         return ResponseEntity.ok().build();
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
-    @GetMapping("/{id}/perfil")
-    public ResponseEntity consultarPerfil(@PathVariable Long id) {
-
-    Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-    Client cliente = null;
-
-    List<Client> todos = clientRepository.findAll();
-        
-    for(int i = 0; i < todos.size(); i++){
-
-    if(todos.get(i).getEmail().equals(user)){
-
-    cliente = todos.get(i);
-    }
-    }
-
-    
-    return ResponseEntity.ok(cliente);
-}
-
 @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
-    @GetMapping("/{id}/perfil1")
-    public Object consultarPerfil1(@PathVariable Long id) {
+    @GetMapping("/{id}/perfil")
+    public Object consultarPerfil(@PathVariable Long id) {
         Map<String,Object> response = new HashMap<>();
         List<String> errores = new ArrayList<String>();
         Optional<Client> cliente = clientRepository.findById(id);
@@ -112,7 +90,7 @@ public class ClientsController {
             response.put("errores", errores);
 			return ResponseEntity.badRequest().body(response);
         }else if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) || cliente.get().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
-            return cliente;
+            return ResponseEntity.ok(cliente);
         }else{
             errores.add("No tienes acceso a este perfil");
             response.put("errores", errores);
