@@ -38,6 +38,8 @@ public class Reserva {
     public Double getFianza() {
 		return fianza;
 	}
+    private Float comision;
+
 
 	public void setFianza(Double fianza) {
 		this.fianza = fianza;
@@ -61,6 +63,14 @@ public class Reserva {
 
 	public Long getId() {
         return id;
+    }
+
+    public Float getComision() {
+        return comision;
+    }
+
+    public void setComision(Float comision) {
+        this.comision = comision;
     }
 
     public Estado getEstado() {

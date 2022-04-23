@@ -1,5 +1,6 @@
 package com.parkinn.service;
 
+import com.parkinn.repository.ComisionRepository;
 import com.parkinn.repository.ReservaRepository;
 
 import java.net.URISyntaxException;
@@ -20,25 +21,41 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
 public class ReservaService {
+	
+	final static String URL_CORREO = "https://park-inn-ispp-fe.herokuapp.com";
 
     @Autowired
     RestTemplate restTemplate;
 	
     @Autowired
     private ReservaRepository repository;
+
+	private ComisionRepository comisionRepository;
+
+    
+    @Autowired
+    private MailService mailService;
+
    
+    
 	public List<Reserva> findAll(){
         return repository.findAll();
     }
+	
+	
 
+	
     public Reserva guardarReserva(Reserva r){
+
         r.setEstado(Estado.pendiente);
         r.setFechaSolicitud(LocalDateTime.now());
+		r.setComision(comisionRepository.getById((long) 1).getPorcentaje());
         Reserva reserva = repository.save(r);
         return reserva;
     }
@@ -118,8 +135,7 @@ public class ReservaService {
 		
 }
 	
-	public Object devolverTodo(Reserva r){
-			
+	public Object devolverTodo(Reserva r){		
 			HttpHeaders headers1 = new HttpHeaders();
 			headers1.set("Content-Type", "application/x-www-form-urlencoded");
 			headers1.set("Authorization", "Basic QWR1NGpVdFRrYUp4TkZxdWZoenRvTnAtQ1F1WldKTGt2VjVGRG5fYUlwa2hiV2xTdm5Qd1NxMlRORHNUNHZGWnQtX3VFbUZfcnRIODlNdms6RUxIYWZIQWMtMFpQclJXZVo1MFBqeFQ0TmtWNDg5UDNnZno3Q3RvWU9yLWVvQVQxekhzcVZuTlZrYm5WRkE4S21RdVFpQVNkSlU2ZzgxN3M=");
@@ -261,10 +277,32 @@ public class ReservaService {
   
 	public Object confirmarServicio(Reserva r, Object user){
 		if(user.equals(r.getUser().getEmail()) && !r.getEstado().equals(Estado.confirmadaPropietario)){
+			try {
+				String subject = "Servicio confirmado por parte del cliente";
+				String text = "El cliente ha indicado que la reserva ha sido exitosa.\nPorfavor, si desea confirmarlo o poner una incidencia haga clic en el siguiente enlace: "+URL_CORREO+"/reservas/"+r.getId()+"\n\nGracias, el equipo de ParkInn.";
+				mailService.sendEmail(r.getPlaza().getAdministrador().getEmail(), subject, text);
+			}catch(MailException e) {
+				r.setEstado(Estado.confirmadaUsuario);
+			}
 			r.setEstado(Estado.confirmadaUsuario);
 		}else if(user.equals(r.getPlaza().getAdministrador().getEmail()) && !r.getEstado().equals(Estado.confirmadaUsuario)){
+			try {
+				String subject = "Servicio confirmado por parte del propietario";
+				String text = "El propietario de la plaza ha indicado que la reserva ha sido exitosa.\nPorfavor, si desea confirmarlo o poner una incidencia haga clic en el siguiente enlace: "+URL_CORREO+"/reservas/"+r.getId()+"\n\nGracias, el equipo de ParkInn.";
+				mailService.sendEmail(r.getUser().getEmail(), subject, text);
+			}catch (MailException e) {
+				r.setEstado(Estado.confirmadaPropietario);
+			}
 			r.setEstado(Estado.confirmadaPropietario);
 		}else{
+			try {
+				String subject = "Servicio confirmado";
+				String text = "Se ha confirmado que la reserva ha sido exitosa.\n¡Esperamos volver a verte!\n\nGracias, el equipo de ParkInn.";
+				mailService.sendEmail(r.getUser().getEmail(), subject, text);
+				mailService.sendEmail(r.getPlaza().getAdministrador().getEmail(), subject, text);
+			}catch (MailException e) {
+				r.setEstado(Estado.confirmadaAmbos);
+			}
 			r.setEstado(Estado.confirmadaAmbos);
 			DecimalFormat df = new DecimalFormat("#.00");
 			df.setMaximumFractionDigits(2);
@@ -317,9 +355,11 @@ public class ReservaService {
 
 			Map<String,Object> item_p = new HashMap<>();
 			Map<String,Object> amount_p = new HashMap<>();
+
+			amount_p.put("value", Math.round((r.getPrecioTotal() - r.getPlaza().getFianza() - r.getComision()*r.getPrecioTotal())*100.0)/100.0);
+
 			//amount_p.put("value", Math.round((r.getPrecioTotal() - r.getPlaza().getFianza() - 0.1*r.getPrecioTotal())*100.0)/100.0);//Poner la comisión como atributo
-			Double pr = 1.56;
-			amount_p.put("value", pr);//Poner la comisión como atributo
+		
 			amount_p.put("currency","EUR");
 
 			item_p.put("amount", amount_p);
