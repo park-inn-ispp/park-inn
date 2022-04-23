@@ -1,12 +1,14 @@
 package com.parkinn.model;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "plazas")
-public class Plaza {
+public class Plaza { 
 
     @Id
     @GeneratedValue
@@ -34,7 +36,18 @@ public class Plaza {
     @JoinColumn(name="user_id")
     private Client administrador;
 
-    public Client getAdministrador() {
+    @OneToMany(mappedBy = "plaza")
+    private Set<Reserva> reservas = new HashSet<>();
+    
+    public Set<Reserva> getReservas() {
+		return reservas;
+	}
+
+	public void setReservas(Set<Reserva> reservas) {
+		this.reservas = reservas;
+	}
+
+	public Client getAdministrador() {
         return this.administrador;
     }
 
