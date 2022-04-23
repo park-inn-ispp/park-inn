@@ -14,7 +14,13 @@ public class Horario {
     private LocalDateTime fechaInicio;
     private LocalDateTime fechaFin;
 
-    public Plaza getPlaza() {
+    public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	public Plaza getPlaza() {
 		return plaza;
 	}
 	public void setPlaza(Plaza plaza) {

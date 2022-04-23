@@ -5,11 +5,13 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 import com.parkinn.model.Client;
 import com.parkinn.model.Estado;
+import com.parkinn.model.Horario;
 import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
 import com.parkinn.repository.ClientRepository;
@@ -81,7 +83,7 @@ public class ReservaController {
 	public List<Reserva> findAll(){
 		return reservaService.findAll();
 	}
-/*
+
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
 	@GetMapping("/{id}/fechasNoDisponibles")
 	public List<List<LocalDateTime>> horariosNoDisponibles(@PathVariable Long id) throws URISyntaxException {
@@ -89,17 +91,16 @@ public class ReservaController {
 			return reservaService.horariosNoDisponibles(id);
 		}
 		else {
-			plazaService.findById(id).setHorarios(new ArrayList<>());
+			plazaService.findById(id).setHorarios(new HashSet<>());
 			return reservaService.horariosNoDisponibles(id);
 		}
 	}
-	*/	
-
-	/*
-	@GetMapping("/{id}/disponibilidad")
-	public List<Horario> horariosPlaza(@PathVariable Long id) throws URISyntaxException {
+		
+	
+	@GetMapping("/{id}/fechasDiscponibles")
+	public List<List<LocalDateTime>> horariosDisponibles(@PathVariable Long id) throws URISyntaxException {
 		return reservaService.horariosDisponibles(id);
-	}*/
+	}
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
 	@GetMapping("/{id}")
@@ -158,6 +159,7 @@ public class ReservaController {
 			return ResponseEntity.badRequest().body(response);
 		}
 	}
+	
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
 	@GetMapping("/{id}/confirmar")

@@ -23,7 +23,7 @@ public class Plaza {
     private Boolean estaDisponible;
     private Boolean esAireLibre;
     private String descripcion;
-    /*private List<List<String>> horarios;
+    //private List<List<String>> horarios;
     private Boolean tramos;
 
 	public Boolean getTramos() {
@@ -33,7 +33,7 @@ public class Plaza {
 	public void setTramos(Boolean tramos) {
 		this.tramos = tramos;
 	}
-
+	/*
 	public List<List<String>> getHorarios() {
 		return horarios;
 	}

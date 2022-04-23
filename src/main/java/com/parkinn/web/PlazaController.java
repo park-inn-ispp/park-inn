@@ -11,12 +11,14 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import com.parkinn.model.Horario;
 import com.parkinn.model.Localizacion;
 import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
 import com.parkinn.model.paypal.Amount;
 import com.parkinn.model.paypal.PayPalClasses;
 import com.parkinn.model.paypal.PurchaseUnit;
+import com.parkinn.service.HorarioService;
 import com.parkinn.service.PlazaService;
 import com.parkinn.service.ReservaService;
 
@@ -45,7 +47,9 @@ public class PlazaController {
     private PlazaService plazaService;
     @Autowired
     private ReservaService reservaService;
-
+    @Autowired
+	private HorarioService horarioService;
+    
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @GetMapping()
     public List<Plaza> filtrarPlazas(@RequestParam(name = "maxPrecioHora", required=false) Double maxPrecioHora, @RequestParam(name = "fechaInicio", required=false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaInicio,
@@ -298,4 +302,42 @@ public class PlazaController {
 			return ResponseEntity.badRequest().body(response);
         }
     }
-   	}
+    
+    @SuppressWarnings("rawtypes")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+    @PostMapping("/{id}/crearHorarios")
+    public ResponseEntity createHorario(@Valid @RequestBody List<Horario> horarios, @PathVariable Long id ) throws URISyntaxException {
+        List<String> errores = new ArrayList<>();
+        Map<String,Object> response = new HashMap<>();
+        for(int i = 0; i<horarios.size(); i++) {
+   	 		Boolean horario_igual = horarios.get(i).getPlaza().getHorarios().contains(horarios.get(i));
+   	 		if(horarios.get(i).getFechaInicio().isAfter(horarios.get(i).getFechaFin())) {
+   	 			errores.add("No puede existir una fecha de inicio posterior a la fecha de fin");
+   	 			response.put("horario", horarios.get(i));
+   	 			response.put("errores",errores);
+   	 			return ResponseEntity.badRequest().body(response);
+   	 		}
+   	 		else if(horarios.get(i).getFechaInicio().isEqual(horarios.get(i).getFechaFin())) {
+   	 			errores.add("No puede existir un tramo horario cuya fecha de inicio y fecha de fin coincidan");
+   	 			response.put("horario", horarios.get(i));
+   	 			response.put("errores",errores);
+   	 		}
+   	 		else if(horario_igual) {
+   	 			errores.add("Este tramo horario ya existe");
+   	 			response.put("horario", horarios.get(i));
+   	 			response.put("errores",errores);
+   	 			return ResponseEntity.badRequest().body(response);
+   	 		}
+   	 		else {
+   	 			Horario nuevoHorario = horarioService.guardarHorario(horarios.get(i));
+   	 			return ResponseEntity.created(new URI("/horarios/" + nuevoHorario.getId())).body(nuevoHorario);
+   	 		}
+        }
+        if(!errores.isEmpty()) {
+	 		return ResponseEntity.badRequest().body(response);
+        }
+        else{
+			return ResponseEntity.ok().build();
+        }
+    }
+}

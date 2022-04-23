@@ -200,24 +200,6 @@ public class ReservaService {
     }
     
     
-    
-    public List<List<LocalDateTime>> horariosNoDisponibles1(Long id){
-   		List<List<LocalDateTime>> horarios = new ArrayList<>();
-    	List<Reserva> lr = repository.findByPlazaId(id);
-       	if(!lr.isEmpty()) {
-       		for(int i = 0; i<lr.size(); i++) {
-       			List<LocalDateTime> nuevoHorario = new ArrayList<>();
-   				nuevoHorario.add(lr.get(i).getFechaInicio());
-   				nuevoHorario.add(lr.get(i).getFechaFin());
-   				horarios.add(nuevoHorario);
-       		}
-       		return horarios;
-       	}
-       	else {
-       		return horarios;
-       	}
-    }
-    
     public List<List<LocalDateTime>> horariosDisponibles(Long id){
        	Plaza plaza = plazaService.findById(id);
 		List<Horario> horariosPorPlaza = (List<Horario>) plaza.getHorarios();
