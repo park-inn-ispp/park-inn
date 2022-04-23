@@ -9,8 +9,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 import javax.validation.Valid;
 
+import com.parkinn.model.EstadoIncidencia;
+import com.parkinn.model.Incidencia;
 import com.parkinn.model.Localizacion;
 import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
@@ -46,6 +49,7 @@ public class PlazaController {
     @Autowired
     private ReservaService reservaService;
 
+    
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @GetMapping()
     public List<Plaza> filtrarPlazas(@RequestParam(name = "maxPrecioHora", required=false) Double maxPrecioHora, @RequestParam(name = "fechaInicio", required=false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaInicio,
@@ -60,7 +64,8 @@ public class PlazaController {
     }
     
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
-    @PostMapping
+    @SuppressWarnings("rawtypes")
+	@PostMapping()
     public ResponseEntity createPlaza(@RequestBody Plaza plaza) throws URISyntaxException {
         List<String> errores = new ArrayList<>();
         Map<String,Object> response = new HashMap<>();
@@ -91,7 +96,8 @@ public class PlazaController {
     	
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+    @SuppressWarnings("rawtypes")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @PutMapping("/{id}")
     public ResponseEntity updatePlaza(@PathVariable Long id, @RequestBody Plaza plaza) {
     	Map<String,Object> response = new HashMap<>();
@@ -144,24 +150,62 @@ public class PlazaController {
     }
     
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
-    @DeleteMapping("/{id}")
+	@DeleteMapping("/{id}")
     public ResponseEntity deletePlaza(@PathVariable Long id) {
     	Plaza currentPlaza = plazaService.findById(id);
         List<String> errores = new ArrayList<String>();
     	if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ||currentPlaza.getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
-    		 plazaService.deleteById(id);
-    	     return ResponseEntity.ok().build();
-
+            //List<String> errores1 = new ArrayList<String>();
+            //Map<String,Object> response = new HashMap<>();
+    		if(currentPlaza.getReservas().isEmpty()) { 
+    			plazaService.deleteById(id);
+    			return ResponseEntity.ok().build();
+    		}else {
+				/*List<Reserva> reservas = (List<Reserva>) currentPlaza.getReservas();
+    			for(int i = 0; i<reservas.size(); i++) {
+        			Boolean incidenciaPendiente = false;
+					List<Incidencia> incidenciasporReserva = (List<Incidencia>) reservas.get(i).getIncidencias();
+        			if(!incidenciasporReserva.isEmpty()) {
+        				for(int a = 0; a<incidenciasporReserva.size(); a++) {
+        					if(!incidenciaPendiente) {
+        						incidenciaPendiente = incidenciasporReserva.get(a).getEstado().equals(EstadoIncidencia.pendiente);	
+        					}
+        				}
+        				if(incidenciaPendiente==true) {
+        					errores1.add("No puede eliminar su plaza debido a que tiene pendiente una incidencia");            
+        					response.put("error", errores1);
+        				
+        				}else if(Duration.between(reservas.get(i).getFechaFin(), LocalDateTime.now()).abs().toHours()<24) {
+        					errores1.add("No puede eliminar su plaza debido a que deben pasar 24 horas tras haber concluido una reserva");            
+        					response.put("error", errores1);
+        					
+        				}else {
+        					currentPlaza.setAdministrador(null);
+        				}
+        			}else {
+        		    	currentPlaza.setAdministrador(null);
+        			}
+    			}
+    			if(errores1.isEmpty()){
+    				return ResponseEntity.ok().build();
+    			}
+    			else {
+					return ResponseEntity.badRequest().body(response);
+    			}*/
+    			currentPlaza.getReservas().forEach(res->res.setPlaza(null));
+    			plazaService.deleteById(id);
+    			return ResponseEntity.ok().build();
+    		}
     	}else{
             Map<String,Object> response = new HashMap<>();
   			errores.add("Esta plaza no es de tu propiedad");            
             response.put("error", errores);
   			return ResponseEntity.badRequest().body(response);
         }
-        
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+    @SuppressWarnings("rawtypes")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @PostMapping("/{id}/validateReservaAntesPago")
     public ResponseEntity validateReservaAntesPago(@Valid @RequestBody Reserva reserva, @PathVariable Long id) throws URISyntaxException {
         Map<String,Object> response = new HashMap<>();
@@ -178,7 +222,8 @@ public class PlazaController {
     	    	
     }
     
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+    @SuppressWarnings("rawtypes")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @PostMapping("/{id}/reservar") //Tras realizar el pago
     public ResponseEntity createReserva(@Valid @RequestBody Reserva reserva, @PathVariable Long id) throws URISyntaxException {
         Map<String,Object> response = new HashMap<>();

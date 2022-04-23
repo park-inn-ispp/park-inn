@@ -31,9 +31,23 @@ public class Incidencia {
     @JoinColumn(name="user_id")
     private Client email;
 
+    public Reserva getIdReserva() {
+		return idReserva;
+	}
 
+	public void setIdReserva(Reserva idReserva) {
+		this.idReserva = idReserva;
+	}
 
-    public Reserva getReserva() {
+	public Client getEmail() {
+		return email;
+	}
+
+	public void setEmail(Client email) {
+		this.email = email;
+	}
+
+	public Reserva getReserva() {
         return this.idReserva;
     }
 
