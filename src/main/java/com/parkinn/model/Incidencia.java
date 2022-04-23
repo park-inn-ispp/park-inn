@@ -31,6 +31,14 @@ public class Incidencia {
     @JoinColumn(name="user_id")
     private Client email;
 
+    
+    public Incidencia(){
+
+    }
+    public Incidencia(Long id) {
+        this.id = id;
+    }
+
     public Reserva getIdReserva() {
 		return idReserva;
 	}

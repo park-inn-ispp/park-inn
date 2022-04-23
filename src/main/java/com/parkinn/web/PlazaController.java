@@ -12,8 +12,6 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
-import com.parkinn.model.EstadoIncidencia;
-import com.parkinn.model.Incidencia;
 import com.parkinn.model.Localizacion;
 import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;

@@ -1,6 +1,5 @@
 package com.parkinn.model;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -38,6 +37,14 @@ public class Plaza {
 
     @OneToMany(mappedBy = "plaza")
     private Set<Reserva> reservas = new HashSet<>();
+
+    public Plaza(){
+
+    }
+    public Plaza(Long id,Client client) {
+        this.id = id;
+        this.administrador=client;
+    }
     
     public Set<Reserva> getReservas() {
 		return reservas;
