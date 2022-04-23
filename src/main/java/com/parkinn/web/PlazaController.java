@@ -59,7 +59,8 @@ public class PlazaController {
         return plazaService.findAll();
     }
     
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+    @SuppressWarnings("rawtypes")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @PostMapping
     public ResponseEntity createPlaza(@RequestBody Plaza plaza) throws URISyntaxException {
         List<String> errores = new ArrayList<>();
@@ -91,7 +92,8 @@ public class PlazaController {
     	
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+    @SuppressWarnings("rawtypes")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @PutMapping("/{id}")
     public ResponseEntity updatePlaza(@PathVariable Long id, @RequestBody Plaza plaza) {
     	Map<String,Object> response = new HashMap<>();
@@ -143,7 +145,8 @@ public class PlazaController {
     	
     }
     
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+    @SuppressWarnings("rawtypes")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @DeleteMapping("/{id}")
     public ResponseEntity deletePlaza(@PathVariable Long id) {
     	Plaza currentPlaza = plazaService.findById(id);
@@ -161,7 +164,8 @@ public class PlazaController {
         
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+    @SuppressWarnings("rawtypes")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @PostMapping("/{id}/validateReservaAntesPago")
     public ResponseEntity validateReservaAntesPago(@Valid @RequestBody Reserva reserva, @PathVariable Long id) throws URISyntaxException {
         Map<String,Object> response = new HashMap<>();
@@ -178,7 +182,8 @@ public class PlazaController {
     	    	
     }
     
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+    @SuppressWarnings("rawtypes")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @PostMapping("/{id}/reservar") //Tras realizar el pago
     public ResponseEntity createReserva(@Valid @RequestBody Reserva reserva, @PathVariable Long id) throws URISyntaxException {
         Map<String,Object> response = new HashMap<>();

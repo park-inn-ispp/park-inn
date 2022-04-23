@@ -81,12 +81,19 @@ public class ReservaController {
 	public List<Reserva> findAll(){
 		return reservaService.findAll();
 	}
-
+/*
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
 	@GetMapping("/{id}/fechasNoDisponibles")
 	public List<List<LocalDateTime>> horariosNoDisponibles(@PathVariable Long id) throws URISyntaxException {
-		return reservaService.horariosNoDisponibles(id);
+		if(plazaService.findById(id).getTramos()==false) {
+			return reservaService.horariosNoDisponibles(id);
+		}
+		else {
+			plazaService.findById(id).setHorarios(new ArrayList<>());
+			return reservaService.horariosNoDisponibles(id);
+		}
 	}
+	*/	
 
 	/*
 	@GetMapping("/{id}/disponibilidad")

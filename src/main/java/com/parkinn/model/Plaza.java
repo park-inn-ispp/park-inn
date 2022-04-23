@@ -1,6 +1,7 @@
 package com.parkinn.model;
 
-import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
 import javax.persistence.*;
 
@@ -22,15 +23,37 @@ public class Plaza {
     private Boolean estaDisponible;
     private Boolean esAireLibre;
     private String descripcion;
+    /*private List<List<String>> horarios;
+    private Boolean tramos;
 
-    /*@OneToMany(mappedBy="plaza", cascade = CascadeType.ALL)
-    private Collection<Horario> horarios;
-	*/
-    /*
-    @OneToOne(mappedBy = "plaza", cascade = CascadeType.ALL)
-    private Horario horario;
-    */
-    @ManyToOne
+	public Boolean getTramos() {
+		return tramos;
+	}
+
+	public void setTramos(Boolean tramos) {
+		this.tramos = tramos;
+	}
+
+	public List<List<String>> getHorarios() {
+		return horarios;
+	}
+
+	public void setHorarios(List<List<String>> horarios) {
+		this.horarios = horarios;
+	}
+*/
+    @OneToMany(mappedBy="plaza", cascade = CascadeType.ALL)
+    private Set<Horario> horarios;
+	
+    public Set<Horario> getHorarios() {
+		return horarios;
+	}
+
+	public void setHorarios(Set<Horario> horarios) {
+		this.horarios = horarios;
+	}
+
+	@ManyToOne
     @JoinColumn(name="user_id")
     private Client administrador;
 
@@ -42,7 +65,6 @@ public class Plaza {
         this.administrador = administrador;
     }
     
-
     public Long getId() {
         return this.id;
     }
@@ -94,14 +116,6 @@ public class Plaza {
     public void setDescripcion(String descripcion) {
         this.descripcion=descripcion;
     }
-    /*
-    public Collection<Horario> getHorarios() {
-        return this.horarios;
-    }*/
-    /*
-    public Horario getHorario() {
-    	return this.horario;
-    }*/
 
 	public String getLatitud() {
 		return latitud;

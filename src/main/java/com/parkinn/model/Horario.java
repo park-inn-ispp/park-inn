@@ -14,11 +14,15 @@ public class Horario {
     private LocalDateTime fechaInicio;
     private LocalDateTime fechaFin;
 
-    /*
-    @ManyToOne()
+    public Plaza getPlaza() {
+		return plaza;
+	}
+	public void setPlaza(Plaza plaza) {
+		this.plaza = plaza;
+	}
+	@ManyToOne()
     @JoinColumn(name = "plaza_id")
     private Plaza plaza;
-	*/
     /*
     @OneToOne
     @JoinColumn(name = "plaza_id")

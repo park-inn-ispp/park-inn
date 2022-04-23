@@ -3,14 +3,23 @@ package com.parkinn.service;
 import com.parkinn.repository.ReservaRepository;
 
 import java.net.URISyntaxException;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import com.parkinn.model.Estado;
+import com.parkinn.model.Horario;
+import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
 import com.parkinn.model.paypal.PayPalAccesToken;
 import com.parkinn.model.paypal.PayPalClasses;
@@ -31,7 +40,10 @@ public class ReservaService {
 	
     @Autowired
     private ReservaRepository repository;
-   
+    
+    @Autowired
+    private PlazaService plazaService;
+    
 	public List<Reserva> findAll(){
         return repository.findAll();
     }
@@ -187,35 +199,80 @@ public class ReservaService {
         return reserva;
     }
     
-    /*
-    public List<Horario> horariosDisponibles(Long id){
-       	Plaza plaza = plazaService.findById(id);
-       	Horario horario = plaza.getHorario();
-       	List<Reserva> lr = repository.findByPlazaId(id);
-   		List<Horario> horarios = new ArrayList<Horario>();
+    
+    
+    public List<List<LocalDateTime>> horariosNoDisponibles1(Long id){
+   		List<List<LocalDateTime>> horarios = new ArrayList<>();
+    	List<Reserva> lr = repository.findByPlazaId(id);
        	if(!lr.isEmpty()) {
-       		for(int i =0; i<lr.size(); i++) {
-           		if(horario.getFechaInicio()!=lr.get(i).getFechaInicio()) {
-           			Horario nuevoHorario = new Horario(horario.getFechaInicio(),lr.get(i).getFechaInicio());
-           			horarios.add(nuevoHorario);
-           		}
-           		else if(horario.getFechaFin()!=lr.get(i).getFechaFin() && lr.get(i).getFechaFin()!=lr.get(i+1).getFechaInicio()) {
-           			Horario nuevoHorario = new Horario(lr.get(i).getFechaFin(),lr.get(i+1).getFechaInicio());
-           			horarios.add(nuevoHorario);
-           		}
-           		else if(horario.getFechaFin()!=lr.get(i).getFechaFin()){
-           			Horario nuevoHorario = new Horario(lr.get(i).getFechaFin(),horario.getFechaFin());
-           			horarios.add(nuevoHorario);
-           		}
-           	}
+       		for(int i = 0; i<lr.size(); i++) {
+       			List<LocalDateTime> nuevoHorario = new ArrayList<>();
+   				nuevoHorario.add(lr.get(i).getFechaInicio());
+   				nuevoHorario.add(lr.get(i).getFechaFin());
+   				horarios.add(nuevoHorario);
+       		}
        		return horarios;
        	}
        	else {
-       		horarios.add(horario);
+       		return horarios;
+       	}
+    }
+    
+    public List<List<LocalDateTime>> horariosDisponibles(Long id){
+       	Plaza plaza = plazaService.findById(id);
+		List<Horario> horariosPorPlaza = (List<Horario>) plaza.getHorarios();
+       	List<Reserva> lr = repository.findByPlazaId(id);
+   		List<List<LocalDateTime>> horarios = new ArrayList<>();
+       	if(!lr.isEmpty()) {
+       		for(int a = 0; a<horariosPorPlaza.size();a++) {
+       			for(int i = 0; i<lr.size(); i++) {
+       				//DateTimeFormatter JEFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm", Locale.US);
+       				//LocalDateTime fechaInicio = LocalDateTime.parse(horariosPorPlaza.get(a).getFechaInicio(), JEFormatter);
+       				//LocalDateTime fechaFin = LocalDateTime.parse(horariosPorPlaza.get(a).getFechaFin(), JEFormatter);
+       				LocalDateTime fechaInicio = horariosPorPlaza.get(a).getFechaInicio();
+       				LocalDateTime fechaFin = horariosPorPlaza.get(a).getFechaFin();
+       				long fechaInicioD = Duration.between(fechaInicio, lr.get(i).getFechaInicio()).toMinutes();
+       				long fechaFinD = Duration.between(lr.get(i).getFechaFin(),fechaFin).toMinutes();
+       				if(fechaInicioD>=0 && fechaFinD>=0) {
+       					if(fechaInicio!=lr.get(i).getFechaInicio()) {
+       						List<LocalDateTime> nuevoHorario = new ArrayList<>();
+       						nuevoHorario.add(fechaInicio);
+       						nuevoHorario.add(lr.get(i).getFechaInicio());
+       						horarios.add(nuevoHorario);
+       					}
+       					else if(fechaFin!=lr.get(i).getFechaFin() && lr.get(i).getFechaFin()!=lr.get(i+1).getFechaInicio()) {
+       						List<LocalDateTime> nuevoHorario = new ArrayList<>();
+       						nuevoHorario.add(lr.get(i).getFechaFin());
+       						nuevoHorario.add(lr.get(i+1).getFechaInicio());
+       						horarios.add(nuevoHorario);
+       					}
+       					else if(fechaFin!=lr.get(i).getFechaFin()){
+       						List<LocalDateTime> nuevoHorario = new ArrayList<>();
+       						nuevoHorario.add(lr.get(i).getFechaFin());
+       						nuevoHorario.add(fechaFin);
+       						horarios.add(nuevoHorario);
+       					}
+       				}
+       			}
+       		}
+       		return horarios;
+       	}
+       	else {
+       		for(int a = 0; a<horariosPorPlaza.size();a++) {
+       			//DateTimeFormatter JEFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm", Locale.US);
+       			//LocalDateTime fechaInicio = LocalDateTime.parse(horariosPorPlaza.get(a).get(0), JEFormatter);
+       			//LocalDateTime fechaFin = LocalDateTime.parse(horariosPorPlaza.get(a).get(1), JEFormatter);
+       			LocalDateTime fechaInicio = horariosPorPlaza.get(a).getFechaInicio();
+   				LocalDateTime fechaFin = horariosPorPlaza.get(a).getFechaFin();
+       			List<LocalDateTime> nuevoHorario = new ArrayList<>();
+					nuevoHorario.add(fechaInicio);
+					nuevoHorario.add(fechaFin);
+					horarios.add(nuevoHorario);
+       		}
        		return horarios;
        	}
        	    
-       }*/
+    }
     
     public List<List<LocalDateTime>> horariosNoDisponibles(Long id){
     List<Reserva> lr = repository.findByPlazaId(id);

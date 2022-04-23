@@ -48,13 +48,15 @@ public class ClientsController {
     }
 
 
-    @PostMapping
+    @SuppressWarnings("rawtypes")
+	@PostMapping
     public ResponseEntity createClient(@RequestBody Client client) throws URISyntaxException {
         Client savedClient = clientRepository.save(client);
         return ResponseEntity.created(new URI("/clients/" + savedClient.getId())).body(savedClient);
     }
 
-    @PutMapping("/{id}")
+    @SuppressWarnings("rawtypes")
+	@PutMapping("/{id}")
     public ResponseEntity updateClient(@PathVariable Long id, @RequestBody Client client) {
         Client currentClient = clientRepository.findById(id).orElseThrow(RuntimeException::new);
         currentClient.setName(client.getName());
@@ -64,7 +66,8 @@ public class ClientsController {
         return ResponseEntity.ok(currentClient);
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @SuppressWarnings("rawtypes")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity deleteClient(@PathVariable Long id) {
         clientRepository.deleteById(id);
