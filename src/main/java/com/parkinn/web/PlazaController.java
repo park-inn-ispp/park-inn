@@ -83,9 +83,6 @@ public class PlazaController {
         return plazaService.findAll();
     }
     
-    @SuppressWarnings("rawtypes")
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
-    @PostMapping
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @SuppressWarnings("rawtypes")
 	@PostMapping()
