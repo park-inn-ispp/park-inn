@@ -66,7 +66,7 @@ public class PlazaController {
     private ReservaRepository reservaRepository;
     @Autowired
     private HorarioRepository horarioRepository;
-  
+    @Autowired
     private MailService mailService;
 
     
@@ -401,7 +401,7 @@ public class PlazaController {
    	 		return ResponseEntity.badRequest().body(response);
    	 	}
    	 	else if(horario_Igual) {
-   	 		errores.add("Este tramo horario ya existe");
+   	 		errores.add("Este tramo horario entra en conflicto con otro. Seleccione otras fechas");
    	 		response.put("horario", horario);
    	 		response.put("errores",errores);
    	 		return ResponseEntity.badRequest().body(response);

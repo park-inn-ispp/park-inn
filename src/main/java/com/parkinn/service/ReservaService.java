@@ -63,7 +63,8 @@ public class ReservaService {
     @Autowired
     private PlazaRepository plazaRepository;
   
-	  private ComisionRepository comisionRepository;
+	@Autowired
+	private ComisionRepository comisionRepository;
 
     
     @Autowired
@@ -259,7 +260,14 @@ public class ReservaService {
 			//Horarios no disponibles especificados por el propietario a partir de hoy (todos excepto horarios disponibles seleccionados)
 		
 		List<Horario> horariosDisponibles= horarioRepository.findHorariosByPlazaIdSortedByFechaInicio(id).stream().filter(horario -> horario.getFechaFin().isAfter(LocalDateTime.now())).collect(Collectors.toList());
-
+		if (horariosDisponibles.size()==0){
+            hoy = LocalDateTime.now();
+            List<LocalDateTime> horarioNoValido = new ArrayList<LocalDateTime>();
+            LocalDateTime fechaLejana=LocalDateTime.of(3000, 1, 1, 12, 0, 0);
+            horarioNoValido.add(hoy);
+            horarioNoValido.add(fechaLejana);
+            horarios.add(horarioNoValido);
+        }
 		for (int i=0;i<horariosDisponibles.size();i++) {
 
 			if(i==0){
@@ -324,9 +332,10 @@ public class ReservaService {
     }
 
 	public Boolean reservaTieneColision(Reserva res){
-			List<List<LocalDateTime>> horarios = horariosNoDisponibles(res.getPlaza().getId(),res.getPlaza().getTramos());
-			for (List<LocalDateTime> h: horarios){
-				if(h.get(1).isAfter(res.getFechaInicio()) && h.get(0).isBefore(res.getFechaFin())){
+			long idPlaza = res.getPlaza().getId();
+			List<Horario> horarios=horarioRepository.findHorariosByPlazaId(idPlaza);
+			for (Horario h: horarios){
+				if(h.getFechaFin().isAfter(res.getFechaInicio()) && h.getFechaInicio().isBefore(res.getFechaFin())){
 					return true;
 				}
 			}
