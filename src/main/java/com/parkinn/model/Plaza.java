@@ -28,6 +28,10 @@ public class Plaza {
     //private List<List<String>> horarios;
     private Boolean tramos;
 
+    @ManyToOne
+    @JoinColumn(name="user_id")
+    private Client administrador;
+
 	public Boolean getTramos() {
 		return tramos;
 	}
