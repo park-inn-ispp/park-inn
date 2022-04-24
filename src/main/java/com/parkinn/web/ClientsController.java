@@ -63,6 +63,7 @@ public class ClientsController {
 
 
     
+
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @PutMapping("/{id}/edit")
     @SuppressWarnings("rawtypes")
@@ -86,6 +87,7 @@ public class ClientsController {
             errores.add("Solo puedes editar los datos de tu perfil");
             response.put("errores", errores);
 			return ResponseEntity.badRequest().body(response);
+            
         }
         
     }
