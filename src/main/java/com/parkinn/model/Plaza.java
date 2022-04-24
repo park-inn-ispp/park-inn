@@ -1,13 +1,15 @@
 package com.parkinn.model;
 
 import java.util.List;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "plazas")
-public class Plaza {
+public class Plaza { 
 
     @Id
     @GeneratedValue
@@ -43,11 +45,7 @@ public class Plaza {
 	}
 */
 
-	@ManyToOne
-    @JoinColumn(name="user_id")
-    private Client administrador;
-
-    public Client getAdministrador() {
+	public Client getAdministrador() {
         return this.administrador;
     }
 

@@ -112,7 +112,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 	@Bean
 	CorsConfigurationSource corsConfigurationSource() {
     final CorsConfiguration configuration = new CorsConfiguration();
+<<<<<<< HEAD
     configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+=======
+    configuration.setAllowedOrigins(Arrays.asList("https://park-inn-ispp-fe.herokuapp.com/"));
+>>>>>>> f27e127052521c6810bd849a07ab00c204a09509
     configuration.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
     configuration.setAllowCredentials(true);
     configuration.setAllowedHeaders(Arrays.asList("*"));
