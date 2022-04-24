@@ -83,7 +83,7 @@ public class PlazaController {
         return plazaService.findAll();
     }
     
-   
+
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @SuppressWarnings("rawtypes")
 	@PostMapping()
