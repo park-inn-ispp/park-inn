@@ -18,6 +18,8 @@ import com.parkinn.model.Reserva;
 import com.parkinn.model.paypal.Amount;
 import com.parkinn.model.paypal.PayPalClasses;
 import com.parkinn.model.paypal.PurchaseUnit;
+import com.parkinn.repository.HorarioRepository;
+import com.parkinn.repository.ReservaRepository;
 import com.parkinn.service.HorarioService;
 import com.parkinn.service.PlazaService;
 import com.parkinn.service.ReservaService;
@@ -49,6 +51,10 @@ public class PlazaController {
     private ReservaService reservaService;
     @Autowired
 	private HorarioService horarioService;
+    @Autowired 
+    private ReservaRepository reservaRepository;
+    @Autowired
+    private HorarioRepository horarioRepository;
     
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @GetMapping()
@@ -149,24 +155,60 @@ public class PlazaController {
     	
     }
     
-    @SuppressWarnings("rawtypes")
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
-    @DeleteMapping("/{id}")
-    public ResponseEntity deletePlaza(@PathVariable Long id) {
-    	Plaza currentPlaza = plazaService.findById(id);
-        List<String> errores = new ArrayList<String>();
-    	if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ||currentPlaza.getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
-    		 plazaService.deleteById(id);
-    	     return ResponseEntity.ok().build();
-
-    	}else{
-            Map<String,Object> response = new HashMap<>();
-  			errores.add("Esta plaza no es de tu propiedad");            
-            response.put("error", errores);
-  			return ResponseEntity.badRequest().body(response);
-        }
-        
-    }
+  //@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+  	@DeleteMapping("/{id}")
+      public ResponseEntity deletePlaza(@PathVariable Long id) {
+      	Plaza currentPlaza = plazaService.findById(id);
+          List<String> errores = new ArrayList<String>();
+      	if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ||currentPlaza.getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+              //List<String> errores1 = new ArrayList<String>();
+              //Map<String,Object> response = new HashMap<>();
+      		if(reservaRepository.findByPlazaId(id).isEmpty()) { 
+      			plazaService.deleteById(id);
+      			return ResponseEntity.ok().build();
+      		}else {
+  				/*List<Reserva> reservas = (List<Reserva>) currentPlaza.getReservas();
+      			for(int i = 0; i<reservas.size(); i++) {
+          			Boolean incidenciaPendiente = false;
+  					List<Incidencia> incidenciasporReserva = (List<Incidencia>) reservas.get(i).getIncidencias();
+          			if(!incidenciasporReserva.isEmpty()) {
+          				for(int a = 0; a<incidenciasporReserva.size(); a++) {
+          					if(!incidenciaPendiente) {
+          						incidenciaPendiente = incidenciasporReserva.get(a).getEstado().equals(EstadoIncidencia.pendiente);	
+          					}
+          				}
+          				if(incidenciaPendiente==true) {
+          					errores1.add("No puede eliminar su plaza debido a que tiene pendiente una incidencia");            
+          					response.put("error", errores1);
+          				
+          				}else if(Duration.between(reservas.get(i).getFechaFin(), LocalDateTime.now()).abs().toHours()<24) {
+          					errores1.add("No puede eliminar su plaza debido a que deben pasar 24 horas tras haber concluido una reserva");            
+          					response.put("error", errores1);
+          					
+          				}else {
+          					currentPlaza.setAdministrador(null);
+          				}
+          			}else {
+          		    	currentPlaza.setAdministrador(null);
+          			}
+      			}
+      			if(errores1.isEmpty()){
+      				return ResponseEntity.ok().build();
+      			}
+      			else {
+  					return ResponseEntity.badRequest().body(response);
+      			}*/
+      			reservaRepository.findByPlazaId(id).forEach(res->res.setPlaza(null));
+      			plazaService.deleteById(id);
+      			return ResponseEntity.ok().build();
+      		}
+      	}else{
+              Map<String,Object> response = new HashMap<>();
+    			errores.add("Esta plaza no es de tu propiedad");            
+              response.put("error", errores);
+    			return ResponseEntity.badRequest().body(response);
+          }
+      }
 
     @SuppressWarnings("rawtypes")
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
@@ -306,33 +348,32 @@ public class PlazaController {
     @SuppressWarnings("rawtypes")
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @PostMapping("/{id}/crearHorarios")
-    public ResponseEntity createHorario(@Valid @RequestBody List<Horario> horarios, @PathVariable Long id ) throws URISyntaxException {
+    public ResponseEntity createHorario(@Valid @RequestBody Horario horario, @PathVariable Long id ) throws URISyntaxException {
         List<String> errores = new ArrayList<>();
         Map<String,Object> response = new HashMap<>();
-        for(int i = 0; i<horarios.size(); i++) {
-   	 		Boolean horario_igual = horarios.get(i).getPlaza().getHorarios().contains(horarios.get(i));
-   	 		if(horarios.get(i).getFechaInicio().isAfter(horarios.get(i).getFechaFin())) {
+   	 		Boolean horario_igual = horarioRepository.findHorariosByPlazaId(horario.getPlaza().getId()).contains(horario);
+   	 		if(horario.getFechaInicio().isAfter(horario.getFechaFin())) {
    	 			errores.add("No puede existir una fecha de inicio posterior a la fecha de fin");
-   	 			response.put("horario", horarios.get(i));
+   	 			response.put("horario", horario);
    	 			response.put("errores",errores);
    	 			return ResponseEntity.badRequest().body(response);
    	 		}
-   	 		else if(horarios.get(i).getFechaInicio().isEqual(horarios.get(i).getFechaFin())) {
+   	 		else if(horario.getFechaInicio().isEqual(horario.getFechaFin())) {
    	 			errores.add("No puede existir un tramo horario cuya fecha de inicio y fecha de fin coincidan");
-   	 			response.put("horario", horarios.get(i));
+   	 			response.put("horario", horario);
    	 			response.put("errores",errores);
    	 		}
    	 		else if(horario_igual) {
    	 			errores.add("Este tramo horario ya existe");
-   	 			response.put("horario", horarios.get(i));
+   	 			response.put("horario", horario);
    	 			response.put("errores",errores);
    	 			return ResponseEntity.badRequest().body(response);
    	 		}
    	 		else {
-   	 			Horario nuevoHorario = horarioService.guardarHorario(horarios.get(i));
+   	 			Horario nuevoHorario = horarioService.guardarHorario(horario);
    	 			return ResponseEntity.created(new URI("/horarios/" + nuevoHorario.getId())).body(nuevoHorario);
    	 		}
-        }
+        
         if(!errores.isEmpty()) {
 	 		return ResponseEntity.badRequest().body(response);
         }

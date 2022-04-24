@@ -42,16 +42,6 @@ public class Plaza {
 		this.horarios = horarios;
 	}
 */
-    @OneToMany(mappedBy="plaza", cascade = CascadeType.ALL)
-    private Set<Horario> horarios;
-	
-    public Set<Horario> getHorarios() {
-		return horarios;
-	}
-
-	public void setHorarios(Set<Horario> horarios) {
-		this.horarios = horarios;
-	}
 
 	@ManyToOne
     @JoinColumn(name="user_id")

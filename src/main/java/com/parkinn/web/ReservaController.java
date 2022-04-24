@@ -15,6 +15,7 @@ import com.parkinn.model.Horario;
 import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
 import com.parkinn.repository.ClientRepository;
+import com.parkinn.repository.HorarioRepository;
 import com.parkinn.service.PlazaService;
 import com.parkinn.service.ReservaService;
 
@@ -41,6 +42,8 @@ public class ReservaController {
 	@Autowired
 	private ClientRepository clientRepository;
 
+	@Autowired
+	private HorarioRepository horarioRepository;
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
 	@GetMapping("/usuario/{id}")
@@ -91,15 +94,21 @@ public class ReservaController {
 			return reservaService.horariosNoDisponibles(id);
 		}
 		else {
-			plazaService.findById(id).setHorarios(new HashSet<>());
+			horarioRepository.findHorariosByPlazaId(id).clear();
 			return reservaService.horariosNoDisponibles(id);
 		}
 	}
 		
 	
-	@GetMapping("/{id}/fechasDiscponibles")
+	@GetMapping("/{id}/fechasDisponibles")
 	public List<List<LocalDateTime>> horariosDisponibles(@PathVariable Long id) throws URISyntaxException {
-		return reservaService.horariosDisponibles(id);
+		if(plazaService.findById(id).getTramos()==false) {
+			return reservaService.horariosDisponibles(id);
+		}
+		else {
+			horarioRepository.findHorariosByPlazaId(id).clear();
+			return reservaService.horariosNoDisponibles(id);
+		}
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")

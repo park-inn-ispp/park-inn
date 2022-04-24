@@ -1,5 +1,6 @@
 package com.parkinn.service;
 
+import com.parkinn.repository.HorarioRepository;
 import com.parkinn.repository.ReservaRepository;
 
 import java.net.URISyntaxException;
@@ -40,6 +41,9 @@ public class ReservaService {
 	
     @Autowired
     private ReservaRepository repository;
+    
+    @Autowired
+    private HorarioRepository horarioRepository;
     
     @Autowired
     private PlazaService plazaService;
@@ -201,8 +205,7 @@ public class ReservaService {
     
     
     public List<List<LocalDateTime>> horariosDisponibles(Long id){
-       	Plaza plaza = plazaService.findById(id);
-		List<Horario> horariosPorPlaza = (List<Horario>) plaza.getHorarios();
+		List<Horario> horariosPorPlaza = horarioRepository.findHorariosByPlazaId(id);
        	List<Reserva> lr = repository.findByPlazaId(id);
    		List<List<LocalDateTime>> horarios = new ArrayList<>();
        	if(!lr.isEmpty()) {
