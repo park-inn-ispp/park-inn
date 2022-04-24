@@ -51,6 +51,7 @@ public class Client {
 
     @OneToMany(mappedBy = "administrador")
     private List<Plaza> plazas;
+    
 
     public Long getId() {
         return this.id;

@@ -1,12 +1,16 @@
 package com.parkinn.model;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 
@@ -28,8 +32,28 @@ public class Reserva {
     private LocalDateTime fechaFin;
     private LocalDateTime fechaSolicitud;
     private String comentarios;
+    private Double fianza;
+    private String direccion;
+    
+    public Double getFianza() {
+		return fianza;
+	}
+    private Float comision;
 
-    @ManyToOne
+
+	public void setFianza(Double fianza) {
+		this.fianza = fianza;
+	}
+
+	public String getDireccion() {
+		return direccion;
+	}
+
+	public void setDireccion(String direccion) {
+		this.direccion = direccion;
+	}
+
+	@ManyToOne
     @JoinColumn(name="plaza_id")
     private Plaza plaza;
 
@@ -37,8 +61,16 @@ public class Reserva {
     @JoinColumn(name="user_id")
     private Client user;
 
-    public Long getId() {
+	public Long getId() {
         return id;
+    }
+
+    public Float getComision() {
+        return comision;
+    }
+
+    public void setComision(Float comision) {
+        this.comision = comision;
     }
 
     public Estado getEstado() {
