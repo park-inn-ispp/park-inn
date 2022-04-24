@@ -60,23 +60,37 @@ public class ClientsController {
         return ResponseEntity.created(new URI("/clients/" + savedClient.getId())).body(savedClient);
     }
 
-    // @PutMapping("/{id}/edit")
-    // public ResponseEntity updateClient(@PathVariable Long id, @RequestBody Client client) {
-    //     Client currentClient = clientRepository.findById(id).orElseThrow(RuntimeException::new);
-    //     currentClient.setName(client.getName());
-    //     currentClient.setEmail(client.getEmail());
-    //     currentClient.setPhone(client.getPhone());
-    //     currentClient.setSurname(client.getSurname());
-    //     currentClient = clientRepository.save(client);
-
-    //     return ResponseEntity.ok(currentClient);
-    // }
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+    @PutMapping("/{id}/edit")
+    public ResponseEntity updateClient(@PathVariable Long id, @RequestBody Client client) {
+        Map<String,Object> response = new HashMap<>();
+        List<String> errores = new ArrayList<String>();
+        Optional<Client> cliente = clientRepository.findById(id);
+        if(!cliente.isPresent()){
+            errores.add("Este usuario no existe");
+            response.put("errores", errores);
+			return ResponseEntity.badRequest().body(response);
+        }else if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) || cliente.get().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+            Client currentClient = clientRepository.findById(id).orElseThrow(RuntimeException::new);
+            currentClient.setName(client.getName());
+            currentClient.setEmail(client.getEmail());
+            currentClient.setPhone(client.getPhone());
+            currentClient.setSurname(client.getSurname());
+            currentClient = clientRepository.save(currentClient);
+            return ResponseEntity.ok(currentClient);
+        }else{
+            errores.add("Solo puedes editar los datos de tu perfil");
+            response.put("errores", errores);
+			return ResponseEntity.badRequest().body(response);
+        }
+        
+    }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{id}/delete")
     public ResponseEntity deleteClient(@PathVariable Long id) {
         clientRepository.deleteById(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("Usuario eliminado satisfactoriamente");
     }
 
 @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
