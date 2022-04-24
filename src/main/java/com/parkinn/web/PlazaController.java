@@ -385,9 +385,8 @@ public class PlazaController {
    	 	for (Horario h: horariosPlaza){
 			if((h.getFechaFin()).isAfter((ChronoLocalDateTime<LocalDate>) horario.getFechaInicio()) && (h.getFechaInicio().isBefore((ChronoLocalDateTime<LocalDate>) horario.getFechaFin()))){
 				horario_Igual = true;
+                break;
 			}
-			else
-				horario_Igual = false; 
 		}
    	 	if(horario.getFechaInicio().isAfter(horario.getFechaFin())) {
    	 		errores.add("No puede existir una fecha de inicio posterior a la fecha de fin");
@@ -417,7 +416,7 @@ public class PlazaController {
     
     @SuppressWarnings({ "rawtypes", "unused" })
    	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
-       @PutMapping("/{id}/cambiarDisponibilidad")
+       @PutMapping("/{id}/cambiarDisponibilidad/{disponibilidad}")
        public ResponseEntity updateDisponibilidad(@PathVariable Long id, @PathVariable Boolean disponibilidad) {
        	Map<String,Object> response = new HashMap<>();
        	List<String> errores = new ArrayList<String>();

@@ -3,6 +3,8 @@ package com.parkinn.web;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.chrono.ChronoLocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,24 +54,11 @@ public class HorariosController {
         Horario currentHorario = horarioService.findById(id);
 
     	if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ||currentHorario.getPlaza().getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
-
-            if(true){
-        
-                errores.add("Este horario ya existe en tu colección. Intenta añadir un horario con un tramo diferente");
-                response.put("horario", horario);
-                response.put("errores",errores);
-                return ResponseEntity.badRequest().body(response);
-            
-            }else{
+		
+            currentHorario.setActivo(horario.getActivo());
+            currentHorario = horarioService.guardarHorario(currentHorario);
+            return ResponseEntity.ok(currentHorario);
                
-            	horarioRepository.findHorariosByPlazaId(currentHorario.getPlaza().getId()).forEach(hor->hor.setActivo(false));
-            	currentHorario.setActivo(true);
-            	
-    
-            	currentHorario = horarioService.guardarHorario(currentHorario);
-                return ResponseEntity.ok(currentHorario);
-
-               }
           
     	}else{
             
