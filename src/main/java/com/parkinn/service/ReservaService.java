@@ -1,16 +1,29 @@
 package com.parkinn.service;
 
+import com.parkinn.repository.HorarioRepository;
+import com.parkinn.repository.PlazaRepository;
 import com.parkinn.repository.ComisionRepository;
 import com.parkinn.repository.ReservaRepository;
 
 import java.net.URISyntaxException;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
 
 import com.parkinn.model.Estado;
+import com.parkinn.model.Horario;
+import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
 import com.parkinn.model.paypal.PayPalAccesToken;
 import com.parkinn.model.paypal.PayPalClasses;
@@ -34,8 +47,17 @@ public class ReservaService {
 	
     @Autowired
     private ReservaRepository repository;
-
-	private ComisionRepository comisionRepository;
+    
+    @Autowired
+    private HorarioRepository horarioRepository;
+    
+    @Autowired
+    private PlazaService plazaService;
+    
+    @Autowired
+    private PlazaRepository plazaRepository;
+  
+	  private ComisionRepository comisionRepository;
 
     
     @Autowired
@@ -104,6 +126,7 @@ public class ReservaService {
 		Map<String,Object> item = new HashMap<>();
 		Map<String,Object> amount = new HashMap<>();
 		amount.put("value", Math.round((r.getPrecioTotal() - r.getPlaza().getFianza())*100.0)/100.0);
+		System.out.println(Math.round((r.getPrecioTotal() - r.getFianza())*100.0)/100.0);
 		amount.put("currency","EUR");
 
 		item.put("amount", amount);
@@ -201,35 +224,9 @@ public class ReservaService {
         return reserva;
     }
     
-    /*
-    public List<Horario> horariosDisponibles(Long id){
-       	Plaza plaza = plazaService.findById(id);
-       	Horario horario = plaza.getHorario();
-       	List<Reserva> lr = repository.findByPlazaId(id);
-   		List<Horario> horarios = new ArrayList<Horario>();
-       	if(!lr.isEmpty()) {
-       		for(int i =0; i<lr.size(); i++) {
-           		if(horario.getFechaInicio()!=lr.get(i).getFechaInicio()) {
-           			Horario nuevoHorario = new Horario(horario.getFechaInicio(),lr.get(i).getFechaInicio());
-           			horarios.add(nuevoHorario);
-           		}
-           		else if(horario.getFechaFin()!=lr.get(i).getFechaFin() && lr.get(i).getFechaFin()!=lr.get(i+1).getFechaInicio()) {
-           			Horario nuevoHorario = new Horario(lr.get(i).getFechaFin(),lr.get(i+1).getFechaInicio());
-           			horarios.add(nuevoHorario);
-           		}
-           		else if(horario.getFechaFin()!=lr.get(i).getFechaFin()){
-           			Horario nuevoHorario = new Horario(lr.get(i).getFechaFin(),horario.getFechaFin());
-           			horarios.add(nuevoHorario);
-           		}
-           	}
-       		return horarios;
-       	}
-       	else {
-       		horarios.add(horario);
-       		return horarios;
-       	}
-       	    
-       }*/
+    
+        
+   
     
     public List<List<LocalDateTime>> horariosNoDisponibles(Long id){
     List<Reserva> lr = repository.findByPlazaId(id);
@@ -249,13 +246,14 @@ public class ReservaService {
     }
 
 	public Boolean reservaTieneColision(Reserva res){
-		List<List<LocalDateTime>> horarios = horariosNoDisponibles(res.getPlaza().getId());
-		for (List<LocalDateTime> h: horarios){
-			if(h.get(1).isAfter(res.getFechaInicio()) && h.get(0).isBefore(res.getFechaFin())){
-				return true;
+			List<List<LocalDateTime>> horarios = horariosNoDisponibles(res.getPlaza().getId());
+			for (List<LocalDateTime> h: horarios){
+				if(h.get(1).isAfter(res.getFechaInicio()) && h.get(0).isBefore(res.getFechaFin())){
+					return true;
+				}
 			}
-		}
-		return false;
+			return false;
+		
 	}
 	public List<String> erroresNuevaReservaAntesDelPago(Reserva reserva){
 		List<String> errores = new ArrayList<String>();
@@ -271,8 +269,7 @@ public class ReservaService {
         }
 		return errores;
 	}
-
-  
+	
 	public Object confirmarServicio(Reserva r, Object user){
 		if(user.equals(r.getUser().getEmail()) && !r.getEstado().equals(Estado.confirmadaPropietario)){
 			try {
@@ -302,7 +299,8 @@ public class ReservaService {
 				r.setEstado(Estado.confirmadaAmbos);
 			}
 			r.setEstado(Estado.confirmadaAmbos);
-			
+			DecimalFormat df = new DecimalFormat("#.00");
+			df.setMaximumFractionDigits(2);
 			HttpHeaders headers1 = new HttpHeaders();
 			headers1.set("Content-Type", "application/x-www-form-urlencoded");
 			headers1.set("Authorization", "Basic QWR1NGpVdFRrYUp4TkZxdWZoenRvTnAtQ1F1WldKTGt2VjVGRG5fYUlwa2hiV2xTdm5Qd1NxMlRORHNUNHZGWnQtX3VFbUZfcnRIODlNdms6RUxIYWZIQWMtMFpQclJXZVo1MFBqeFQ0TmtWNDg5UDNnZno3Q3RvWU9yLWVvQVQxekhzcVZuTlZrYm5WRkE4S21RdVFpQVNkSlU2ZzgxN3M=");
@@ -324,7 +322,9 @@ public class ReservaService {
 
 			Map<String,Object> item = new HashMap<>();
 			Map<String,Object> amount = new HashMap<>();
-			amount.put("value", Math.round((r.getPlaza().getFianza())*100.0)/100.0);
+			Integer am = 15;
+			//amount.put("value", (double)Math.round((r.getPlaza().getFianza()) * 100d) / 100d);
+			amount.put("value", am);
 			amount.put("currency","EUR");
 
 			item.put("amount", amount);
@@ -350,7 +350,10 @@ public class ReservaService {
 
 			Map<String,Object> item_p = new HashMap<>();
 			Map<String,Object> amount_p = new HashMap<>();
-			amount_p.put("value", Math.round((r.getPrecioTotal() - r.getPlaza().getFianza() - r.getComision()*r.getPrecioTotal())*100.0)/100.0);
+
+			amount_p.put("value", Math.round((r.getPrecioTotal() - r.getFianza() - r.getComision()*r.getPrecioTotal())*100.0)/100.0);
+
+		
 			amount_p.put("currency","EUR");
 
 			item_p.put("amount", amount_p);

@@ -54,14 +54,17 @@ public class ClientsController {
     }
 
 
-    @PostMapping
+    @SuppressWarnings("rawtypes")
+	@PostMapping
     public ResponseEntity createClient(@RequestBody Client client) throws URISyntaxException {
         Client savedClient = clientRepository.save(client);
         return ResponseEntity.created(new URI("/clients/" + savedClient.getId())).body(savedClient);
     }
 
+
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @PutMapping("/{id}/edit")
+    @SuppressWarnings("rawtypes")
     public ResponseEntity updateClient(@PathVariable Long id, @RequestBody Client client) {
         Map<String,Object> response = new HashMap<>();
         List<String> errores = new ArrayList<String>();
@@ -86,8 +89,10 @@ public class ClientsController {
         
     }
 
+
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}/delete")
+    @SuppressWarnings("rawtypes")
     public ResponseEntity deleteClient(@PathVariable Long id) {
         clientRepository.deleteById(id);
         return ResponseEntity.ok("Usuario eliminado satisfactoriamente");

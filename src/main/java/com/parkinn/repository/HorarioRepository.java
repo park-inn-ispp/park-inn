@@ -8,10 +8,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.parkinn.model.Horario;
-
+import com.parkinn.model.Plaza;
+import com.parkinn.model.Reserva;
 
 public interface HorarioRepository extends JpaRepository<Horario, Long> {
-
-	@Query(value = "SELECT DISTINCT h.* FROM HORARIOS h WHERE h.plaza_id LIKE :id",nativeQuery = true)
-    public List<Horario> horarios(@Param("id") Long id) throws DataAccessException;
+	
+	@Query(value = "SELECT DISTINCT h.* FROM horarios h WHERE h.plaza_id LIKE :plaza_id", nativeQuery=true)
+	 public List<Horario> findHorariosByPlazaId(@Param("plaza_id") Long id) throws DataAccessException;
 }
