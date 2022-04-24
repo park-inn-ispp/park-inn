@@ -1,6 +1,7 @@
 package com.parkinn.service;
 
 import com.parkinn.repository.HorarioRepository;
+import com.parkinn.repository.PlazaRepository;
 import com.parkinn.repository.ReservaRepository;
 
 import java.net.URISyntaxException;
@@ -48,6 +49,9 @@ public class ReservaService {
     
     @Autowired
     private PlazaService plazaService;
+    
+    @Autowired
+    private PlazaRepository plazaRepository;
     
 	public List<Reserva> findAll(){
         return repository.findAll();
@@ -204,110 +208,9 @@ public class ReservaService {
         return reserva;
     }
     
-    Predicate comprobar(List<Boolean> lista) {
-    	return null;
-    }
     
-    Predicate<Horario> predicado1= p->p.getActivo()==true;
-    
-    public List<List<LocalDateTime>> horariosDisponibles(Long id){
-		List<Horario> horariosPorPlaza = horarioRepository.findHorariosByPlazaId(id);
-       	List<Reserva> lr = repository.findByPlazaId(id);
-   		List<List<LocalDateTime>> horarios = new ArrayList<>();
-       	if(!lr.isEmpty()) {
-       		if(!horariosPorPlaza.isEmpty() && plazaService.findById(id).getTramos()==false) {
-       			for(int i = 0; i<lr.size(); i++) {
-   					//DateTimeFormatter JEFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm", Locale.US);
-   					//LocalDateTime fechaInicio = LocalDateTime.parse(horariosPorPlaza.get(a).getFechaInicio(), JEFormatter);
-   					//LocalDateTime fechaFin = LocalDateTime.parse(horariosPorPlaza.get(a).getFechaFin(), JEFormatter);
-       				LocalDateTime fechaInicio = LocalDateTime.of(2000, 1, 1, 12, 0, 0);
-           			LocalDateTime fechaFin = LocalDateTime.of(3000, 1, 1, 12, 0, 0);
-   					long fechaInicioD = Duration.between(fechaInicio, lr.get(i).getFechaInicio()).toMinutes();
-   					long fechaFinD = Duration.between(lr.get(i).getFechaFin(),fechaFin).toMinutes();
-   					if(fechaInicioD>=0 && fechaFinD>=0) {
-   						if(fechaInicio!=lr.get(i).getFechaInicio()) {
-   							List<LocalDateTime> nuevoHorario = new ArrayList<>();
-   							nuevoHorario.add(fechaInicio);
-   							nuevoHorario.add(lr.get(i).getFechaInicio());
-   							horarios.add(nuevoHorario);
-   						}
-   						else if(fechaFin!=lr.get(i).getFechaFin() && lr.get(i).getFechaFin()!=lr.get(i+1).getFechaInicio()) {
-   							List<LocalDateTime> nuevoHorario = new ArrayList<>();
-   							nuevoHorario.add(lr.get(i).getFechaFin());
-   							nuevoHorario.add(lr.get(i+1).getFechaInicio());
-   							horarios.add(nuevoHorario);
-   						}
-   						else if(fechaFin!=lr.get(i).getFechaFin()){
-   							List<LocalDateTime> nuevoHorario = new ArrayList<>();
-   							nuevoHorario.add(lr.get(i).getFechaFin());
-   							nuevoHorario.add(fechaFin);
-   							horarios.add(nuevoHorario);
-   						}
-   					}
-   				}
-       			return horarios;
-       		}
-       		else {
-       			for(int a = 0; a<horariosPorPlaza.size();a++) {
-       				for(int i = 0; i<lr.size(); i++) {
-       					//DateTimeFormatter JEFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm", Locale.US);
-       					//LocalDateTime fechaInicio = LocalDateTime.parse(horariosPorPlaza.get(a).getFechaInicio(), JEFormatter);
-       					//LocalDateTime fechaFin = LocalDateTime.parse(horariosPorPlaza.get(a).getFechaFin(), JEFormatter);
-       					LocalDateTime fechaInicio = horariosPorPlaza.get(a).getFechaInicio();
-       					LocalDateTime fechaFin = horariosPorPlaza.get(a).getFechaFin();
-       					long fechaInicioD = Duration.between(fechaInicio, lr.get(i).getFechaInicio()).toMinutes();
-       					long fechaFinD = Duration.between(lr.get(i).getFechaFin(),fechaFin).toMinutes();
-       					if(fechaInicioD>=0 && fechaFinD>=0) {
-       						if(fechaInicio!=lr.get(i).getFechaInicio()) {
-       							List<LocalDateTime> nuevoHorario = new ArrayList<>();
-       							nuevoHorario.add(fechaInicio);
-       							nuevoHorario.add(lr.get(i).getFechaInicio());
-       							horarios.add(nuevoHorario);
-       						}
-       						else if(fechaFin!=lr.get(i).getFechaFin() && lr.get(i).getFechaFin()!=lr.get(i+1).getFechaInicio()) {
-       							List<LocalDateTime> nuevoHorario = new ArrayList<>();
-       							nuevoHorario.add(lr.get(i).getFechaFin());
-       							nuevoHorario.add(lr.get(i+1).getFechaInicio());
-       							horarios.add(nuevoHorario);
-       						}
-       						else if(fechaFin!=lr.get(i).getFechaFin()){
-       							List<LocalDateTime> nuevoHorario = new ArrayList<>();
-       							nuevoHorario.add(lr.get(i).getFechaFin());
-       							nuevoHorario.add(fechaFin);
-       							horarios.add(nuevoHorario);
-       						}
-       					}
-       				}
-       			}
-       		}
-       		return horarios;
-       	}
-       	else {
-       		if(!horariosPorPlaza.isEmpty() && plazaService.findById(id).getTramos()==false) {
-       			for(int a = 0; a<horariosPorPlaza.size();a++) {
-       				//DateTimeFormatter JEFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm", Locale.US);
-       				//LocalDateTime fechaInicio = LocalDateTime.parse(horariosPorPlaza.get(a).get(0), JEFormatter);
-       				//LocalDateTime fechaFin = LocalDateTime.parse(horariosPorPlaza.get(a).get(1), JEFormatter);
-       				LocalDateTime fechaInicio = horariosPorPlaza.get(a).getFechaInicio();
-       				LocalDateTime fechaFin = horariosPorPlaza.get(a).getFechaFin();
-       				List<LocalDateTime> nuevoHorario = new ArrayList<>();
-       				nuevoHorario.add(fechaInicio);
-					nuevoHorario.add(fechaFin);
-					horarios.add(nuevoHorario);
-       			}
-       			return horarios;
-       		}
-       		else {
-       			LocalDateTime fechaInicio = LocalDateTime.of(2000, 1, 1, 12, 0, 0);
-       			LocalDateTime fechaFin = LocalDateTime.of(3000, 1, 1, 12, 0, 0);
-   				List<LocalDateTime> nuevoHorario = new ArrayList<>();
-   				nuevoHorario.add(fechaInicio);
-				nuevoHorario.add(fechaFin);
-				horarios.add(nuevoHorario);
-       		}
-       		return horarios;
-       	}
-    }
+        
+   
     
     public List<List<LocalDateTime>> horariosNoDisponibles(Long id){
     List<Reserva> lr = repository.findByPlazaId(id);
@@ -327,7 +230,6 @@ public class ReservaService {
     }
 
 	public Boolean reservaTieneColision(Reserva res){
-		if(res.getPlaza().getTramos() == false) {
 			List<List<LocalDateTime>> horarios = horariosNoDisponibles(res.getPlaza().getId());
 			for (List<LocalDateTime> h: horarios){
 				if(h.get(1).isAfter(res.getFechaInicio()) && h.get(0).isBefore(res.getFechaFin())){
@@ -335,16 +237,7 @@ public class ReservaService {
 				}
 			}
 			return false;
-		}
-		else {
-			List<List<LocalDateTime>> horariosD = horariosDisponibles(res.getPlaza().getId());
-			for (List<LocalDateTime> h: horariosD){
-				if(h.get(1).isAfter(res.getFechaInicio()) && h.get(0).isBefore(res.getFechaFin())){
-					return true;
-				}
-			}
-			return false;
-		}
+		
 	}
 	public List<String> erroresNuevaReservaAntesDelPago(Reserva reserva){
 		List<String> errores = new ArrayList<String>();
@@ -361,8 +254,6 @@ public class ReservaService {
 		return errores;
 	}
 	
-
-  
 	public Object confirmarServicio(Reserva r, Object user){
 		if(user.equals(r.getUser().getEmail()) && !r.getEstado().equals(Estado.confirmadaPropietario)){
 			r.setEstado(Estado.confirmadaUsuario);

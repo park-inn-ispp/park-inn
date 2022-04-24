@@ -16,6 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -38,6 +39,13 @@ public class HorariosController {
 	private HorarioService horarioService;
 	@Autowired
 	private HorarioRepository horarioRepository;
+	
+	
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+    @GetMapping("/all")
+    public Object getPlazas() {
+        return horarioRepository.findAll();
+    }
 	
 	@SuppressWarnings({ "rawtypes", "unused" })
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")

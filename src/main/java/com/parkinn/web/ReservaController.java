@@ -102,13 +102,7 @@ public class ReservaController {
 	
 	@GetMapping("/{id}/fechasDisponibles")
 	public List<List<LocalDateTime>> horariosDisponibles(@PathVariable Long id) throws URISyntaxException {
-		if(plazaService.findById(id).getTramos()==false) {
-			return reservaService.horariosDisponibles(id);
-		}
-		else {
-			horarioRepository.findHorariosByPlazaId(id).clear();
 			return reservaService.horariosNoDisponibles(id);
-		}
 	}
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
