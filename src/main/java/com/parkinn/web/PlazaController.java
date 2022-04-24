@@ -3,7 +3,10 @@ package com.parkinn.web;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.chrono.ChronoLocalDate;
+import java.time.chrono.ChronoLocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -351,34 +354,62 @@ public class PlazaController {
     public ResponseEntity createHorario(@Valid @RequestBody Horario horario, @PathVariable Long id ) throws URISyntaxException {
         List<String> errores = new ArrayList<>();
         Map<String,Object> response = new HashMap<>();
-   	 		Boolean horario_igual = horarioRepository.findHorariosByPlazaId(horario.getPlaza().getId()).contains(horario);
-   	 		if(horario.getFechaInicio().isAfter(horario.getFechaFin())) {
-   	 			errores.add("No puede existir una fecha de inicio posterior a la fecha de fin");
-   	 			response.put("horario", horario);
-   	 			response.put("errores",errores);
-   	 			return ResponseEntity.badRequest().body(response);
-   	 		}
-   	 		else if(horario.getFechaInicio().isEqual(horario.getFechaFin())) {
-   	 			errores.add("No puede existir un tramo horario cuya fecha de inicio y fecha de fin coincidan");
-   	 			response.put("horario", horario);
-   	 			response.put("errores",errores);
-   	 		}
-   	 		else if(horario_igual) {
-   	 			errores.add("Este tramo horario ya existe");
-   	 			response.put("horario", horario);
-   	 			response.put("errores",errores);
-   	 			return ResponseEntity.badRequest().body(response);
-   	 		}
-   	 		else {
-   	 			Horario nuevoHorario = horarioService.guardarHorario(horario);
-   	 			return ResponseEntity.created(new URI("/horarios/" + nuevoHorario.getId())).body(nuevoHorario);
-   	 		}
-        
-        if(!errores.isEmpty()) {
-	 		return ResponseEntity.badRequest().body(response);
-        }
-        else{
-			return ResponseEntity.ok().build();
-        }
+   	 	List<Horario> horariosPlaza = horarioRepository.findHorariosByPlazaId(horario.getPlaza().getId());
+		Boolean horario_Igual = false;
+   	 	for (Horario h: horariosPlaza){
+			if((h.getFechaFin()).isAfter((ChronoLocalDateTime<LocalDate>) horario.getFechaInicio()) && (h.getFechaInicio().isBefore((ChronoLocalDateTime<LocalDate>) horario.getFechaFin()))){
+				horario_Igual = true;
+			}
+			else
+				horario_Igual = false; 
+		}
+   	 	if(horario.getFechaInicio().isAfter(horario.getFechaFin())) {
+   	 		errores.add("No puede existir una fecha de inicio posterior a la fecha de fin");
+   	 		response.put("horario", horario);
+   	 		response.put("errores",errores);
+   	 		return ResponseEntity.badRequest().body(response);
+   	 	}
+   	 	else if(horario.getFechaInicio().isEqual(horario.getFechaFin())) {
+   	 		errores.add("No puede existir un tramo horario cuya fecha de inicio y fecha de fin coincidan");
+   	 		response.put("horario", horario);
+   	 		response.put("errores",errores);
+   	 		return ResponseEntity.badRequest().body(response);
+   	 	}
+   	 	else if(horario_Igual) {
+   	 		errores.add("Este tramo horario ya existe");
+   	 		response.put("horario", horario);
+   	 		response.put("errores",errores);
+   	 		return ResponseEntity.badRequest().body(response);
+   	 	}
+   	 	else {
+   	 		horario.setActivo(false);
+   	 		Horario nuevoHorario = horarioService.guardarHorario(horario);
+   	 		return ResponseEntity.created(new URI("/horarios/" + nuevoHorario.getId())).body(nuevoHorario);
+   	 	}
     }
+    
+    
+    @SuppressWarnings({ "rawtypes", "unused" })
+   	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+       @PutMapping("/{id}/cambiarDisponibilidad")
+       public ResponseEntity updateDisponibilidad(@PathVariable Long id, @PathVariable Boolean disponibilidad) {
+       	Map<String,Object> response = new HashMap<>();
+       	List<String> errores = new ArrayList<String>();
+           Plaza currentPlaza = plazaService.findById(id);
+
+       	if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ||currentPlaza.getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+           	
+           	currentPlaza.setTramos(disponibilidad);
+
+           	currentPlaza = plazaService.guardarPlaza(currentPlaza);
+               return ResponseEntity.ok(currentPlaza);
+
+             
+       	}else{
+               
+     			errores.add("No puedes editar una plaza que no es de tu propiedad");            
+               response.put("errores", errores);
+     			return ResponseEntity.badRequest().body(response);
+           }
+       }
 }

@@ -27,6 +27,7 @@ import com.parkinn.model.Horario;
 import com.parkinn.model.Localizacion;
 import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
+import com.parkinn.repository.HorarioRepository;
 import com.parkinn.service.HorarioService;
 
 @RestController
@@ -35,6 +36,8 @@ public class HorariosController {
 
 	@Autowired
 	private HorarioService horarioService;
+	@Autowired
+	private HorarioRepository horarioRepository;
 	
 	@SuppressWarnings({ "rawtypes", "unused" })
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
@@ -55,8 +58,9 @@ public class HorariosController {
             
             }else{
                
-            	currentHorario.setFechaInicio(horario.getFechaInicio());
-            	currentHorario.setFechaFin(horario.getFechaFin());
+            	horarioRepository.findHorariosByPlazaId(currentHorario.getPlaza().getId()).forEach(hor->hor.setActivo(false));
+            	currentHorario.setActivo(true);
+            	
     
             	currentHorario = horarioService.guardarHorario(currentHorario);
                 return ResponseEntity.ok(currentHorario);
