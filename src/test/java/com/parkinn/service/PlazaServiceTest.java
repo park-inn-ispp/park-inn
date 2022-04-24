@@ -3,7 +3,6 @@ package com.parkinn.service;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -136,23 +135,6 @@ class PlazaServiceTest {
 		boolean existe = plazaService.comprobarPlazasIguales("TestFalse", client);
 
 		Assertions.assertFalse(existe,"El resultado esperado es que NO existe la plaza");
-
-	}
-
-	@Test
-	@DisplayName("Test filtrar plazas success")
-	void testFiltrarPlazas() {
-
-		Client client = new Client(1l);
-		Plaza plaza = new Plaza(1l,client);
-		Plaza plaza2 = new Plaza(2l,client);
-		Plaza plaza3 = new Plaza(3l,client);
-
-		doReturn(Arrays.asList(plaza,plaza2,plaza3)).when(plazaRepository).filter(34.5, LocalDateTime.of(2022, 07, 22, 10, 0, 0), LocalDateTime.of(2022, 07, 24, 11, 0, 0), "Consejero Enrique Linde 24");
-
-		List<Plaza> plazaReturn = plazaService.filtrarPlazas(34.5, LocalDateTime.of(2022, 07, 22, 10, 0, 0), LocalDateTime.of(2022, 07, 24, 11, 0, 0), "Consejero Enrique Linde 24");
-
-		Assertions.assertEquals(3, plazaReturn.size(),"El tamaño de la lista devuelta debe ser 3");
 
 	}
 

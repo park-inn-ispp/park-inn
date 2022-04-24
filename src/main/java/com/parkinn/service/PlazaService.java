@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,12 +21,6 @@ public class PlazaService {
    
     @Autowired
     RestTemplate restTemplate;
-
-    
-    public List<Plaza> filtrarPlazas(Double max, LocalDateTime inicio, LocalDateTime fin, String zona){
-        List<Plaza> plazas = repository.filter(max, inicio, fin, zona);
-        return plazas;
-    }
 
     public List<Plaza> findAll(){
         return repository.findAll();

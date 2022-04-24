@@ -76,7 +76,7 @@ public class ReservaController {
 			response.put("errores",errores);
 			return ResponseEntity.badRequest().body(response);
 		}else if(plaza.getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())  || SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
-			return reservaService.findPlazaById(id);
+			return reservaService.findByPlazaId(id);
 		}
 		errores.add("No puedes acceder a las reservas de una plaza que no es tuya sin ser administrador");
 		response.put("errores",errores);
