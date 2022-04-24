@@ -41,11 +41,7 @@ public class HorariosController {
 	private HorarioRepository horarioRepository;
 	
 	
-	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
-    @GetMapping("/all")
-    public Object getPlazas() {
-        return horarioRepository.findAll();
-    }
+
 	
 	@SuppressWarnings({ "rawtypes", "unused" })
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")

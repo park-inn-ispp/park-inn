@@ -157,6 +157,11 @@ public class PlazaController {
         }
     	
     }
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+    @GetMapping("/{id}/horarios")
+    public List<Horario> getHorarios(@PathVariable Long id ) throws URISyntaxException {
+        return horarioRepository.findHorariosByPlazaId(id);
+    }
     
   //@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
   	@DeleteMapping("/{id}")

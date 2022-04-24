@@ -13,12 +13,17 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.io.*; 
+import java.util.*;  
+
 
 import com.parkinn.model.Estado;
 import com.parkinn.model.Horario;
@@ -26,6 +31,7 @@ import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
 import com.parkinn.model.paypal.PayPalAccesToken;
 import com.parkinn.model.paypal.PayPalClasses;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -212,9 +218,10 @@ public class ReservaService {
         
    
     
-    public List<List<LocalDateTime>> horariosNoDisponibles(Long id){
-    List<Reserva> lr = repository.findByPlazaId(id);
+    public List<List<LocalDateTime>> horariosNoDisponibles(Long id,boolean tramosPersonalizados){
+    	List<Reserva> lr = repository.findByPlazaId(id); //Reservas de esa plaza
 		List<List<LocalDateTime>> horarios = new ArrayList<>();
+		// Horarios ocupados por otras reservas
 		if(!lr.isEmpty()) {
 			for(int i =0; i<lr.size(); i++) {
        			List<LocalDateTime> HorarioOcupado = new ArrayList<LocalDateTime>();
@@ -222,15 +229,86 @@ public class ReservaService {
        			HorarioOcupado.add(lr.get(i).getFechaFin());
        			horarios.add(HorarioOcupado);
 			}
-			return horarios;
+			
 		}
-		else{
-			return horarios;
+		// Fechas pasadas
+		List<LocalDateTime> horarioNoValidoAntiguo = new ArrayList<LocalDateTime>();
+		LocalDateTime fechaAntigua=LocalDateTime.of(2000, 1, 1, 12, 0, 0);
+		LocalDateTime hoy = LocalDateTime.now();
+		horarioNoValidoAntiguo.add(fechaAntigua);
+		horarioNoValidoAntiguo.add(hoy);
+		horarios.add(horarioNoValidoAntiguo);
+
+		if(tramosPersonalizados){
+			//Horarios no disponibles especificados por el propietario a partir de hoy (todos excepto horarios disponibles seleccionados)
+		
+		List<Horario> horariosDisponibles= horarioRepository.findHorariosByPlazaIdSortedByFechaInicio(id).stream().filter(horario -> horario.getFechaFin().isAfter(LocalDateTime.now())).collect(Collectors.toList());
+
+		for (int i=0;i<horariosDisponibles.size();i++) {
+
+			if(i==0){
+
+				Horario horarioDisponible1 = horariosDisponibles.get(i);
+				
+				hoy = LocalDateTime.now();
+
+				if(horarioDisponible1.getFechaInicio().isAfter(hoy)){ // Fecha de hoy hasta la fecha de inicio del horario
+					List<LocalDateTime> horarioNoValidoInicio = new ArrayList<LocalDateTime>();
+					horarioNoValidoInicio.add(hoy);
+					horarioNoValidoInicio.add(horarioDisponible1.getFechaInicio());
+					horarios.add(horarioNoValidoInicio);
+				}
+
+				if (i==horariosDisponibles.size()-1){ // Solo hay 1 elemento en la lista
+					List<LocalDateTime> horarioNoValido = new ArrayList<LocalDateTime>();
+					LocalDateTime fechaLejana=LocalDateTime.of(3000, 1, 1, 12, 0, 0);
+					horarioNoValido.add(horarioDisponible1.getFechaFin());
+					horarioNoValido.add(fechaLejana);
+					horarios.add(horarioNoValido);
+
+				}else{ // Hay más horarios en la lista
+					List<LocalDateTime> horarioNoValido = new ArrayList<LocalDateTime>();
+
+					Horario horarioSiguiente = horariosDisponibles.get(i+1);
+					horarioNoValido.add(horarioDisponible1.getFechaFin());
+					horarioNoValido.add(horarioSiguiente.getFechaInicio());
+					horarios.add(horarioNoValido);
+
+				}
+				
+
+
+			}else if(i==horariosDisponibles.size()-1){ // Último horario de la lista, y en la lista hay más de 1 elemento
+				List<LocalDateTime> horarioNoValido = new ArrayList<LocalDateTime>();
+
+				Horario horarioDisponible1 = horariosDisponibles.get(i);
+				LocalDateTime fechaLejana=LocalDateTime.of(3000, 1, 1, 12, 0, 0);
+				horarioNoValido.add(horarioDisponible1.getFechaFin());
+				horarioNoValido.add(fechaLejana);
+				horarios.add(horarioNoValido);
+
+			}else{ // Hay más horarios en la lista y no se trata del último elemento
+
+				Horario horarioDisponible1 = horariosDisponibles.get(i);
+				Horario horarioDisponibleSiguiente = horariosDisponibles.get(i+1);
+
+				List<LocalDateTime> horarioNoValido = new ArrayList<LocalDateTime>();
+				horarioNoValido.add(horarioDisponible1.getFechaFin());
+				horarioNoValido.add(horarioDisponibleSiguiente.getFechaInicio());
+				horarios.add(horarioNoValido);
+				
+				}
+			}
 		}
+
+		
+		return horarios;
+		
+		
     }
 
 	public Boolean reservaTieneColision(Reserva res){
-			List<List<LocalDateTime>> horarios = horariosNoDisponibles(res.getPlaza().getId());
+			List<List<LocalDateTime>> horarios = horariosNoDisponibles(res.getPlaza().getId(),res.getPlaza().getTramos());
 			for (List<LocalDateTime> h: horarios){
 				if(h.get(1).isAfter(res.getFechaInicio()) && h.get(0).isBefore(res.getFechaFin())){
 					return true;
@@ -248,7 +326,7 @@ public class ReservaService {
             errores.add("No se pueden realizar reservas en el pasado");
          
         }else if(reservaTieneColision(reserva)){
-            errores.add("Este horario está ocupado por otra reserva");
+            errores.add("Este horario no está disponible o está ocupado por otra reserva");
            
         }
 		return errores;
