@@ -98,6 +98,7 @@ public class ClientsController {
     }
 
 
+    
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}/delete")
     @SuppressWarnings("rawtypes")
