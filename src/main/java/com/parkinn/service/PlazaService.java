@@ -40,7 +40,7 @@ public class PlazaService {
     }
 
     // Si ya existe una plaza con la misma latitud y longitud, modificamos levemente las coordenadas para que 
-    // no se pisen en el mapa
+    // no se pisen en el mapa, y vayan formando una espiral
     public List<String> latitudLongitudDiferentes(String latitud, String longitud){
         List<String> nuevasCoordenadas= new ArrayList<String>();
         nuevasCoordenadas.add(latitud);

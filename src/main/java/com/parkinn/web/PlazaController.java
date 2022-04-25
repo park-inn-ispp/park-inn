@@ -98,7 +98,7 @@ public class PlazaController {
             plaza.setLongitud(nuevasCoordenadas.get(1));
           }
           catch(Exception e) {
-            errores.add("La dirección insertada no existe. Por favor, indique el tipo (calle, avenida...) y nombre correcto de su dirección");
+            errores.add("La dirección insertada no existe o no es reconocida por el sistema. Por favor, indique el tipo (calle, avenida...) y nombre correcto de su dirección");
             response.put("plaza", plaza);
             response.put("errores",errores);
             return ResponseEntity.badRequest().body(response);
@@ -120,11 +120,15 @@ public class PlazaController {
 
     	if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ||currentPlaza.getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
             try{
-                Localizacion localizacion = plazaService.getLocalizacion(plaza.getDireccion());
-
-                List<String> nuevasCoordenadas= plazaService.latitudLongitudDiferentes(localizacion.getLat(),localizacion.getLon());
-                plaza.setLatitud(nuevasCoordenadas.get(0));
-                plaza.setLongitud(nuevasCoordenadas.get(1));
+                // Si se cambia la dirección se recalculan las coordenadas, 
+                // y si ya existen en otra plaza, se modifican ligeramente para no superponerse en el mapa
+                if(!currentPlaza.getDireccion().equals(plaza.getDireccion())){
+                    Localizacion localizacion = plazaService.getLocalizacion(plaza.getDireccion());
+                    List<String> nuevasCoordenadas= plazaService.latitudLongitudDiferentes(localizacion.getLat(),localizacion.getLon());
+                    plaza.setLatitud(nuevasCoordenadas.get(0));
+                    plaza.setLongitud(nuevasCoordenadas.get(1));
+                }
+               
              
             } catch(Exception e) {
                 errores.add("La dirección insertada no existe o no es reconocida por el sistema. Por favor, indique el tipo (calle, avenida...) y nombre correcto de su dirección");

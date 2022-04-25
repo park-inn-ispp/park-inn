@@ -189,26 +189,44 @@ public class ClientsController {
     @PutMapping("/{id}/banear")
     public ResponseEntity banClient(@PathVariable Long id) {
     	Client currentClient = clientRepository.findById(id).orElseThrow(RuntimeException::new);
+    	Set<Role> currentRole = currentClient.getRoles();
+        Role role = roleRepository.findByName("ROLE_USER").get();
+
+        if(!currentRole.contains(role)){
+            Map<String,Object> response = new HashMap<>();
+		    List<String> errores = new ArrayList<>();
+            errores.add("No puedes banear a un usuario que ya estaba previamente baneado");
+			response.put("errores",errores);
+			return ResponseEntity.badRequest().body(response);
+
+        }else{
+
+            currentClient.setRoles(null);
+            currentClient = clientRepository.save(currentClient);
+            return ResponseEntity.ok(currentClient);
+        }
     	
-    	currentClient.setRoles(null);
-    	
-    	currentClient = clientRepository.save(currentClient);
-        return ResponseEntity.ok(currentClient);
     }
     
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/{id}/desbanear")
     public ResponseEntity unbanClient(@PathVariable Long id) {
     	Client currentClient = clientRepository.findById(id).orElseThrow(RuntimeException::new);
-    	    	
+    	
     	Role role = roleRepository.findByName("ROLE_USER").get();
     	Set<Role> currentRole = currentClient.getRoles();
-    	currentRole.add(role);
-    	currentClient.setRoles(currentRole);
-    		
-    	
-    	currentClient = clientRepository.save(currentClient);
-        return ResponseEntity.ok(currentClient);
+        if(currentRole.contains(role)){
+            Map<String,Object> response = new HashMap<>();
+		    List<String> errores = new ArrayList<>();
+            errores.add("No puedes desbanear a un usuario que no estaba previamente baneado");
+			response.put("errores",errores);
+			return ResponseEntity.badRequest().body(response);
+        }else{
+            currentRole.add(role);
+    	    currentClient.setRoles(currentRole);
+            currentClient = clientRepository.save(currentClient);
+            return ResponseEntity.ok(currentClient);
+        }
     }
     
 
