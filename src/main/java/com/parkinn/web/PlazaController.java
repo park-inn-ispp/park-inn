@@ -3,7 +3,10 @@ package com.parkinn.web;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.chrono.ChronoLocalDate;
+import java.time.chrono.ChronoLocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,6 +15,7 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import com.parkinn.model.Horario;
 import com.parkinn.model.EstadoIncidencia;
 import com.parkinn.model.Incidencia;
 import com.parkinn.model.Localizacion;
@@ -20,6 +24,9 @@ import com.parkinn.model.Reserva;
 import com.parkinn.model.paypal.Amount;
 import com.parkinn.model.paypal.PayPalClasses;
 import com.parkinn.model.paypal.PurchaseUnit;
+import com.parkinn.repository.HorarioRepository;
+import com.parkinn.repository.ReservaRepository;
+import com.parkinn.service.HorarioService;
 import com.parkinn.service.MailService;
 import com.parkinn.service.PlazaService;
 import com.parkinn.service.ReservaService;
@@ -54,6 +61,12 @@ public class PlazaController {
     @Autowired
     private ReservaService reservaService;
     @Autowired
+	  private HorarioService horarioService;
+    @Autowired 
+    private ReservaRepository reservaRepository;
+    @Autowired
+    private HorarioRepository horarioRepository;
+    @Autowired
     private MailService mailService;
 
     
@@ -70,6 +83,7 @@ public class PlazaController {
         return plazaService.findAll();
     }
     
+
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @SuppressWarnings("rawtypes")
 	@PostMapping()
@@ -155,61 +169,67 @@ public class PlazaController {
         }
     	
     }
-    
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
-	@DeleteMapping("/{id}")
-    public ResponseEntity deletePlaza(@PathVariable Long id) {
-    	Plaza currentPlaza = plazaService.findById(id);
-        List<String> errores = new ArrayList<String>();
-    	if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ||currentPlaza.getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
-            //List<String> errores1 = new ArrayList<String>();
-            //Map<String,Object> response = new HashMap<>();
-    		if(currentPlaza.getReservas().isEmpty()) { 
-    			plazaService.deleteById(id);
-    			return ResponseEntity.ok().build();
-    		}else {
-				/*List<Reserva> reservas = (List<Reserva>) currentPlaza.getReservas();
-    			for(int i = 0; i<reservas.size(); i++) {
-        			Boolean incidenciaPendiente = false;
-					List<Incidencia> incidenciasporReserva = (List<Incidencia>) reservas.get(i).getIncidencias();
-        			if(!incidenciasporReserva.isEmpty()) {
-        				for(int a = 0; a<incidenciasporReserva.size(); a++) {
-        					if(!incidenciaPendiente) {
-        						incidenciaPendiente = incidenciasporReserva.get(a).getEstado().equals(EstadoIncidencia.pendiente);	
-        					}
-        				}
-        				if(incidenciaPendiente==true) {
-        					errores1.add("No puede eliminar su plaza debido a que tiene pendiente una incidencia");            
-        					response.put("error", errores1);
-        				
-        				}else if(Duration.between(reservas.get(i).getFechaFin(), LocalDateTime.now()).abs().toHours()<24) {
-        					errores1.add("No puede eliminar su plaza debido a que deben pasar 24 horas tras haber concluido una reserva");            
-        					response.put("error", errores1);
-        					
-        				}else {
-        					currentPlaza.setAdministrador(null);
-        				}
-        			}else {
-        		    	currentPlaza.setAdministrador(null);
-        			}
-    			}
-    			if(errores1.isEmpty()){
-    				return ResponseEntity.ok().build();
-    			}
-    			else {
-					return ResponseEntity.badRequest().body(response);
-    			}*/
-    			currentPlaza.getReservas().forEach(res->res.setPlaza(null));
-    			plazaService.deleteById(id);
-    			return ResponseEntity.ok().build();
-    		}
-    	}else{
-            Map<String,Object> response = new HashMap<>();
-  			errores.add("Esta plaza no es de tu propiedad");            
-            response.put("error", errores);
-  			return ResponseEntity.badRequest().body(response);
-        }
+    @GetMapping("/{id}/horarios")
+    public List<Horario> getHorarios(@PathVariable Long id ) throws URISyntaxException {
+        return horarioRepository.findHorariosByPlazaId(id);
     }
+    
+  //@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+  	@DeleteMapping("/{id}")
+      public ResponseEntity deletePlaza(@PathVariable Long id) {
+      	Plaza currentPlaza = plazaService.findById(id);
+          List<String> errores = new ArrayList<String>();
+      	if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ||currentPlaza.getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+              //List<String> errores1 = new ArrayList<String>();
+              //Map<String,Object> response = new HashMap<>();
+      		if(reservaRepository.findByPlazaId(id).isEmpty()) { 
+      			plazaService.deleteById(id);
+      			return ResponseEntity.ok().build();
+      		}else {
+  				/*List<Reserva> reservas = (List<Reserva>) currentPlaza.getReservas();
+      			for(int i = 0; i<reservas.size(); i++) {
+          			Boolean incidenciaPendiente = false;
+  					List<Incidencia> incidenciasporReserva = (List<Incidencia>) reservas.get(i).getIncidencias();
+          			if(!incidenciasporReserva.isEmpty()) {
+          				for(int a = 0; a<incidenciasporReserva.size(); a++) {
+          					if(!incidenciaPendiente) {
+          						incidenciaPendiente = incidenciasporReserva.get(a).getEstado().equals(EstadoIncidencia.pendiente);	
+          					}
+          				}
+          				if(incidenciaPendiente==true) {
+          					errores1.add("No puede eliminar su plaza debido a que tiene pendiente una incidencia");            
+          					response.put("error", errores1);
+          				
+          				}else if(Duration.between(reservas.get(i).getFechaFin(), LocalDateTime.now()).abs().toHours()<24) {
+          					errores1.add("No puede eliminar su plaza debido a que deben pasar 24 horas tras haber concluido una reserva");            
+          					response.put("error", errores1);
+          					
+          				}else {
+          					currentPlaza.setAdministrador(null);
+          				}
+          			}else {
+          		    	currentPlaza.setAdministrador(null);
+          			}
+      			}
+      			if(errores1.isEmpty()){
+      				return ResponseEntity.ok().build();
+      			}
+      			else {
+  					return ResponseEntity.badRequest().body(response);
+      			}*/
+      			reservaRepository.findByPlazaId(id).forEach(res->res.setPlaza(null));
+      			plazaService.deleteById(id);
+      			return ResponseEntity.ok().build();
+      		}
+      	}else{
+              Map<String,Object> response = new HashMap<>();
+    			errores.add("Esta plaza no es de tu propiedad");            
+              response.put("error", errores);
+    			return ResponseEntity.badRequest().body(response);
+          }
+      }
+  
 
     @SuppressWarnings("rawtypes")
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
@@ -353,4 +373,68 @@ public class PlazaController {
 			return ResponseEntity.badRequest().body(response);
         }
     }
-   	}
+    
+    @SuppressWarnings("rawtypes")
+	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+    @PostMapping("/{id}/crearHorarios")
+    public ResponseEntity createHorario(@Valid @RequestBody Horario horario, @PathVariable Long id ) throws URISyntaxException {
+        List<String> errores = new ArrayList<>();
+        Map<String,Object> response = new HashMap<>();
+   	 	List<Horario> horariosPlaza = horarioRepository.findHorariosByPlazaId(horario.getPlaza().getId());
+		Boolean horario_Igual = false;
+   	 	for (Horario h: horariosPlaza){
+			if((h.getFechaFin()).isAfter((ChronoLocalDateTime<LocalDate>) horario.getFechaInicio()) && (h.getFechaInicio().isBefore((ChronoLocalDateTime<LocalDate>) horario.getFechaFin()))){
+				horario_Igual = true;
+                break;
+			}
+		}
+   	 	if(horario.getFechaInicio().isAfter(horario.getFechaFin())) {
+   	 		errores.add("No puede existir una fecha de inicio posterior a la fecha de fin");
+   	 		response.put("horario", horario);
+   	 		response.put("errores",errores);
+   	 		return ResponseEntity.badRequest().body(response);
+   	 	}
+   	 	else if(horario.getFechaInicio().isEqual(horario.getFechaFin())) {
+   	 		errores.add("No puede existir un tramo horario cuya fecha de inicio y fecha de fin coincidan");
+   	 		response.put("horario", horario);
+   	 		response.put("errores",errores);
+   	 		return ResponseEntity.badRequest().body(response);
+   	 	}
+   	 	else if(horario_Igual) {
+   	 		errores.add("Este tramo horario entra en conflicto con otro. Seleccione otras fechas");
+   	 		response.put("horario", horario);
+   	 		response.put("errores",errores);
+   	 		return ResponseEntity.badRequest().body(response);
+   	 	}
+   	 	else {
+   	 		horario.setActivo(false);
+   	 		Horario nuevoHorario = horarioService.guardarHorario(horario);
+   	 		return ResponseEntity.created(new URI("/horarios/" + nuevoHorario.getId())).body(nuevoHorario);
+   	 	}
+    }
+    
+    
+    @SuppressWarnings({ "rawtypes", "unused" })
+   	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+       @PutMapping("/{id}/cambiarDisponibilidad/{disponibilidad}")
+       public ResponseEntity updateDisponibilidad(@PathVariable Long id, @PathVariable Boolean disponibilidad) {
+       	Map<String,Object> response = new HashMap<>();
+       	List<String> errores = new ArrayList<String>();
+           Plaza currentPlaza = plazaService.findById(id);
+
+       	if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ||currentPlaza.getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+           	
+           	currentPlaza.setTramos(disponibilidad);
+
+           	currentPlaza = plazaService.guardarPlaza(currentPlaza);
+               return ResponseEntity.ok(currentPlaza);
+
+             
+       	}else{
+               
+     			errores.add("No puedes editar una plaza que no es de tu propiedad");            
+               response.put("errores", errores);
+     			return ResponseEntity.badRequest().body(response);
+           }
+       }
+}

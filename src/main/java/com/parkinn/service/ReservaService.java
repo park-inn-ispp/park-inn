@@ -1,20 +1,38 @@
 package com.parkinn.service;
 
+import com.parkinn.repository.HorarioRepository;
+import com.parkinn.repository.PlazaRepository;
 import com.parkinn.repository.ComisionRepository;
 import com.parkinn.repository.ReservaRepository;
 
 import java.net.URISyntaxException;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.io.*; 
+import java.util.*;  
+
 
 import com.parkinn.model.Estado;
+import com.parkinn.model.Horario;
+import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
 import com.parkinn.model.paypal.PayPalAccesToken;
 import com.parkinn.model.paypal.PayPalClasses;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -22,11 +40,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
 public class ReservaService {
+
+	
 	
 	final static String URL_CORREO = "https://park-inn-ispp-fe.herokuapp.com";
 
@@ -35,7 +56,17 @@ public class ReservaService {
 	
     @Autowired
     private ReservaRepository repository;
-
+    
+    @Autowired
+    private HorarioRepository horarioRepository;
+    
+    @Autowired
+    private PlazaService plazaService;
+    
+    @Autowired
+    private PlazaRepository plazaRepository;
+  
+	@Autowired
 	private ComisionRepository comisionRepository;
 
     
@@ -105,7 +136,7 @@ public class ReservaService {
 		Map<String,Object> item = new HashMap<>();
 		Map<String,Object> amount = new HashMap<>();
 		amount.put("value", Math.round((r.getPrecioTotal() - r.getPlaza().getFianza())*100.0)/100.0);
-		System.out.println(Math.round((r.getPrecioTotal() - r.getPlaza().getFianza())*100.0)/100.0);
+		System.out.println(Math.round((r.getPrecioTotal() - r.getFianza())*100.0)/100.0);
 		amount.put("currency","EUR");
 
 		item.put("amount", amount);
@@ -203,39 +234,14 @@ public class ReservaService {
         return reserva;
     }
     
-    /*
-    public List<Horario> horariosDisponibles(Long id){
-       	Plaza plaza = plazaService.findById(id);
-       	Horario horario = plaza.getHorario();
-       	List<Reserva> lr = repository.findByPlazaId(id);
-   		List<Horario> horarios = new ArrayList<Horario>();
-       	if(!lr.isEmpty()) {
-       		for(int i =0; i<lr.size(); i++) {
-           		if(horario.getFechaInicio()!=lr.get(i).getFechaInicio()) {
-           			Horario nuevoHorario = new Horario(horario.getFechaInicio(),lr.get(i).getFechaInicio());
-           			horarios.add(nuevoHorario);
-           		}
-           		else if(horario.getFechaFin()!=lr.get(i).getFechaFin() && lr.get(i).getFechaFin()!=lr.get(i+1).getFechaInicio()) {
-           			Horario nuevoHorario = new Horario(lr.get(i).getFechaFin(),lr.get(i+1).getFechaInicio());
-           			horarios.add(nuevoHorario);
-           		}
-           		else if(horario.getFechaFin()!=lr.get(i).getFechaFin()){
-           			Horario nuevoHorario = new Horario(lr.get(i).getFechaFin(),horario.getFechaFin());
-           			horarios.add(nuevoHorario);
-           		}
-           	}
-       		return horarios;
-       	}
-       	else {
-       		horarios.add(horario);
-       		return horarios;
-       	}
-       	    
-       }*/
     
-    public List<List<LocalDateTime>> horariosNoDisponibles(Long id){
-    List<Reserva> lr = repository.findByPlazaId(id);
+        
+   
+    
+    public List<List<LocalDateTime>> horariosNoDisponibles(Long id,boolean tramosPersonalizados){
+    	List<Reserva> lr = repository.findByPlazaId(id); //Reservas de esa plaza
 		List<List<LocalDateTime>> horarios = new ArrayList<>();
+		// Horarios ocupados por otras reservas
 		if(!lr.isEmpty()) {
 			for(int i =0; i<lr.size(); i++) {
        			List<LocalDateTime> HorarioOcupado = new ArrayList<LocalDateTime>();
@@ -243,21 +249,101 @@ public class ReservaService {
        			HorarioOcupado.add(lr.get(i).getFechaFin());
        			horarios.add(HorarioOcupado);
 			}
-			return horarios;
+			
 		}
-		else{
-			return horarios;
+		// Fechas pasadas
+		List<LocalDateTime> horarioNoValidoAntiguo = new ArrayList<LocalDateTime>();
+		LocalDateTime fechaAntigua=LocalDateTime.of(2000, 1, 1, 12, 0, 0);
+		LocalDateTime hoy = LocalDateTime.now();
+		horarioNoValidoAntiguo.add(fechaAntigua);
+		horarioNoValidoAntiguo.add(hoy);
+		horarios.add(horarioNoValidoAntiguo);
+
+		if(tramosPersonalizados){
+			//Horarios no disponibles especificados por el propietario a partir de hoy (todos excepto horarios disponibles seleccionados)
+		
+		List<Horario> horariosDisponibles= horarioRepository.findHorariosByPlazaIdSortedByFechaInicio(id).stream().filter(horario -> horario.getFechaFin().isAfter(LocalDateTime.now())).collect(Collectors.toList());
+		if (horariosDisponibles.size()==0){
+            hoy = LocalDateTime.now();
+            List<LocalDateTime> horarioNoValido = new ArrayList<LocalDateTime>();
+            LocalDateTime fechaLejana=LocalDateTime.of(3000, 1, 1, 12, 0, 0);
+            horarioNoValido.add(hoy);
+            horarioNoValido.add(fechaLejana);
+            horarios.add(horarioNoValido);
+        }
+		for (int i=0;i<horariosDisponibles.size();i++) {
+
+			if(i==0){
+
+				Horario horarioDisponible1 = horariosDisponibles.get(i);
+				
+				hoy = LocalDateTime.now();
+
+				if(horarioDisponible1.getFechaInicio().isAfter(hoy)){ // Fecha de hoy hasta la fecha de inicio del horario
+					List<LocalDateTime> horarioNoValidoInicio = new ArrayList<LocalDateTime>();
+					horarioNoValidoInicio.add(hoy);
+					horarioNoValidoInicio.add(horarioDisponible1.getFechaInicio());
+					horarios.add(horarioNoValidoInicio);
+				}
+
+				if (i==horariosDisponibles.size()-1){ // Solo hay 1 elemento en la lista
+					List<LocalDateTime> horarioNoValido = new ArrayList<LocalDateTime>();
+					LocalDateTime fechaLejana=LocalDateTime.of(3000, 1, 1, 12, 0, 0);
+					horarioNoValido.add(horarioDisponible1.getFechaFin());
+					horarioNoValido.add(fechaLejana);
+					horarios.add(horarioNoValido);
+
+				}else{ // Hay más horarios en la lista
+					List<LocalDateTime> horarioNoValido = new ArrayList<LocalDateTime>();
+
+					Horario horarioSiguiente = horariosDisponibles.get(i+1);
+					horarioNoValido.add(horarioDisponible1.getFechaFin());
+					horarioNoValido.add(horarioSiguiente.getFechaInicio());
+					horarios.add(horarioNoValido);
+
+				}
+				
+
+
+			}else if(i==horariosDisponibles.size()-1){ // Último horario de la lista, y en la lista hay más de 1 elemento
+				List<LocalDateTime> horarioNoValido = new ArrayList<LocalDateTime>();
+
+				Horario horarioDisponible1 = horariosDisponibles.get(i);
+				LocalDateTime fechaLejana=LocalDateTime.of(3000, 1, 1, 12, 0, 0);
+				horarioNoValido.add(horarioDisponible1.getFechaFin());
+				horarioNoValido.add(fechaLejana);
+				horarios.add(horarioNoValido);
+
+			}else{ // Hay más horarios en la lista y no se trata del último elemento
+
+				Horario horarioDisponible1 = horariosDisponibles.get(i);
+				Horario horarioDisponibleSiguiente = horariosDisponibles.get(i+1);
+
+				List<LocalDateTime> horarioNoValido = new ArrayList<LocalDateTime>();
+				horarioNoValido.add(horarioDisponible1.getFechaFin());
+				horarioNoValido.add(horarioDisponibleSiguiente.getFechaInicio());
+				horarios.add(horarioNoValido);
+				
+				}
+			}
 		}
+
+		
+		return horarios;
+		
+		
     }
 
 	public Boolean reservaTieneColision(Reserva res){
-		List<List<LocalDateTime>> horarios = horariosNoDisponibles(res.getPlaza().getId());
-		for (List<LocalDateTime> h: horarios){
-			if(h.get(1).isAfter(res.getFechaInicio()) && h.get(0).isBefore(res.getFechaFin())){
-				return true;
+			long idPlaza = res.getPlaza().getId();
+			List<Horario> horarios=horarioRepository.findHorariosByPlazaId(idPlaza);
+			for (Horario h: horarios){
+				if(h.getFechaFin().isAfter(res.getFechaInicio()) && h.getFechaInicio().isBefore(res.getFechaFin())){
+					return true;
+				}
 			}
-		}
-		return false;
+			return false;
+		
 	}
 	public List<String> erroresNuevaReservaAntesDelPago(Reserva reserva){
 		List<String> errores = new ArrayList<String>();
@@ -268,13 +354,12 @@ public class ReservaService {
             errores.add("No se pueden realizar reservas en el pasado");
          
         }else if(reservaTieneColision(reserva)){
-            errores.add("Este horario está ocupado por otra reserva");
+            errores.add("Este horario no está disponible o está ocupado por otra reserva");
            
         }
 		return errores;
 	}
-
-  
+	
 	public Object confirmarServicio(Reserva r, Object user){
 		if(user.equals(r.getUser().getEmail()) && !r.getEstado().equals(Estado.confirmadaPropietario)){
 			try {
@@ -356,9 +441,8 @@ public class ReservaService {
 			Map<String,Object> item_p = new HashMap<>();
 			Map<String,Object> amount_p = new HashMap<>();
 
-			amount_p.put("value", Math.round((r.getPrecioTotal() - r.getPlaza().getFianza() - r.getComision()*r.getPrecioTotal())*100.0)/100.0);
+			amount_p.put("value", Math.round((r.getPrecioTotal() - r.getFianza() - r.getComision()*r.getPrecioTotal())*100.0)/100.0);
 
-			//amount_p.put("value", Math.round((r.getPrecioTotal() - r.getPlaza().getFianza() - 0.1*r.getPrecioTotal())*100.0)/100.0);//Poner la comisión como atributo
 		
 			amount_p.put("currency","EUR");
 

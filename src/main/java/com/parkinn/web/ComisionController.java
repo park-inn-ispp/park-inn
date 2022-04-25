@@ -25,7 +25,7 @@ import java.util.Optional;
 public class ComisionController {
 
 
-
+    @Autowired
     private final ComisionRepository comisionRepository;
 
     public ComisionController(ComisionRepository comisionRepository) {
