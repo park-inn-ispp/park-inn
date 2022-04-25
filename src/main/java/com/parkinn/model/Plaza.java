@@ -48,9 +48,6 @@ public class Plaza {
 		this.horarios = horarios;
 	}
 */
-	@ManyToOne
-    @JoinColumn(name="user_id")
-    private Client administrador;
 
     public Client getAdministrador() {
         return this.administrador;
