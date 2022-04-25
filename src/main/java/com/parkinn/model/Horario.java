@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 
 import javax.persistence.*;
 
+import org.hibernate.type.TrueFalseType;
+
 @Entity
 @Table(name = "horarios")
 public class Horario {
@@ -33,7 +35,7 @@ public class Horario {
 	public void setPlaza(Plaza plaza) {
 		this.plaza = plaza;
 	}
-	@ManyToOne()
+	@ManyToOne(optional = true)
     @JoinColumn(name = "plaza_id")
     private Plaza plaza;
     /*

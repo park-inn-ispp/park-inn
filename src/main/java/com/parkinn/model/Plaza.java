@@ -28,7 +28,7 @@ public class Plaza {
     //private List<List<String>> horarios;
     private Boolean tramos;
 
-    @ManyToOne
+    @ManyToOne(optional = true)
     @JoinColumn(name="user_id")
     private Client administrador;
 
