@@ -92,8 +92,10 @@ public class PlazaController {
         Map<String,Object> response = new HashMap<>();
         try {
             Localizacion localizacion = plazaService.getLocalizacion(plaza.getDireccion());
-            plaza.setLatitud(localizacion.getLat());
-            plaza.setLongitud(localizacion.getLon());
+            // Se cambia ligeramente si ya existen esas coordenadas en otra plaza
+            List<String> nuevasCoordenadas= plazaService.latitudLongitudDiferentes(localizacion.getLat(),localizacion.getLon());
+            plaza.setLatitud(nuevasCoordenadas.get(0));
+            plaza.setLongitud(nuevasCoordenadas.get(1));
           }
           catch(Exception e) {
             errores.add("La dirección insertada no existe. Por favor, indique el tipo (calle, avenida...) y nombre correcto de su dirección");
@@ -119,8 +121,11 @@ public class PlazaController {
     	if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ||currentPlaza.getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
             try{
                 Localizacion localizacion = plazaService.getLocalizacion(plaza.getDireccion());
-                currentPlaza.setLatitud(localizacion.getLat());
-                currentPlaza.setLongitud(localizacion.getLon());
+
+                List<String> nuevasCoordenadas= plazaService.latitudLongitudDiferentes(localizacion.getLat(),localizacion.getLon());
+                plaza.setLatitud(nuevasCoordenadas.get(0));
+                plaza.setLongitud(nuevasCoordenadas.get(1));
+             
             } catch(Exception e) {
                 errores.add("La dirección insertada no existe o no es reconocida por el sistema. Por favor, indique el tipo (calle, avenida...) y nombre correcto de su dirección");
                 response.put("plaza", plaza);
