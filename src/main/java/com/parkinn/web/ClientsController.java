@@ -3,7 +3,6 @@ package com.parkinn.web;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import java.util.Collections;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,7 +13,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import java.util.Map;
-import java.util.Optional;
 
 
 import com.parkinn.model.Client;
@@ -35,7 +33,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -74,20 +71,65 @@ public class ClientsController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @GetMapping
-    public List<Client> getClients() {
-        return clientRepository.findAll();
-    }
+    public ResponseEntity getClients() {
+    Map<String,Object> response = new HashMap<>();
+    List<String> errores = new ArrayList<String>();
+    List<Client> clients = clientRepository.findAll();
+    if(clients.isEmpty()){
+        errores.add("No existen usuarios en la base de datos");
+        response.put("errores", errores);
+	    return ResponseEntity.badRequest().body(response);
 
-  //  @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
-    @GetMapping("/{id}")
-    public Client getClient(@PathVariable Long id) {
-        return clientRepository.findById(id).orElseThrow(RuntimeException::new);
+    }else if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))){
+        return ResponseEntity.ok(clients);
+    }else{
+        errores.add("No tienes acceso");
+        response.put("errores", errores);
+        return ResponseEntity.badRequest().body(response);
     }
+    }
+    
+    
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+    @GetMapping("/{id}")
+    public ResponseEntity getClient(@PathVariable Long id) {
+
+    Map<String,Object> response = new HashMap<>();
+    List<String> errores = new ArrayList<String>();
+    Optional<Client> cliente = clientRepository.findById(id);
+    if(!cliente.isPresent()){
+        errores.add("Este usuario no existe");
+        response.put("errores", errores);
+	    return ResponseEntity.badRequest().body(response);
+
+    }else if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) || cliente.get().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+        Client currentClient = clientRepository.findById(id).orElseThrow(RuntimeException::new);
+        return ResponseEntity.ok(currentClient);
+    }else{
+        errores.add("Solo puedes acceder a tus datos");
+        response.put("errores", errores);
+        return ResponseEntity.badRequest().body(response);
+    }
+}
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @GetMapping("/usuariopormail/{email}")
-    public Client getByEmail(@PathVariable String email) {
-        return clientRepository.findByEmail(email).orElseThrow(RuntimeException::new);
+    public ResponseEntity getByEmail(@PathVariable String email) {
+    Map<String,Object> response = new HashMap<>();
+    List<String> errores = new ArrayList<String>();
+    Optional<Client> cliente = clientRepository.findByEmail(email);
+    if(!cliente.isPresent()){
+        errores.add("Este usuario no existe");
+        response.put("errores", errores);
+	    return ResponseEntity.badRequest().body(response);
+
+    }else if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) || cliente.get().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+        return ResponseEntity.ok(cliente);
+    }else{
+        errores.add("No tienes acceso");
+        response.put("errores", errores);
+        return ResponseEntity.badRequest().body(response);
+    }
     }
 
 
@@ -131,16 +173,6 @@ public class ClientsController {
     }
 
 
-   /* 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @DeleteMapping("/{id}/delete")
-    @SuppressWarnings("rawtypes")
-    public ResponseEntity deleteClient(@PathVariable Long id) {
-        clientRepository.deleteById(id);
-        return ResponseEntity.ok("Usuario eliminado satisfactoriamente");
-    }
-*/
-
 @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @GetMapping("/{id}/perfil")
     public Object consultarPerfil(@PathVariable Long id) {
@@ -159,29 +191,6 @@ public class ClientsController {
 			return ResponseEntity.badRequest().body(response);
         }
         }
-
-
-
-         
-
-
-    //     Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-    //     Client cliente = null;
-
-    //     List<Client> todos = clientRepository.findAll();
-        
-    //     for(int i = 0; i < todos.size(); i++){
-
-    //         if(todos.get(i).getEmail().equals(user)){
-
-    //             cliente = todos.get(i);
-    //         }
-    //     }
-
-    //     return ResponseEntity.ok(cliente);
-         
-    // }
 
 
     
