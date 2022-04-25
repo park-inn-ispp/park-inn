@@ -52,6 +52,7 @@ import org.springframework.web.bind.annotation.RestController;
 	    	return incidenciaService.findAll();
 	    }
 	  
+		@SuppressWarnings("rawtypes")
 		@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
 		@PostMapping
 		public ResponseEntity guardarIncidencia(@RequestBody Incidencia incidencia) throws URISyntaxException {
@@ -87,6 +88,7 @@ import org.springframework.web.bind.annotation.RestController;
 			
 		}
 
+		@SuppressWarnings("rawtypes")
 		@PreAuthorize("hasRole('ROLE_ADMIN')")
 		@PutMapping("/{id}")
 		public ResponseEntity cerrarIncidencia(@PathVariable Long id) {

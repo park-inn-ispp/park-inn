@@ -72,7 +72,8 @@ public class PlazaService {
         String numero = res[1];
         String ciudad = res[2];
         String provincia = res[3];
-        String cogigoPostal = res[4];
+        @SuppressWarnings("unused")
+		String cogigoPostal = res[4];
         
         String direccion = calle + "," + numero + "," + ciudad + "," + provincia;
         
