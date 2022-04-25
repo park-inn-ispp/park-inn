@@ -11,10 +11,12 @@ import java.util.Optional;
 import com.parkinn.model.Client;
 import com.parkinn.repository.ClientRepository;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +31,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/clients")
 public class ClientsController {
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     private final ClientRepository clientRepository;
 
     public ClientsController(ClientRepository clientRepository) {
@@ -81,13 +85,14 @@ public class ClientsController {
             currentClient.setEmail(client.getEmail());
             currentClient.setPhone(client.getPhone());
             currentClient.setSurname(client.getSurname());
+            currentClient.setPassword(passwordEncoder.encode(client.getPassword()));
             currentClient = clientRepository.save(currentClient);
             return ResponseEntity.ok(currentClient);
         }else{
             errores.add("Solo puedes editar los datos de tu perfil");
             response.put("errores", errores);
 			return ResponseEntity.badRequest().body(response);
-            
+
         }
         
     }
