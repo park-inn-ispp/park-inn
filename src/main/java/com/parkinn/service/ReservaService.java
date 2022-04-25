@@ -442,7 +442,7 @@ public class ReservaService {
 			Map<String,Object> item_p = new HashMap<>();
 			Map<String,Object> amount_p = new HashMap<>();
 
-			amount_p.put("value", Math.round((r.getPrecioTotal() - r.getFianza() - r.getComision()*r.getPrecioTotal())*100.0)/100.0);
+			amount_p.put("value", Math.round((r.getPrecioTotal() - r.getFianza() - r.getComision()*(r.getPrecioTotal()- r.getFianza()))*100.0)/100.0);
 
 		
 			amount_p.put("currency","EUR");
