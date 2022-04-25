@@ -5,19 +5,24 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 import com.parkinn.model.Client;
 import com.parkinn.model.Estado;
+import com.parkinn.model.Horario;
 import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
 import com.parkinn.repository.ClientRepository;
+import com.parkinn.repository.HorarioRepository;
+import com.parkinn.service.MailService;
 import com.parkinn.service.PlazaService;
 import com.parkinn.service.ReservaService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,6 +34,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/reservas")
 public class ReservaController {
+	
+	final static String URL_CORREO = "https://park-inn-ispp-fe.herokuapp.com";
 
 	@Autowired
 	private ReservaService reservaService;
@@ -38,7 +45,12 @@ public class ReservaController {
 	
 	@Autowired
 	private ClientRepository clientRepository;
+	
+    @Autowired
+    private MailService mailService;
 
+	@Autowired
+	private HorarioRepository horarioRepository;
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
 	@GetMapping("/usuario/{id}")
@@ -85,14 +97,15 @@ public class ReservaController {
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
 	@GetMapping("/{id}/fechasNoDisponibles")
 	public List<List<LocalDateTime>> horariosNoDisponibles(@PathVariable Long id) throws URISyntaxException {
-		return reservaService.horariosNoDisponibles(id);
-	}
 
-	/*
-	@GetMapping("/{id}/disponibilidad")
-	public List<Horario> horariosPlaza(@PathVariable Long id) throws URISyntaxException {
-		return reservaService.horariosDisponibles(id);
-	}*/
+		Plaza plazaAReservar= plazaService.findById(id);
+		return reservaService.horariosNoDisponibles(id,plazaAReservar.getTramos());
+		
+		
+	}
+		
+	
+
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
 	@GetMapping("/{id}")
@@ -125,6 +138,13 @@ public class ReservaController {
 			response.put("errores",errores);
 			return ResponseEntity.badRequest().body(response);
 		}else if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) || reserva.getPlaza().getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+			try {
+				String subject = "Reserva aceptada";
+				String text = "¡Enhorabuena! Su reserva ha sido aceptada.\nHaga clic en el siguiente enlace para ver los detalles: "+URL_CORREO+"/reservas/"+reserva.getId()+"\n\nGracias, el equipo de ParkInn.";
+				mailService.sendEmail(reserva.getUser().getEmail(), subject, text);
+				}catch(MailException m) {
+					return reservaService.aceptarReserva(id);
+				}
 			return reservaService.aceptarReserva(id);
 		}else{
 			errores.add("Esta reserva no es sobre una plaza de tu propiedad");
@@ -144,6 +164,13 @@ public class ReservaController {
 			response.put("errores",errores);
 			return ResponseEntity.badRequest().body(response);
 		}else if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ||reserva.getPlaza().getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+			try {
+				String subject = "Reserva rechazada";
+				String text = "¡Lo sentimos! Su solicitud reserva ha sido rechazada por el propietario.\nHaga clic en el siguiente enlace para ver los detalles: "+URL_CORREO+"/reservas/"+reserva.getId()+"\n\nGracias, el equipo de ParkInn.";
+				mailService.sendEmail(reserva.getUser().getEmail(), subject, text);
+				}catch(MailException m) {
+					return reservaService.rechazarReserva(id);
+				}
 			return reservaService.rechazarReserva(id);
 		}else{
 			errores.add("Esta reserva no es sobre una plaza de tu propiedad");
@@ -151,6 +178,7 @@ public class ReservaController {
 			return ResponseEntity.badRequest().body(response);
 		}
 	}
+	
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
 	@GetMapping("/{id}/confirmar")
@@ -203,6 +231,21 @@ public class ReservaController {
 		Long periodo = Duration.between(LocalDateTime.now(), reserva.getFechaInicio()).toMinutes();
 		
 		if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) || reserva.getPlaza().getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+			try {
+				String subject = "Reserva cancelada";
+				String text = "La reserva se ha cancelado correctamente.\nSe le reembolsará al cliente el importe íntegro pagado por el alquiler de la plaza.\n\nGracias, el equipo de ParkInn.";
+				mailService.sendEmail(reserva.getPlaza().getAdministrador().getEmail(), subject, text);
+			}catch (MailException e) {
+				return reservaService.devolverTodo(reserva);
+			}
+			try {
+				String subject = "Reserva cancelada por propietario";
+				String text = "Le informamos que el propietario de la plaza ha cancelado su reserva de la plaza "+URL_CORREO+"/reservas/plaza/"+reserva.getPlaza().getId()+".\nSe le reembolsará el importe íntegro.\n\nGracias, el equipo de ParkInn.";
+				mailService.sendEmail(reserva.getUser().getEmail(), subject, text);
+			}catch (MailException e) {
+				return reservaService.devolverTodo(reserva);
+			}
+			
 			return reservaService.devolverTodo(reserva);
 		}else if(!reserva.getUser().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
 			errores.add("No estás involucrado en esta reserva");
@@ -213,8 +256,36 @@ public class ReservaController {
 			response.put("errores",errores);
 			return ResponseEntity.badRequest().body(response);
 		}else if(periodo<1440) {
+			try {
+				String subject = "Reserva cancelada";
+				String text = "La reserva se ha cancelado con menos de 24 horas de antelación.\nSe le reembolsará el importe pagado por la plaza sin la fianza.\n\nGracias, el equipo de ParkInn.";
+				mailService.sendEmail(reserva.getUser().getEmail(), subject, text);
+			}catch (MailException e) {
+				return reservaService.devolverSinFianza(reserva);
+			}
+			try {
+				String subject = "Reserva de una de sus plazas cancelada";
+				String text = "Le informamos que "+reserva.getUser().getName()+" "+reserva.getUser().getSurname()+" ha cancelado su reserva de la plaza "+URL_CORREO+"/mis-reservas-de-mis-plazas/plaza/"+reserva.getPlaza().getId()+".\nComo se ha cancelado con menos de 24 horas de antelación, se le reembolsará el importe de la plaza, la fianza se le devolverá a usted segun la política de cancelaciones de la empresa.\n\nGracias, el equipo de ParkInn.";
+				mailService.sendEmail(reserva.getPlaza().getAdministrador().getEmail(), subject, text);
+			}catch (MailException e) {
+				return reservaService.devolverSinFianza(reserva);
+			}
 				return reservaService.devolverSinFianza(reserva);
 		}else {
+			try {
+				String subject = "Reserva cancelada";
+				String text = "La reserva se ha cancelado correctamente.\nSe le reembolsará el importe integro pagado por el alquiler de la plaza.\n\nGracias, el equipo de ParkInn.";
+				mailService.sendEmail(reserva.getUser().getEmail(), subject, text);
+			}catch (MailException e) {
+				return reservaService.devolverTodo(reserva);
+			}
+			try {
+				String subject = "Reserva de una de sus plazas cancelada";
+				String text = "Le informamos que "+reserva.getUser().getName()+" "+reserva.getUser().getSurname()+" ha cancelado su reserva de la plaza "+URL_CORREO+"/mis-reservas-de-mis-plazas/plaza/"+reserva.getPlaza().getId()+".\nComo se ha cancelado con más de 24 horas de antelación, se le reembolsará el importe integro pagado por el alquiler de la plaza siguiendo la política de devoluciones de la empresa.\n\nGracias, el equipo de ParkInn.";
+				mailService.sendEmail(reserva.getPlaza().getAdministrador().getEmail(), subject, text);
+			}catch (MailException e) {
+				return reservaService.devolverTodo(reserva);
+			}
 			return reservaService.devolverTodo(reserva);
 		}
 	}
