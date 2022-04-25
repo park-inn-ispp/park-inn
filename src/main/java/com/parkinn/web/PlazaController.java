@@ -66,7 +66,7 @@ public class PlazaController {
     private ReservaRepository reservaRepository;
     @Autowired
     private HorarioRepository horarioRepository;
-  
+    @Autowired
     private MailService mailService;
 
     
@@ -83,6 +83,7 @@ public class PlazaController {
         return plazaService.findAll();
     }
     
+
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @SuppressWarnings("rawtypes")
 	@PostMapping()
@@ -167,6 +168,11 @@ public class PlazaController {
   			return ResponseEntity.badRequest().body(response);
         }
     	
+    }
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+    @GetMapping("/{id}/horarios")
+    public List<Horario> getHorarios(@PathVariable Long id ) throws URISyntaxException {
+        return horarioRepository.findHorariosByPlazaId(id);
     }
     
   //@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
@@ -379,9 +385,8 @@ public class PlazaController {
    	 	for (Horario h: horariosPlaza){
 			if((h.getFechaFin()).isAfter((ChronoLocalDateTime<LocalDate>) horario.getFechaInicio()) && (h.getFechaInicio().isBefore((ChronoLocalDateTime<LocalDate>) horario.getFechaFin()))){
 				horario_Igual = true;
+                break;
 			}
-			else
-				horario_Igual = false; 
 		}
    	 	if(horario.getFechaInicio().isAfter(horario.getFechaFin())) {
    	 		errores.add("No puede existir una fecha de inicio posterior a la fecha de fin");
@@ -396,7 +401,7 @@ public class PlazaController {
    	 		return ResponseEntity.badRequest().body(response);
    	 	}
    	 	else if(horario_Igual) {
-   	 		errores.add("Este tramo horario ya existe");
+   	 		errores.add("Este tramo horario entra en conflicto con otro. Seleccione otras fechas");
    	 		response.put("horario", horario);
    	 		response.put("errores",errores);
    	 		return ResponseEntity.badRequest().body(response);
@@ -411,7 +416,7 @@ public class PlazaController {
     
     @SuppressWarnings({ "rawtypes", "unused" })
    	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
-       @PutMapping("/{id}/cambiarDisponibilidad")
+       @PutMapping("/{id}/cambiarDisponibilidad/{disponibilidad}")
        public ResponseEntity updateDisponibilidad(@PathVariable Long id, @PathVariable Boolean disponibilidad) {
        	Map<String,Object> response = new HashMap<>();
        	List<String> errores = new ArrayList<String>();
