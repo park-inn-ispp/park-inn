@@ -14,7 +14,7 @@ import com.parkinn.model.Estado;
 import com.parkinn.model.Horario;
 import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
-import com.parkinn.repository.ClientRepository;
+import com.parkinn.service.ClientService;
 import com.parkinn.repository.HorarioRepository;
 import com.parkinn.service.MailService;
 import com.parkinn.service.PlazaService;
@@ -44,7 +44,7 @@ public class ReservaController {
 	private PlazaService plazaService;
 	
 	@Autowired
-	private ClientRepository clientRepository;
+	private ClientService clientService;
 	
     @Autowired
     private MailService mailService;
@@ -57,7 +57,7 @@ public class ReservaController {
 	public Object reservasUsuario(@PathVariable Long id){
 		Map<String,Object> response = new HashMap<>();
 		List<String> errores = new ArrayList<>();
-		Client usuario = clientRepository.findById(id).orElse(null);
+		Client usuario = clientService.findById(id);
 		if(usuario==null){
 			errores.add("No se encuentra al usuario");
 			response.put("errores",errores);

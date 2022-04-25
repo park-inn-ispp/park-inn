@@ -1,6 +1,5 @@
 package com.parkinn.service;
 
-import com.parkinn.repository.ClientRepository;
 import com.parkinn.repository.IncidenciaRepository;
 
 import java.time.LocalDateTime;
@@ -24,7 +23,7 @@ public class IncidenciaService {
     private ReservaService reservaService;
 
 	@Autowired
-    private ClientRepository clientRepository;
+    private ClientService clientService;
     
     
 	public List<Incidencia> findAll(){
@@ -66,7 +65,7 @@ public class IncidenciaService {
 		String email = (r.getUser() == null) ? "sinmail" : r.getUser().getEmail();
 		Long idReserva = (r.getReserva() == null) ? -1 : r.getReserva().getId();
 		if(!email.equals("sinmail")){
-			r.setUser(clientRepository.findByEmail(email).get());
+			r.setUser(clientService.findByEmail(email));
 		}
 		if(idReserva != -1){
 			r.setReserva(reservaService.findById(idReserva));

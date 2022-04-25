@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.parkinn.model.Client;
-import com.parkinn.repository.ClientRepository;
+import com.parkinn.service.ClientService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -33,40 +33,53 @@ public class ClientsController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-    private final ClientRepository clientRepository;
 
-    public ClientsController(ClientRepository clientRepository) {
-        this.clientRepository = clientRepository;
-    }
+    @Autowired
+    private ClientService clientService;
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @GetMapping
     public List<Client> getClients() {
-        return clientRepository.findAll();
+        return clientService.findAll();
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @GetMapping("/{id}")
-    public Client getClient(@PathVariable Long id) {
-        return clientRepository.findById(id).orElseThrow(RuntimeException::new);
+    public ResponseEntity<?> getClient(@PathVariable Long id) {
+        Map<String,Object> response = new HashMap<>();
+        List<String> errores = new ArrayList<String>();
+        Client c = clientService.findById(id);
+        if(c==null){
+            errores.add("Este usuario no existe");
+            response.put("errores", errores);
+			return ResponseEntity.badRequest().body(response);
+        }else{
+            return ResponseEntity.ok().body(c);
+        } 
     }
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @GetMapping("/usuariopormail/{email}")
-    public Client getByEmail(@PathVariable String email) {
-        return clientRepository.findByEmail(email).orElseThrow(RuntimeException::new);
+    public ResponseEntity<?> getByEmail(@PathVariable String email) {
+        Map<String,Object> response = new HashMap<>();
+        List<String> errores = new ArrayList<String>();
+        Client c = clientService.findByEmail(email);
+        if(c==null){
+            errores.add("Este usuario no existe");
+            response.put("errores", errores);
+			return ResponseEntity.badRequest().body(response);
+        }else{
+            return ResponseEntity.ok().body(c);
+        }
+        
     }
-
 
     @SuppressWarnings("rawtypes")
 	@PostMapping
     public ResponseEntity createClient(@RequestBody Client client) throws URISyntaxException {
-        Client savedClient = clientRepository.save(client);
+        Client savedClient = clientService.save(client);
         return ResponseEntity.created(new URI("/clients/" + savedClient.getId())).body(savedClient);
     }
-
-
-    
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @PutMapping("/{id}/edit")
@@ -74,60 +87,51 @@ public class ClientsController {
     public ResponseEntity updateClient(@PathVariable Long id, @RequestBody Client client) {
         Map<String,Object> response = new HashMap<>();
         List<String> errores = new ArrayList<String>();
-        Optional<Client> cliente = clientRepository.findById(id);
-        if(!cliente.isPresent()){
+        Client cliente = clientService.findById(id);
+        if(cliente==null){
             errores.add("Este usuario no existe");
             response.put("errores", errores);
 			return ResponseEntity.badRequest().body(response);
-        }else if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) || cliente.get().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
-            Client currentClient = clientRepository.findById(id).orElseThrow(RuntimeException::new);
+        }else if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) || cliente.getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+            Client currentClient = clientService.findById(id);
             currentClient.setName(client.getName());
             currentClient.setEmail(client.getEmail());
             currentClient.setPhone(client.getPhone());
             currentClient.setSurname(client.getSurname());
             currentClient.setPassword(passwordEncoder.encode(client.getPassword()));
-            currentClient = clientRepository.save(currentClient);
+            currentClient = clientService.save(currentClient);
             return ResponseEntity.ok(currentClient);
         }else{
             errores.add("Solo puedes editar los datos de tu perfil");
             response.put("errores", errores);
 			return ResponseEntity.badRequest().body(response);
-
         }
-        
     }
-
-
     
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}/delete")
     @SuppressWarnings("rawtypes")
     public ResponseEntity deleteClient(@PathVariable Long id) {
-        clientRepository.deleteById(id);
+        clientService.deleteById(id);
         return ResponseEntity.ok("Usuario eliminado satisfactoriamente");
     }
 
-@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @GetMapping("/{id}/perfil")
     public Object consultarPerfil(@PathVariable Long id) {
         Map<String,Object> response = new HashMap<>();
         List<String> errores = new ArrayList<String>();
-        Optional<Client> cliente = clientRepository.findById(id);
-        if(!cliente.isPresent()){
+        Client cliente = clientService.findById(id);
+        if(cliente==null){
             errores.add("Este usuario no existe");
             response.put("errores", errores);
 			return ResponseEntity.badRequest().body(response);
-        }else if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) || cliente.get().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+        }else if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) || cliente.getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
             return ResponseEntity.ok(cliente);
         }else{
             errores.add("No tienes acceso a este perfil");
             response.put("errores", errores);
 			return ResponseEntity.badRequest().body(response);
         }
-        }
-
-
+    }
 }
-         
-
-

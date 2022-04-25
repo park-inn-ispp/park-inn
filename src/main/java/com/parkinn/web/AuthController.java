@@ -7,7 +7,7 @@ import com.parkinn.model.Client;
 import com.parkinn.model.Role;
 import com.parkinn.payload.LoginDto;
 import com.parkinn.payload.SignUpDto;
-import com.parkinn.repository.ClientRepository;
+import com.parkinn.service.ClientService;
 import com.parkinn.repository.RoleRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,11 +27,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
-
-
-
-
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -40,7 +35,7 @@ public class AuthController {
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    private ClientRepository clientRepository;
+    private ClientService clientService;
 
     @Autowired
     private RoleRepository roleRepository;
@@ -57,7 +52,7 @@ public class AuthController {
         
         Map<String,Object> response = new HashMap<>();
         List<String> errores = new ArrayList<>();
-        Client userlogged = clientRepository.findByNameOrEmail(loginDto.getnameOrEmail(), loginDto.getnameOrEmail()).get();
+        Client userlogged = clientService.findByNameOrEmail(loginDto.getnameOrEmail(), loginDto.getnameOrEmail());
 
         if(userlogged == null){
             errores.add("Este usuario no está registrado. Primero debes registrarte");
@@ -65,7 +60,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(response);
         }
         
-        clientRepository.save(userlogged);
+        clientService.save(userlogged);
         return new ResponseEntity<>("User signed-in successfully!.", HttpStatus.OK);
     }
 
@@ -76,7 +71,7 @@ public class AuthController {
         List<String> errores = new ArrayList<>();
 
         // add check for email exists in DB
-        if(clientRepository.existsByEmail(signUpDto.getEmail())){
+        if(clientService.existsByEmail(signUpDto.getEmail())){
             errores.add("Este email ya está registrado");
             response.put("errores", errores);
             return ResponseEntity.badRequest().body(response);
@@ -88,7 +83,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(response);
         }
 
-        if(clientRepository.existsByPhone(signUpDto.getPhone()) == true){
+        if(clientService.existsByPhone(signUpDto.getPhone()) == true){
             errores.add("Este número de teléfono ya está registrado");
             response.put("errores", errores);
             return ResponseEntity.badRequest().body(response);
@@ -121,7 +116,7 @@ public class AuthController {
         Role roles = roleRepository.findByName("ROLE_USER").get();
         user.setRoles(Collections.singleton(roles));
 
-        clientRepository.save(user);
+        clientService.save(user);
 
         return new ResponseEntity<>("Usuario registrado correctamente", HttpStatus.OK);
 

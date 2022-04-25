@@ -15,11 +15,13 @@ import java.util.Optional;
 import com.parkinn.model.Client;
 import com.parkinn.model.Comision;
 import com.parkinn.model.Estado;
+import com.parkinn.model.Horario;
 import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
 import com.parkinn.model.paypal.PayPalAccesToken;
 import com.parkinn.model.paypal.PayPalClasses;
 import com.parkinn.repository.ComisionRepository;
+import com.parkinn.repository.HorarioRepository;
 import com.parkinn.repository.ReservaRepository;
 
 import org.junit.jupiter.api.Assertions;
@@ -45,6 +47,9 @@ public class ReservaServiceTest{
     
     @MockBean
 	private ComisionRepository comisionRepository;
+
+    @MockBean
+	private HorarioRepository horarioRepository;
 
     @MockBean
     RestTemplate restTemplate;
@@ -215,9 +220,9 @@ public class ReservaServiceTest{
 
 		doReturn(Arrays.asList(r1,r2)).when(reservaRepository).findByPlazaId(1l);
 
-		List<List<LocalDateTime>> res = reservaService.horariosNoDisponibles(1l);
+		List<List<LocalDateTime>> res = reservaService.horariosNoDisponibles(1l,false);
 
-		Assertions.assertSame(2,res.size(), "No hay el número de horarios no disponibles que se esperaban");
+		Assertions.assertSame(3,res.size(), "No hay el número de horarios no disponibles que se esperaban");
     }
 
     @Test
@@ -292,21 +297,21 @@ public class ReservaServiceTest{
     @Test
     @DisplayName("Test validar reserva antes del pago sin éxito por colisión")
     public void testErroresNuevaReservaAntesDelPagoFailColision(){
-		Plaza p = new Plaza(1l, null);
+        Plaza p = new Plaza(1l, null);
+		Horario h = new Horario();
 		Reserva r1 = new Reserva(1l);
-		Reserva r2 = new Reserva(2l);
         r1.setFechaInicio(LocalDateTime.of(LocalDateTime.now().getYear()+1, 9, 10, 16, 0, 0));
         r1.setFechaFin(LocalDateTime.of(LocalDateTime.now().getYear()+1, 9, 12, 20, 0, 0));
-        r2.setFechaInicio(LocalDateTime.of(LocalDateTime.now().getYear()+1, 9, 9, 0, 0, 0));
-        r2.setFechaFin(LocalDateTime.of(LocalDateTime.now().getYear()+1, 9, 15, 0, 0, 0));
+        h.setFechaInicio(LocalDateTime.of(LocalDateTime.now().getYear()+1, 9, 9, 0, 0, 0));
+        h.setFechaFin(LocalDateTime.of(LocalDateTime.now().getYear()+1, 9, 15, 0, 0, 0));
         r1.setPlaza(p);
-        r2.setPlaza(p);
 
-        doReturn(Arrays.asList(r2)).when(reservaRepository).findByPlazaId(1l);
+        doReturn(Arrays.asList(h)).when(horarioRepository).findHorariosByPlazaId(1l);
 
 		List<String> res = reservaService.erroresNuevaReservaAntesDelPago(r1);
 
-		Assertions.assertEquals("Este horario está ocupado por otra reserva", res.get(0),"La reserva no tiene error de colisión");
+        Assertions.assertEquals(1, res.size(),"La reserva no erorres");
+		Assertions.assertEquals("Este horario no está disponible o está ocupado por otra reserva", res.get(0),"La reserva no tiene error de colisión");
     }
 
     @Test
