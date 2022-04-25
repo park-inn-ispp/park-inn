@@ -97,9 +97,15 @@ public class ReservaController {
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
 	@GetMapping("/{id}/fechasNoDisponibles")
 	public List<List<LocalDateTime>> horariosNoDisponibles(@PathVariable Long id) throws URISyntaxException {
-			return reservaService.horariosNoDisponibles(id);
+
+		Plaza plazaAReservar= plazaService.findById(id);
+		return reservaService.horariosNoDisponibles(id,plazaAReservar.getTramos());
+		
+		
 	}
 		
+	
+
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
 	@GetMapping("/{id}")

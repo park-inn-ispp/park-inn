@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ComisionController {
 
 
-
+    @Autowired
     private final ComisionRepository comisionRepository;
 
     public ComisionController(ComisionRepository comisionRepository) {
