@@ -184,6 +184,13 @@ public class PlazaController {
               //List<String> errores1 = new ArrayList<String>();
               //Map<String,Object> response = new HashMap<>();
       		if(reservaRepository.findByPlazaId(id).isEmpty()) { 
+      		
+      			List<Horario> horarios = horarioRepository.findHorariosByPlazaId(id);
+        		
+        		for(int i = 0; i<horarios.size(); i++) {
+        			Horario horario = horarios.get(i);
+        			horarioRepository.delete(horario);
+        		}
       			plazaService.deleteById(id);
       			return ResponseEntity.ok().build();
       		}else {
@@ -218,6 +225,12 @@ public class PlazaController {
       			else {
   					return ResponseEntity.badRequest().body(response);
       			}*/
+      			List<Horario> horarios = horarioRepository.findHorariosByPlazaId(id);
+        		
+        		for(int i = 0; i<horarios.size(); i++) {
+        			Horario horario = horarios.get(i);
+        			horarioRepository.delete(horario);
+        		}
       			reservaRepository.findByPlazaId(id).forEach(res->res.setPlaza(null));
       			plazaService.deleteById(id);
       			return ResponseEntity.ok().build();
@@ -373,6 +386,7 @@ public class PlazaController {
         }
     }
     
+
     @SuppressWarnings("rawtypes")
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @PostMapping("/{id}/crearHorarios")
@@ -437,3 +451,4 @@ public class PlazaController {
            }
        }
 }
+
