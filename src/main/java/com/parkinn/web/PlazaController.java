@@ -101,19 +101,10 @@ public class PlazaController {
             response.put("errores",errores);
             return ResponseEntity.badRequest().body(response);
           }
-          
         
-       if(plazaService.comprobarPlazasIguales(plaza.getDireccion(),plaza.getAdministrador())){
-        
-        errores.add("Esta plaza ya existe. Intenta añadir una plaza con una dirección diferente");
-        response.put("plaza", plaza);
-        response.put("errores",errores);
-        return ResponseEntity.badRequest().body(response);
-       }else{
+       
         Plaza savedPlaza = plazaService.guardarPlaza(plaza);
         return ResponseEntity.created(new URI("/plazas/" + savedPlaza.getId())).body(savedPlaza);
-       }
-    	    	
     	
     }
 
@@ -137,13 +128,7 @@ public class PlazaController {
                 return ResponseEntity.badRequest().body(response);
             }
 
-            if(plazaService.comprobarPlazasIgualesEditar(plaza.getDireccion(),currentPlaza.getAdministrador(),id)){
-        
-                errores.add("Esta plaza ya existe en tu colección. Intenta añadir una plaza con una dirección diferente");
-                response.put("plaza", plaza);
-                response.put("errores",errores);
-                return ResponseEntity.badRequest().body(response);
-               }else{
+          
                
                 currentPlaza.setDireccion(plaza.getDireccion());
                 currentPlaza.setDescripcion(plaza.getDescripcion());
@@ -156,11 +141,6 @@ public class PlazaController {
     
                 currentPlaza = plazaService.guardarPlaza(currentPlaza);
                 return ResponseEntity.ok(currentPlaza);
-
-               }
-           
-           
-
     	}else{
             
   			errores.add("No puedes editar una plaza que no es de tu propiedad");            
@@ -194,37 +174,7 @@ public class PlazaController {
       			plazaService.deleteById(id);
       			return ResponseEntity.ok().build();
       		}else {
-  				/*List<Reserva> reservas = (List<Reserva>) currentPlaza.getReservas();
-      			for(int i = 0; i<reservas.size(); i++) {
-          			Boolean incidenciaPendiente = false;
-  					List<Incidencia> incidenciasporReserva = (List<Incidencia>) reservas.get(i).getIncidencias();
-          			if(!incidenciasporReserva.isEmpty()) {
-          				for(int a = 0; a<incidenciasporReserva.size(); a++) {
-          					if(!incidenciaPendiente) {
-          						incidenciaPendiente = incidenciasporReserva.get(a).getEstado().equals(EstadoIncidencia.pendiente);	
-          					}
-          				}
-          				if(incidenciaPendiente==true) {
-          					errores1.add("No puede eliminar su plaza debido a que tiene pendiente una incidencia");            
-          					response.put("error", errores1);
-          				
-          				}else if(Duration.between(reservas.get(i).getFechaFin(), LocalDateTime.now()).abs().toHours()<24) {
-          					errores1.add("No puede eliminar su plaza debido a que deben pasar 24 horas tras haber concluido una reserva");            
-          					response.put("error", errores1);
-          					
-          				}else {
-          					currentPlaza.setAdministrador(null);
-          				}
-          			}else {
-          		    	currentPlaza.setAdministrador(null);
-          			}
-      			}
-      			if(errores1.isEmpty()){
-      				return ResponseEntity.ok().build();
-      			}
-      			else {
-  					return ResponseEntity.badRequest().body(response);
-      			}*/
+  				
       			List<Horario> horarios = horarioRepository.findHorariosByPlazaId(id);
         		
         		for(int i = 0; i<horarios.size(); i++) {
