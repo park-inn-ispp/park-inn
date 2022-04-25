@@ -40,11 +40,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
 public class ReservaService {
+
+	
 	
 	final static String URL_CORREO = "https://park-inn-ispp-fe.herokuapp.com";
 
@@ -133,7 +136,7 @@ public class ReservaService {
 		Map<String,Object> item = new HashMap<>();
 		Map<String,Object> amount = new HashMap<>();
 		amount.put("value", Math.round((r.getPrecioTotal() - r.getPlaza().getFianza())*100.0)/100.0);
-		System.out.println(Math.round((r.getPrecioTotal() - r.getPlaza().getFianza())*100.0)/100.0);
+		System.out.println(Math.round((r.getPrecioTotal() - r.getFianza())*100.0)/100.0);
 		amount.put("currency","EUR");
 
 		item.put("amount", amount);
@@ -438,9 +441,8 @@ public class ReservaService {
 			Map<String,Object> item_p = new HashMap<>();
 			Map<String,Object> amount_p = new HashMap<>();
 
-			amount_p.put("value", Math.round((r.getPrecioTotal() - r.getPlaza().getFianza() - r.getComision()*r.getPrecioTotal())*100.0)/100.0);
+			amount_p.put("value", Math.round((r.getPrecioTotal() - r.getFianza() - r.getComision()*r.getPrecioTotal())*100.0)/100.0);
 
-			//amount_p.put("value", Math.round((r.getPrecioTotal() - r.getPlaza().getFianza() - 0.1*r.getPrecioTotal())*100.0)/100.0);//Poner la comisión como atributo
 		
 			amount_p.put("currency","EUR");
 
