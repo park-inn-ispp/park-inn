@@ -184,6 +184,13 @@ public class PlazaController {
               //List<String> errores1 = new ArrayList<String>();
               //Map<String,Object> response = new HashMap<>();
       		if(reservaRepository.findByPlazaId(id).isEmpty()) { 
+      		
+      			List<Horario> horarios = horarioRepository.findHorariosByPlazaId(id);
+        		
+        		for(int i = 0; i<horarios.size(); i++) {
+        			Horario horario = horarios.get(i);
+        			horarioRepository.delete(horario);
+        		}
       			plazaService.deleteById(id);
       			return ResponseEntity.ok().build();
       		}else {
@@ -218,6 +225,12 @@ public class PlazaController {
       			else {
   					return ResponseEntity.badRequest().body(response);
       			}*/
+      			List<Horario> horarios = horarioRepository.findHorariosByPlazaId(id);
+        		
+        		for(int i = 0; i<horarios.size(); i++) {
+        			Horario horario = horarios.get(i);
+        			horarioRepository.delete(horario);
+        		}
       			reservaRepository.findByPlazaId(id).forEach(res->res.setPlaza(null));
       			plazaService.deleteById(id);
       			return ResponseEntity.ok().build();
@@ -285,6 +298,7 @@ public class PlazaController {
 		Double precio = Duration.between(reserva.getFechaInicio(), reserva.getFechaFin()).toMinutes() * reserva.getPlaza().getPrecioHora()/60;
 		precio = precio + reserva.getPlaza().getFianza();
 		reserva.setPrecioTotal(Math.round(precio*100.0)/100.0);
+        reserva.setPropietarioId(reserva.getPlaza().getAdministrador().getId());
 		
 		if(!currencyCode.equals("EUR")) {
 			
@@ -362,9 +376,7 @@ public class PlazaController {
         Map<String,Object> response = new HashMap<>();
         List<String> errores = new ArrayList<String>();
         if(p.isEmpty()){
-            errores.add("Este usuario no tiene ninguna plaza");
-            response.put("errores", errores);
-			return ResponseEntity.badRequest().body(response);
+			return p;
         }else if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) || p.get(0).getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
             return p;
         }else{
