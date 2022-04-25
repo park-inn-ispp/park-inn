@@ -197,44 +197,80 @@ public class ClientsController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/{id}/banear")
     public ResponseEntity banClient(@PathVariable Long id) {
-    	Client currentClient = clientRepository.findById(id).orElseThrow(RuntimeException::new);
-    	Set<Role> currentRole = currentClient.getRoles();
-        Role role = roleRepository.findByName("ROLE_USER").get();
+    	Optional<Client> optionalClient = clientRepository.findById(id);
+        Map<String,Object> response = new HashMap<>();
+        List<String> errores = new ArrayList<>();
+       
+        if(optionalClient.isPresent()){
+            Client currentClient= optionalClient.get();
+            Set<Role> currentRole = currentClient.getRoles();
+            Role roleUser = roleRepository.findByName("ROLE_USER").get();
+            Role roleAdmin = roleRepository.findByName("ROLE_ADMIN").get();
+            if(currentRole.contains(roleAdmin)){
+                errores.add("No puedes banear a un usuario que tiene permisos de administrador");
+                response.put("errores",errores);
+                return ResponseEntity.badRequest().body(response);
+    
+            } else if(!currentRole.contains(roleUser)){
+               
+                errores.add("No puedes banear a un usuario que ya estaba previamente baneado");
+                response.put("errores",errores);
+                return ResponseEntity.badRequest().body(response);
+    
+             }else{
+    
+                currentClient.setRoles(null);
+                currentClient = clientRepository.save(currentClient);
+                return ResponseEntity.ok(currentClient);
+            }
 
-        if(!currentRole.contains(role)){
-            Map<String,Object> response = new HashMap<>();
-		    List<String> errores = new ArrayList<>();
-            errores.add("No puedes banear a un usuario que ya estaba previamente baneado");
+        }else{
+            
+		   
+            errores.add("No puedes banear a un usuario que no existe");
 			response.put("errores",errores);
 			return ResponseEntity.badRequest().body(response);
 
-        }else{
-
-            currentClient.setRoles(null);
-            currentClient = clientRepository.save(currentClient);
-            return ResponseEntity.ok(currentClient);
         }
+   
     	
     }
     
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/{id}/desbanear")
     public ResponseEntity unbanClient(@PathVariable Long id) {
-    	Client currentClient = clientRepository.findById(id).orElseThrow(RuntimeException::new);
-    	
-    	Role role = roleRepository.findByName("ROLE_USER").get();
-    	Set<Role> currentRole = currentClient.getRoles();
-        if(currentRole.contains(role)){
-            Map<String,Object> response = new HashMap<>();
-		    List<String> errores = new ArrayList<>();
-            errores.add("No puedes desbanear a un usuario que no estaba previamente baneado");
+    
+
+        Optional<Client> optionalClient = clientRepository.findById(id);
+        Map<String,Object> response = new HashMap<>();
+        List<String> errores = new ArrayList<>();
+        if(optionalClient.isPresent()){
+            Client currentClient= optionalClient.get();
+            Role roleUser = roleRepository.findByName("ROLE_USER").get();
+            Role roleAdmin = roleRepository.findByName("ROLE_ADMIN").get();
+            Set<Role> currentRole = currentClient.getRoles();
+
+            if(currentRole.contains(roleAdmin)){
+                errores.add("No puedes desbanear a un usuario que tiene permisos de administrador");
+                response.put("errores",errores);
+                return ResponseEntity.badRequest().body(response);
+    
+            }else if(currentRole.contains(roleUser)){
+              
+                errores.add("No puedes desbanear a un usuario que no estaba previamente baneado");
+                response.put("errores",errores);
+                return ResponseEntity.badRequest().body(response);
+            }else{
+                currentRole.add(roleUser);
+                currentClient.setRoles(currentRole);
+                currentClient = clientRepository.save(currentClient);
+                return ResponseEntity.ok(currentClient);
+            }
+
+        }else{
+            errores.add("No puedes desbanear a un usuario que no existe");
 			response.put("errores",errores);
 			return ResponseEntity.badRequest().body(response);
-        }else{
-            currentRole.add(role);
-    	    currentClient.setRoles(currentRole);
-            currentClient = clientRepository.save(currentClient);
-            return ResponseEntity.ok(currentClient);
         }
     }
     
@@ -244,28 +280,52 @@ public class ClientsController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity deleteClient(@PathVariable Long id) {
-    	List<Plaza> plazas = plazaRepository.findByUserId(id);
-    	for(int i = 0; i<plazas.size(); i++) {
-    		Plaza plaza = plazas.get(i);
-    		
-    		List<Reserva> reservas = reservasRepository.findByPlazaId(plaza.getId());
-    		
-    		for(int i1 = 0; i1<reservas.size(); i1++) {
-    			Reserva reserva = reservas.get(i1);
-    			reserva.setPlaza(null);
-    		}
-    		    		
-    		List<Horario> horarios = horarioRepository.findHorariosByPlazaId(plaza.getId());
-    		
-    		for(int i2 = 0; i2<horarios.size(); i2++) {
-    			Horario horario = horarios.get(i2);
-    			horarioRepository.delete(horario);
-    		}
-    		
-    		plazaRepository.delete(plaza);
-    	}
-    	clientRepository.deleteById(id);
-        return ResponseEntity.ok().build();
+        Optional<Client> optionalClient = clientRepository.findById(id);
+        Map<String,Object> response = new HashMap<>();
+        List<String> errores = new ArrayList<>();
+
+        if (optionalClient.isPresent()){
+            Client usuario= optionalClient.get();
+            Role roleAdmin = roleRepository.findByName("ROLE_ADMIN").get();
+            Set<Role> currentRole = usuario.getRoles();
+            
+            if(currentRole.contains(roleAdmin)){
+                errores.add("No puedes eliminar a un usuario que tiene permisos de administrador");
+                response.put("errores",errores);
+                return ResponseEntity.badRequest().body(response);
+    
+            }else{
+                List<Plaza> plazas = plazaRepository.findByUserId(id);
+            
+                for(int i = 0; i<plazas.size(); i++) {
+                        Plaza plaza = plazas.get(i);
+                        
+                        List<Reserva> reservas = reservasRepository.findByPlazaId(plaza.getId());
+                        
+                        for(int i1 = 0; i1<reservas.size(); i1++) {
+                            Reserva reserva = reservas.get(i1);
+                            reserva.setPlaza(null);
+                        }
+                                    
+                        List<Horario> horarios = horarioRepository.findHorariosByPlazaId(plaza.getId());
+                        
+                        for(int i2 = 0; i2<horarios.size(); i2++) {
+                            Horario horario = horarios.get(i2);
+                            horarioRepository.delete(horario);
+                        }
+                        
+                        plazaRepository.delete(plaza);
+                    }
+                clientRepository.deleteById(id);
+                return ResponseEntity.ok().build();
+            }
+           
+        }else{
+           
+            errores.add("No puedes eliminar a un usuario que no existe");
+			response.put("errores",errores);
+			return ResponseEntity.badRequest().body(response);
+        }
     }
 
     
