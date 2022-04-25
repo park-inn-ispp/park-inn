@@ -23,9 +23,9 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.io.*; 
-import java.util.*;  
+import java.util.*;
 
-
+import com.parkinn.model.Client;
 import com.parkinn.model.Estado;
 import com.parkinn.model.Horario;
 import com.parkinn.model.Plaza;
@@ -360,17 +360,17 @@ public class ReservaService {
 		return errores;
 	}
 	
-	public Object confirmarServicio(Reserva r, Object user){
+	public Object confirmarServicio(Reserva r, Object user, String emailPropietario){
 		if(user.equals(r.getUser().getEmail()) && !r.getEstado().equals(Estado.confirmadaPropietario)){
 			try {
 				String subject = "Servicio confirmado por parte del cliente";
 				String text = "El cliente ha indicado que la reserva ha sido exitosa.\nPorfavor, si desea confirmarlo o poner una incidencia haga clic en el siguiente enlace: "+URL_CORREO+"/reservas/"+r.getId()+"\n\nGracias, el equipo de ParkInn.";
-				mailService.sendEmail(r.getPlaza().getAdministrador().getEmail(), subject, text);
+				mailService.sendEmail(emailPropietario, subject, text);
 			}catch(MailException e) {
 				r.setEstado(Estado.confirmadaUsuario);
 			}
 			r.setEstado(Estado.confirmadaUsuario);
-		}else if(user.equals(r.getPlaza().getAdministrador().getEmail()) && !r.getEstado().equals(Estado.confirmadaUsuario)){
+		}else if(user.equals(emailPropietario) && !r.getEstado().equals(Estado.confirmadaUsuario)){
 			try {
 				String subject = "Servicio confirmado por parte del propietario";
 				String text = "El propietario de la plaza ha indicado que la reserva ha sido exitosa.\nPorfavor, si desea confirmarlo o poner una incidencia haga clic en el siguiente enlace: "+URL_CORREO+"/reservas/"+r.getId()+"\n\nGracias, el equipo de ParkInn.";
@@ -384,7 +384,7 @@ public class ReservaService {
 				String subject = "Servicio confirmado";
 				String text = "Se ha confirmado que la reserva ha sido exitosa.\n¡Esperamos volver a verte!\n\nGracias, el equipo de ParkInn.";
 				mailService.sendEmail(r.getUser().getEmail(), subject, text);
-				mailService.sendEmail(r.getPlaza().getAdministrador().getEmail(), subject, text);
+				mailService.sendEmail(emailPropietario, subject, text);
 			}catch (MailException e) {
 				r.setEstado(Estado.confirmadaAmbos);
 			}
@@ -431,12 +431,13 @@ public class ReservaService {
 			ResponseEntity<Object> response = restTemplate.exchange("https://api-m.sandbox.paypal.com/v1/payments/payouts", HttpMethod.POST, entity, Object.class);
 
 			//--------------- Pagar al propietario ---------------
+			
 			Map<String,Object> body_p = new HashMap<>();
 			Map<String,Object> senderHeader_p = new HashMap<>();
 			//senderHeader_p.put("sender_batch_id", "");
 			senderHeader_p.put("recipient_type", "EMAIL");
-			senderHeader_p.put("email_subject", "Ingresos de la plaza " + r.getPlaza());
-			senderHeader_p.put("email_message", "Se te ha ingredado el dinero ganado sobre tu plaza " + r.getPlaza());
+			senderHeader_p.put("email_subject", "Ingresos de la plaza " + r.getDireccion());
+			senderHeader_p.put("email_message", "Se te ha ingresado el dinero ganado sobre tu plaza " + r.getDireccion());
 
 			Map<String,Object> item_p = new HashMap<>();
 			Map<String,Object> amount_p = new HashMap<>();
