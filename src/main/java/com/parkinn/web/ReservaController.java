@@ -3,6 +3,7 @@ package com.parkinn.web;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,6 +19,7 @@ import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
 import com.parkinn.repository.ClientRepository;
 import com.parkinn.repository.HorarioRepository;
+import com.parkinn.repository.ReservaRepository;
 import com.parkinn.service.MailService;
 import com.parkinn.service.PlazaService;
 import com.parkinn.service.ReservaService;
@@ -47,6 +49,9 @@ public class ReservaController {
 	
 	@Autowired
 	private ClientRepository clientRepository;
+
+	@Autowired
+	private ReservaRepository reservaRepository;
 	
     @Autowired
     private MailService mailService;
@@ -413,6 +418,37 @@ public class ReservaController {
 			return ResponseEntity.badRequest().body(response);
 		}
     }
+
+	public void confirmarServicio24h(){
+
+		List<Reserva> reservas = reservaRepository.findAllOpen();
+		for(int i  = 0; i<reservas.size(); i++){
+
+			Reserva reservaSelec = reservas.get(i);
+			Long propietarioId= reservaSelec.getPropietarioId();
+			Optional<Client> propietarioOptional = clientRepository.findById(propietarioId);
+			String emailPropietario= "No Disponible";
+
+			if(propietarioOptional.isPresent()){
+				Client propietario = propietarioOptional.get();
+				emailPropietario= propietario.getEmail();
+			}
+		
+			if(reservaSelec.getFechaFin().isBefore(LocalDateTime.now())){
+			Period period = Period.between(reservaSelec.getFechaFin().toLocalDate(), LocalDateTime.now().toLocalDate());
+
+			if(period.getDays()>1){
+
+				reservaSelec.setEstado(Estado.confirmadaAmbos);
+
+				reservaService.confirmarServicio(reservaSelec, "sistema", emailPropietario);
+			}
+		}
+		}
+
+		
+			
+	}
 
     
 }

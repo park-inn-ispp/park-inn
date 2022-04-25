@@ -18,6 +18,9 @@ public interface ReservaRepository extends JpaRepository<Reserva, Long> {
 	   	
 	 @Query(value = "SELECT DISTINCT r.* FROM Reservas r WHERE r.user_id LIKE :usuario_id", nativeQuery=true)
 	   	public List<Reserva> findByUserId(@Param("usuario_id")Long id) throws DataAccessException;
+
+	@Query(value = "SELECT DISTINCT r.* FROM Reservas r WHERE r.estado LIKE aceptada", nativeQuery=true)
+		public List<Reserva> findAllOpen() throws DataAccessException;	   
 	 
 	 public Optional<Reserva> findById(Long id);
 } 
