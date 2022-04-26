@@ -50,7 +50,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 @RequestMapping("/plazas")
 public class PlazaController {
 
-	final static String URL_CORREO = "https://parkinn-app-v3.herokuapp.com";
+	final static String URL_CORREO = "https://parkinn-api-v3.herokuapp.com";
 
 	
     @Autowired
