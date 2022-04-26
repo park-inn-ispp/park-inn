@@ -111,7 +111,7 @@ class PlazaServiceTest {
 
 	}
 
-	@Test
+	/* @Test
 	@DisplayName("Test comprobar plazas iguales True")
 	void testComprobarPlazasIgualesTrue() {
 		Client client = new Client(1l);
@@ -136,6 +136,6 @@ class PlazaServiceTest {
 
 		Assertions.assertFalse(existe,"El resultado esperado es que NO existe la plaza");
 
-	}
+	} */
 
 }
