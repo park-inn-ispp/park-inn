@@ -18,7 +18,10 @@ public class Reserva {
     private Long id;
 
     private String paypal_order_id;
+
+    private Long propietarioId;
    
+  
     private Estado estado;
     private Double precioTotal;
     @NotNull
@@ -40,6 +43,14 @@ public class Reserva {
 		this.fianza = fianza;
 	}
 
+    public Long getPropietarioId() {
+        return propietarioId;
+    }
+
+    public void setPropietarioId(Long propietarioId) {
+        this.propietarioId = propietarioId;
+    }
+
 	public String getDireccion() {
 		return direccion;
 	}
@@ -48,11 +59,11 @@ public class Reserva {
 		this.direccion = direccion;
 	}
 
-	@ManyToOne
+	@ManyToOne(optional = true)
     @JoinColumn(name="plaza_id")
     private Plaza plaza;
 
-    @ManyToOne
+    @ManyToOne(optional = true)
     @JoinColumn(name="user_id")
     private Client user;
 

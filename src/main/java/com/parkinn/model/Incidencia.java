@@ -23,11 +23,11 @@ public class Incidencia {
     private String titulo;
     private String descripcion;
    
-    @ManyToOne
+    @ManyToOne(optional = true)
     @JoinColumn(name="reserva_id")
     private Reserva idReserva;
 
-    @ManyToOne
+    @ManyToOne(optional = true)
     @JoinColumn(name="user_id")
     private Client email;
 

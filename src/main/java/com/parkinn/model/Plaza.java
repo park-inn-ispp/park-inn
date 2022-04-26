@@ -43,6 +43,11 @@ public class Plaza {
 		return reservas;
     }
 
+    @ManyToOne(optional = true)
+    @JoinColumn(name="user_id")
+    private Client administrador;
+
+
 	public Boolean getTramos() {
 		return tramos;
 
@@ -60,9 +65,6 @@ public class Plaza {
 		this.horarios = horarios;
 	}
 */
-	@ManyToOne
-    @JoinColumn(name="user_id")
-    private Client administrador;
 
     public Client getAdministrador() {
         return this.administrador;

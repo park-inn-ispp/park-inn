@@ -329,7 +329,7 @@ public class ReservaServiceTest{
 
         doReturn(r).when(reservaRepository).save(r);
 
-        Object res = reservaService.confirmarServicio(r,"emailUserTest");
+        Object res = reservaService.confirmarServicio(r,"emailUserTest","emailPropietarioTest");
     
         if(res instanceof Reserva){
             Reserva reservaReturn = (Reserva) res;
@@ -355,7 +355,7 @@ public class ReservaServiceTest{
 
         doReturn(r).when(reservaRepository).save(r);
 
-        Object res = reservaService.confirmarServicio(r,"emailPropietarioTest");
+        Object res = reservaService.confirmarServicio(r,"emailPropietarioTest","emailPropietarioTest");
     
         Assertions.assertNotNull(res,"La reserva devuelta es null");
         if(res instanceof Reserva){
@@ -390,7 +390,7 @@ public class ReservaServiceTest{
         doReturn(entity2).when(restTemplate).exchange(eq("https://api-m.sandbox.paypal.com/v1/payments/payouts"),any(),any(),same(Object.class));
         doReturn(r).when(reservaRepository).save(r);
 
-        Object res = reservaService.confirmarServicio(r,"emailPropietarioTest");
+        Object res = reservaService.confirmarServicio(r,"emailPropietarioTest","emailPropietarioTest");
     
         Assertions.assertNotNull(res,"La reserva devuelta es null");
         if(res instanceof Reserva){
