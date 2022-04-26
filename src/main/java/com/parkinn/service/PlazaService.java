@@ -3,7 +3,6 @@ package com.parkinn.service;
 import com.parkinn.repository.PlazaRepository;
 import com.parkinn.model.Localizacion;
 import com.parkinn.model.Plaza;
-import com.parkinn.model.Client;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

@@ -3,7 +3,7 @@ package com.parkinn.model;
 import javax.persistence.*;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
+
 
 
 @Entity

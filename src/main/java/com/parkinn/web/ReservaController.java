@@ -34,7 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/reservas")
 public class ReservaController {
 	
-	final static String URL_CORREO = "https://park-inn-ispp-fe.herokuapp.com";
+	final static String URL_CORREO = "https://parkinn-api-v3.herokuapp.com";
 
 	@Autowired
 	private ReservaService reservaService;

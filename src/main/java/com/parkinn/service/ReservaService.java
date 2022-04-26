@@ -6,29 +6,17 @@ import com.parkinn.repository.ComisionRepository;
 import com.parkinn.repository.ReservaRepository;
 
 import java.net.URISyntaxException;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.io.*; 
-import java.util.*;
 
-import com.parkinn.model.Client;
 import com.parkinn.model.Estado;
 import com.parkinn.model.Horario;
-import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
 import com.parkinn.model.paypal.PayPalAccesToken;
 import com.parkinn.model.paypal.PayPalClasses;
@@ -40,7 +28,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -49,7 +36,7 @@ public class ReservaService {
 
 	
 	
-	final static String URL_CORREO = "https://park-inn-ispp-fe.herokuapp.com";
+	final static String URL_CORREO = "https://parkinn-api-v3.herokuapp.com";
 
     @Autowired
     RestTemplate restTemplate;
