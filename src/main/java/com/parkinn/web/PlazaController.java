@@ -5,7 +5,6 @@ import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.chrono.ChronoLocalDate;
 import java.time.chrono.ChronoLocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,8 +15,6 @@ import java.util.Map;
 import javax.validation.Valid;
 
 import com.parkinn.model.Horario;
-import com.parkinn.model.EstadoIncidencia;
-import com.parkinn.model.Incidencia;
 import com.parkinn.model.Localizacion;
 import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
@@ -53,7 +50,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 @RequestMapping("/plazas")
 public class PlazaController {
 
-	final static String URL_CORREO = "https://park-inn-ispp-fe.herokuapp.com";
+	final static String URL_CORREO = "https://parkinn-app-v3.herokuapp.com";
 
 	
     @Autowired

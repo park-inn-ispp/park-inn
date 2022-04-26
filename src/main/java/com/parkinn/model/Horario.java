@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 
 import javax.persistence.*;
 
-import org.hibernate.type.TrueFalseType;
 
 @Entity
 @Table(name = "horarios")
