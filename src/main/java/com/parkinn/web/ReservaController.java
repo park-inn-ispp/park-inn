@@ -5,15 +5,12 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import com.gargoylesoftware.htmlunit.javascript.host.fetch.Response;
 import com.parkinn.model.Client;
 import com.parkinn.model.Estado;
-import com.parkinn.model.Horario;
 import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
 import com.parkinn.service.ClientService;
@@ -377,10 +374,8 @@ public class ReservaController {
 			Client propietario = clientService.findById(propietarioId);
 			if(propietario!=null){
 				esPropietario  = propietario.getEmail().equals(user);
-				emailPropietario= propietario.getEmail();
-				
+				emailPropietario= propietario.getEmail();	
 			}
-			
 		}
 		if(r==null){
 			errores.add("No se encuentra la reserva");

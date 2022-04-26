@@ -3,7 +3,6 @@ package com.parkinn.web;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import java.util.Collections;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,7 +32,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -73,39 +71,63 @@ public class ClientsController {
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @GetMapping
-    public List<Client> getClients() {
-        return clientService.findAll();
-    }
+    public ResponseEntity getClients() {
+    Map<String,Object> response = new HashMap<>();
+    List<String> errores = new ArrayList<String>();
+    List<Client> clients = clientService.findAll();
+    if(clients.isEmpty()){
+        errores.add("No existen usuarios en la base de datos");
+        response.put("errores", errores);
+	    return ResponseEntity.badRequest().body(response);
 
-  //  @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getClient(@PathVariable Long id) {
-        Map<String,Object> response = new HashMap<>();
-        List<String> errores = new ArrayList<String>();
-        Client c = clientService.findById(id);
-        if(c==null){
-            errores.add("Este usuario no existe");
-            response.put("errores", errores);
-			return ResponseEntity.badRequest().body(response);
-        }else{
-            return ResponseEntity.ok().body(c);
-        } 
+    }else if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))){
+        return ResponseEntity.ok(clients);
+    }else{
+        errores.add("No tienes acceso");
+        response.put("errores", errores);
+        return ResponseEntity.badRequest().body(response);
     }
+    }
+    
+    
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+    @GetMapping("/{id}")
+    public ResponseEntity getClient(@PathVariable Long id) {
+    Map<String,Object> response = new HashMap<>();
+    List<String> errores = new ArrayList<String>();
+    Client cliente = clientService.findById(id);
+    if(cliente==null){
+        errores.add("Este usuario no existe");
+        response.put("errores", errores);
+	    return ResponseEntity.badRequest().body(response);
+
+    }else if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) || cliente.getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+        Client currentClient = clientService.findById(id);
+        return ResponseEntity.ok(currentClient);
+    }else{
+        errores.add("Solo puedes acceder a tus datos");
+        response.put("errores", errores);
+        return ResponseEntity.badRequest().body(response);
+    }
+}
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @GetMapping("/usuariopormail/{email}")
-    public ResponseEntity<?> getByEmail(@PathVariable String email) {
-        Map<String,Object> response = new HashMap<>();
-        List<String> errores = new ArrayList<String>();
-        Client c = clientService.findByEmail(email);
-        if(c==null){
-            errores.add("Este usuario no existe");
-            response.put("errores", errores);
-			return ResponseEntity.badRequest().body(response);
-        }else{
-            return ResponseEntity.ok().body(c);
-        }
-        
+    public ResponseEntity getByEmail(@PathVariable String email) {
+    Map<String,Object> response = new HashMap<>();
+    List<String> errores = new ArrayList<String>();
+    Client cliente = clientService.findByEmail(email);
+    if(cliente==null){
+        errores.add("Este usuario no existe");
+        response.put("errores", errores);
+        return ResponseEntity.badRequest().body(response);
+    }else if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) || cliente.getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+        return ResponseEntity.ok(cliente);
+    }else{
+        errores.add("No tienes acceso");
+        response.put("errores", errores);
+        return ResponseEntity.badRequest().body(response);
+    }
     }
 
     @SuppressWarnings("rawtypes")
@@ -142,15 +164,6 @@ public class ClientsController {
         }
     }
 
-   /* 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @DeleteMapping("/{id}/delete")
-    @SuppressWarnings("rawtypes")
-    public ResponseEntity deleteClient(@PathVariable Long id) {
-        clientService.deleteById(id);
-        return ResponseEntity.ok("Usuario eliminado satisfactoriamente");
-    }
-*/
 
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @GetMapping("/{id}/perfil")
@@ -170,104 +183,133 @@ public class ClientsController {
 			return ResponseEntity.badRequest().body(response);
         }
     }
-
-
-
-         
-
-
-    //     Object user = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-    //     Client cliente = null;
-
-    //     List<Client> todos = clientService.findAll();
-        
-    //     for(int i = 0; i < todos.size(); i++){
-
-    //         if(todos.get(i).getEmail().equals(user)){
-
-    //             cliente = todos.get(i);
-    //         }
-    //     }
-
-    //     return ResponseEntity.ok(cliente);
-         
-    // }
-
-
     
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/{id}/banear")
     public ResponseEntity banClient(@PathVariable Long id) {
-    	Map<String,Object> response = new HashMap<>();
+        Map<String,Object> response = new HashMap<>();
         List<String> errores = new ArrayList<String>();
-    	Client currentClient = clientService.findById(id);
-        if(currentClient==null){
-            errores.add("No se ha encontrado al cliente");
-            response.put("errores", errores);
+        Client currentClient = clientService.findById(id);
+        if(currentClient!=null){
+            Set<Role> currentRole = currentClient.getRoles();
+            Role roleUser = roleRepository.findByName("ROLE_USER").get();
+            Role roleAdmin = roleRepository.findByName("ROLE_ADMIN").get();
+            if(currentRole.contains(roleAdmin)){
+                errores.add("No puedes banear a un usuario que tiene permisos de administrador");
+                response.put("errores",errores);
+                return ResponseEntity.badRequest().body(response);
+    
+            } else if(!currentRole.contains(roleUser)){
+               
+                errores.add("No puedes banear a un usuario que ya estaba previamente baneado");
+                response.put("errores",errores);
+                return ResponseEntity.badRequest().body(response);
+    
+             }else{
+    
+                currentClient.setRoles(null);
+                currentClient = clientService.save(currentClient);
+                return ResponseEntity.ok(currentClient);
+            }
+
+        }else{
+            
+		   
+            errores.add("No puedes banear a un usuario que no existe");
+			response.put("errores",errores);
 			return ResponseEntity.badRequest().body(response);
+
         }
-    	
-    	currentClient.setRoles(null);
-    	
-    	currentClient = clientService.save(currentClient);
-        return ResponseEntity.ok(currentClient);
     }
     
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PutMapping("/{id}/desbanear")
     public ResponseEntity unbanClient(@PathVariable Long id) {
         Map<String,Object> response = new HashMap<>();
-        List<String> errores = new ArrayList<String>();
-    	Client currentClient = clientService.findById(id);
+        List<String> errores = new ArrayList<>();
+        Client currentClient = clientService.findById(id);
         if(currentClient==null){
             errores.add("No se ha encontrado al cliente");
             response.put("errores", errores);
+            return ResponseEntity.badRequest().body(response);
+        }
+        
+        if(currentClient!=null){
+            Role roleUser = roleRepository.findByName("ROLE_USER").get();
+            Role roleAdmin = roleRepository.findByName("ROLE_ADMIN").get();
+            Set<Role> currentRole = currentClient.getRoles();
+
+            if(currentRole.contains(roleAdmin)){
+                errores.add("No puedes desbanear a un usuario que tiene permisos de administrador");
+                response.put("errores",errores);
+                return ResponseEntity.badRequest().body(response);
+    
+            }else if(currentRole.contains(roleUser)){
+              
+                errores.add("No puedes desbanear a un usuario que no estaba previamente baneado");
+                response.put("errores",errores);
+                return ResponseEntity.badRequest().body(response);
+            }else{
+                currentRole.add(roleUser);
+                currentClient.setRoles(currentRole);
+                currentClient = clientService.save(currentClient);
+                return ResponseEntity.ok(currentClient);
+            }
+
+        }else{
+            errores.add("No puedes desbanear a un usuario que no existe");
+			response.put("errores",errores);
 			return ResponseEntity.badRequest().body(response);
         }
-    	    	
-    	Role role = roleRepository.findByName("ROLE_USER").get();
-    	Set<Role> currentRole = currentClient.getRoles();
-    	currentRole.add(role);
-    	currentClient.setRoles(currentRole);
-    		
-    	
-    	currentClient = clientService.save(currentClient);
-        return ResponseEntity.ok(currentClient);
     }
-    
-
-
    
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity deleteClient(@PathVariable Long id) {
-    	List<Plaza> plazas = plazaRepository.findByUserId(id);
-    	for(int i = 0; i<plazas.size(); i++) {
-    		Plaza plaza = plazas.get(i);
-    		
-    		List<Reserva> reservas = reservasRepository.findByPlazaId(plaza.getId());
-    		
-    		for(int i1 = 0; i1<reservas.size(); i1++) {
-    			Reserva reserva = reservas.get(i1);
-    			reserva.setPlaza(null);
-    		}
-    		    		
-    		List<Horario> horarios = horarioRepository.findHorariosByPlazaId(plaza.getId());
-    		
-    		for(int i2 = 0; i2<horarios.size(); i2++) {
-    			Horario horario = horarios.get(i2);
-    			horarioRepository.delete(horario);
-    		}
-    		
-    		plazaRepository.delete(plaza);
-    	}
-    	clientService.deleteById(id);
-        return ResponseEntity.ok().build();
-    }
+        Client usuario = clientService.findById(id);
+        Map<String,Object> response = new HashMap<>();
+        List<String> errores = new ArrayList<>();
 
+        if (usuario!=null){
+            Role roleAdmin = roleRepository.findByName("ROLE_ADMIN").get();
+            Set<Role> currentRole = usuario.getRoles();
+            
+            if(currentRole.contains(roleAdmin)){
+                errores.add("No puedes eliminar a un usuario que tiene permisos de administrador");
+                response.put("errores",errores);
+                return ResponseEntity.badRequest().body(response);
     
-     
-    
-    
+            }else{
+                List<Plaza> plazas = plazaRepository.findByUserId(id);
+            
+                for(int i = 0; i<plazas.size(); i++) {
+                        Plaza plaza = plazas.get(i);
+                        
+                        List<Reserva> reservas = reservasRepository.findByPlazaId(plaza.getId());
+                        
+                        for(int i1 = 0; i1<reservas.size(); i1++) {
+                            Reserva reserva = reservas.get(i1);
+                            reserva.setPlaza(null);
+                        }
+                                    
+                        List<Horario> horarios = horarioRepository.findHorariosByPlazaId(plaza.getId());
+                        
+                        for(int i2 = 0; i2<horarios.size(); i2++) {
+                            Horario horario = horarios.get(i2);
+                            horarioRepository.delete(horario);
+                        }
+                        
+                        plazaRepository.delete(plaza);
+                    }
+                clientService.deleteById(id);
+                return ResponseEntity.ok().build();
+            }
+           
+        }else{
+           
+            errores.add("No puedes eliminar a un usuario que no existe");
+			response.put("errores",errores);
+			return ResponseEntity.badRequest().body(response);
+        }
+    }
 }
