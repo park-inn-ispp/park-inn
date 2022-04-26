@@ -16,6 +16,13 @@ public class Horario {
     private LocalDateTime fechaInicio;
     private LocalDateTime fechaFin;
     private Boolean activo;
+
+    public Horario() {}
+
+    public Horario(Long id) {
+        this.id = id;
+    }
+
     
     public Boolean getActivo() {
 		return activo;
