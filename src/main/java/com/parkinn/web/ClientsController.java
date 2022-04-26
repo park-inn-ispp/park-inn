@@ -228,12 +228,6 @@ public class ClientsController {
         Map<String,Object> response = new HashMap<>();
         List<String> errores = new ArrayList<>();
         Client currentClient = clientService.findById(id);
-        if(currentClient==null){
-            errores.add("No se ha encontrado al cliente");
-            response.put("errores", errores);
-            return ResponseEntity.badRequest().body(response);
-        }
-        
         if(currentClient!=null){
             Role roleUser = roleRepository.findByName("ROLE_USER").get();
             Role roleAdmin = roleRepository.findByName("ROLE_ADMIN").get();
