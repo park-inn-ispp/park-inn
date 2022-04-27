@@ -60,7 +60,7 @@ import org.springframework.web.bind.annotation.RestController;
         	response.put("incidencia", incidencia);
 			List<String> errores = new ArrayList<>();
 
-			if(incidencia.getUser().getEmail() == null || incidencia.getUser() == null){
+			if(incidencia.getEmail().getEmail() == null || incidencia.getUser() == null){
 				errores.add("La incidencia no tiene ningún usuario asociado");
 			}
 			if(incidencia.getReserva() == null || incidencia.getReserva().getId() == null ){
