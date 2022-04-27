@@ -117,8 +117,12 @@ public class ReservaServiceTest{
     @DisplayName("Test devolver dinero sin fianza")
     public void testdevolverSinFianza(){
         Reserva r = new Reserva(1l);
+        Client c1 = new Client(1l);
+        Plaza plaza = new Plaza(1l, c1);
+        plaza.setFianza(1.0);
         r.setFianza(1.0);
         r.setPrecioTotal(5.0);
+        r.setPlaza(plaza);
 
         PayPalAccesToken paypal= new PayPalAccesToken();
         paypal.setAccessToken("AccesoTest");

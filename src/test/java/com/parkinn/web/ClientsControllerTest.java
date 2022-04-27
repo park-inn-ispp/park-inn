@@ -104,16 +104,17 @@ public class ClientsControllerTest {
 		roles.add(rB);
 		c4.setRoles(roles);
 
-		given(this.service.findAll()).willReturn(asList(c1,c2));
-		given(this.service.findById(c1.getId())).willReturn(c1);
-		given(this.service.findById(c2.getId())).willReturn(c2);
-		given(this.service.findById(c3.getId())).willReturn(c3);
-		given(this.service.findById(c4.getId())).willReturn(c4);
-		given(this.service.findByEmail(c1.getEmail())).willReturn(c1);
-		given(this.service.save(c1)).willReturn(c1);
-		given(this.service.save(c2)).willReturn(c2);
-		given(this.service.save(c3)).willReturn(c3);
-		given(this.service.save(c4)).willReturn(c4);
+		given(this.clientRepository.findAll()).willReturn(asList(c1,c2));
+		given(this.clientRepository.findById(c1.getId())).willReturn(Optional.of(c1));
+		given(this.clientRepository.findById(c1.getId())).willReturn(Optional.of(c1));
+		given(this.clientRepository.findById(c2.getId())).willReturn(Optional.of(c2));
+		given(this.clientRepository.findById(c3.getId())).willReturn(Optional.of(c3));
+		given(this.clientRepository.findById(c4.getId())).willReturn(Optional.of(c4));
+		given(this.clientRepository.findByEmail(c1.getEmail())).willReturn(Optional.of(c1));
+		given(this.clientRepository.save(c1)).willReturn(c1);
+		given(this.clientRepository.save(c2)).willReturn(c2);
+		given(this.clientRepository.save(c3)).willReturn(c3);
+		given(this.clientRepository.save(c4)).willReturn(c4);
 		given(this.roleRepository.findByName(rU.getName())).willReturn(Optional.of(rU));
 		given(this.roleRepository.findByName(rA.getName())).willReturn(Optional.of(rA));
 		given(this.roleRepository.findByName(rB.getName())).willReturn(Optional.of(rB));
@@ -129,7 +130,7 @@ public class ClientsControllerTest {
 	@WithMockUser(authorities  = "ROLE_ADMIN")
     @Test
 	void testGetClientsEmpty() throws Exception {
-		given(this.service.findAll()).willReturn(asList());
+		given(this.clientRepository.findAll()).willReturn(asList());
 		mockMvc.perform(get("/clients")).andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.errores[0]").value("No existen usuarios en la base de datos"));
 	}
@@ -151,7 +152,7 @@ public class ClientsControllerTest {
 	@WithMockUser(authorities  = "ROLE_ADMIN")
     @Test
 	void testGetClientNotFound() throws Exception {
-		given(this.service.findById(c1.getId())).willReturn(null);
+		given(this.clientRepository.findById(c1.getId())).willReturn(Optional.empty());
 		mockMvc.perform(get("/clients/{id}", c1.getId())).andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.errores[0]").value("Este usuario no existe"));
 	}
@@ -173,7 +174,7 @@ public class ClientsControllerTest {
 	@WithMockUser(authorities  = "ROLE_ADMIN")
     @Test
 	void testGetByEmailNotFound() throws Exception {
-		given(this.service.findByEmail(c1.getEmail())).willReturn(null);
+		given(this.clientRepository.findByEmail(c1.getEmail())).willReturn(Optional.empty());
 		mockMvc.perform(get("/clients/usuariopormail/{email}", c1.getEmail())).andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.errores[0]").value("Este usuario no existe"));
 	}
@@ -204,7 +205,7 @@ public class ClientsControllerTest {
     @Test
 	void testUpdateClientNotFound() throws Exception {
 		c2.setEmail("emailUpdate");
-		given(this.service.findById(c2.getId())).willReturn(null);
+		given(this.clientRepository.findById(c2.getId())).willReturn(Optional.empty());
 		mockMvc.perform(put("/clients/{id}/edit",c2.getId()).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(c2))).andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.errores[0]").value("Este usuario no existe"));
 	}
@@ -227,7 +228,7 @@ public class ClientsControllerTest {
 	@WithMockUser(authorities  = "ROLE_ADMIN")
     @Test
 	void testConsultarPerfilNotFound() throws Exception {
-		given(this.service.findById(c1.getId())).willReturn(null);
+		given(this.clientRepository.findById(c1.getId())).willReturn(Optional.empty());
 		mockMvc.perform(get("/clients/{id}/perfil", c1.getId())).andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.errores[0]").value("Este usuario no existe"));
 	}
@@ -249,7 +250,7 @@ public class ClientsControllerTest {
 	@WithMockUser(authorities  = "ROLE_ADMIN")
     @Test
 	void testBanClientNotFound() throws Exception {
-		given(this.service.findById(c3.getId())).willReturn(null);
+		given(this.clientRepository.findById(c3.getId())).willReturn(Optional.empty());
 		mockMvc.perform(put("/clients/{id}/banear",c3.getId())).andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.errores[0]").value("No puedes banear a un usuario que no existe"));
 	}
@@ -264,7 +265,7 @@ public class ClientsControllerTest {
 	@WithMockUser(authorities  = "ROLE_ADMIN")
     @Test
 	void testUnbanClientNotFound() throws Exception {
-		given(this.service.findById(c4.getId())).willReturn(null);
+		given(this.clientRepository.findById(c4.getId())).willReturn(Optional.empty());
 		mockMvc.perform(put("/clients/{id}/desbanear",c4.getId())).andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.errores[0]").value("No puedes desbanear a un usuario que no existe"));
 	}
@@ -278,7 +279,7 @@ public class ClientsControllerTest {
 	@WithMockUser(authorities  = "ROLE_ADMIN")
     @Test
 	void testDeleteClientNotFound() throws Exception {
-		given(this.service.findById(c2.getId())).willReturn(null);
+		given(this.clientRepository.findById(c2.getId())).willReturn(Optional.empty());
 		mockMvc.perform(delete("/clients/{id}",c2.getId())).andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.errores[0]").value("No puedes eliminar a un usuario que no existe"));
 	}

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.parkinn.model.Comision;
-import com.parkinn.repository.ComisionRepository;
+import com.parkinn.service.ComisionService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.GetMapping;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/comision")
@@ -25,25 +24,25 @@ public class ComisionController {
 
 
     @Autowired
-    private final ComisionRepository comisionRepository;
+    private final ComisionService comisionService;
 
-    public ComisionController(ComisionRepository comisionRepository) {
-        this.comisionRepository = comisionRepository;
+    public ComisionController(ComisionService comisionService) {
+        this.comisionService = comisionService;
     }
     @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @GetMapping("/{id}")
     public Object getComision(@PathVariable Long id){
-        Optional<Comision>  comision = comisionRepository.findById(id);
+        Comision  comision = comisionService.findById(id);
         List<String> errores = new ArrayList<String>();
         Map<String,Object> response = new HashMap<>();
         
         
-        if(!comision.isPresent()){
+        if(comision == null){
 			errores.add("Estás intentando acceder a una comisión inválida que no existe");
 			response.put("errores", errores);
 			return ResponseEntity.badRequest().body(response);
         }else{
-            return comision.get();
+            return comision;
 
         }
     }
@@ -64,11 +63,11 @@ public class ComisionController {
         }else{
 
             
-            Optional<Comision> currentComision = comisionRepository.findById(id);
-            if(currentComision.isPresent()){
-                Comision comisionExistente= currentComision.get();
+            Comision currentComision = comisionService.findById(id);
+            if(currentComision != null){
+                Comision comisionExistente= currentComision;
                 comisionExistente.setPorcentaje(comision.getPorcentaje());
-                comisionExistente = comisionRepository.save(comisionExistente);
+                comisionExistente = comisionService.save(comisionExistente);
                 return ResponseEntity.ok(comisionExistente);
 
             }else{

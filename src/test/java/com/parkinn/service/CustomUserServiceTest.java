@@ -2,6 +2,7 @@ package com.parkinn.service;
 
 import static org.mockito.Mockito.doReturn;
 
+import java.util.Optional;
 import java.util.Set;
 
 import com.parkinn.model.Client;
@@ -42,7 +43,7 @@ class CustomUserServiceTest {
 		rol.setId(1l);
 		rol.setName("ROLE_ADMIN");
 		client.setRoles(Set.of(rol));
-		doReturn(client).when(clientService).findByNameOrEmail("prueba@prueba.com","prueba@prueba.com");
+		doReturn(Optional.of(client)).when(clientRepository).findByNameOrEmail("prueba@prueba.com","prueba@prueba.com");
 
 		UserDetails userDetailsReturn = customUserDetailsService.loadUserByUsername("prueba@prueba.com");
 

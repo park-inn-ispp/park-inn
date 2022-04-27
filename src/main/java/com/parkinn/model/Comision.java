@@ -45,6 +45,7 @@ public class Comision {
         return "Comision [id=" + id + ", porcentaje=" + porcentaje + "]";
     }
 
+
     
 
 }
