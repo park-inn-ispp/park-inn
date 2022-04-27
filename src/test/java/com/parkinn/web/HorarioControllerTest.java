@@ -1,7 +1,6 @@
 package com.parkinn.web;
 
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -10,11 +9,9 @@ import javax.sql.DataSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.parkinn.model.Client;
-import com.parkinn.model.Comision;
 import com.parkinn.model.Horario;
 import com.parkinn.model.Plaza;
 import com.parkinn.repository.HorarioRepository;
-import com.parkinn.service.ComisionService;
 import com.parkinn.service.CustomUserDetailsService;
 import com.parkinn.service.HorarioService;
 

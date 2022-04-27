@@ -1,7 +1,6 @@
 package com.parkinn.service;
 
 import com.parkinn.repository.HorarioRepository;
-import com.parkinn.repository.PlazaRepository;
 import com.parkinn.repository.ComisionRepository;
 import com.parkinn.repository.ReservaRepository;
 
