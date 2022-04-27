@@ -153,7 +153,7 @@ public class ClientsController {
             currentClient.setEmail(client.getEmail());
             currentClient.setPhone(client.getPhone());
             currentClient.setSurname(client.getSurname());
-            currentClient.setPassword(passwordEncoder.encode(client.getPassword()));
+            
             currentClient = clientService.save(currentClient);
             return ResponseEntity.ok(currentClient);
         }else{

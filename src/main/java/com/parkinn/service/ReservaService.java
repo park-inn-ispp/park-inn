@@ -34,7 +34,7 @@ public class ReservaService {
 
 	
 	
-	final static String URL_CORREO = "https://park-inn-ispp-fe.herokuapp.com";
+	final static String URL_CORREO = "https://parkinn-api-v3.herokuapp.com";
 
     @Autowired
     RestTemplate restTemplate;
