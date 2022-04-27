@@ -3,13 +3,11 @@ package com.parkinn.service;
 import com.parkinn.repository.PlazaRepository;
 import com.parkinn.model.Localizacion;
 import com.parkinn.model.Plaza;
-import com.parkinn.model.Client;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

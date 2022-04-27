@@ -7,14 +7,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import com.parkinn.model.Client;
 import com.parkinn.model.Estado;
 import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
 import com.parkinn.service.ClientService;
-import com.parkinn.repository.HorarioRepository;
 import com.parkinn.service.MailService;
 import com.parkinn.service.PlazaService;
 import com.parkinn.service.ReservaService;
@@ -48,8 +46,6 @@ public class ReservaController {
     @Autowired
     private MailService mailService;
 
-	@Autowired
-	private HorarioRepository horarioRepository;
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
 	@GetMapping("/usuario/{id}")

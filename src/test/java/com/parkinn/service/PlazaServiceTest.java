@@ -111,31 +111,30 @@ class PlazaServiceTest {
 
 	}
 
-	/* @Test
-	@DisplayName("Test comprobar plazas iguales True")
-	void testComprobarPlazasIgualesTrue() {
-		Client client = new Client(1l);
-		Plaza plaza = new Plaza(1l,client);
+	// @Test
+	// @DisplayName("Test comprobar plazas iguales True")
+	// void testComprobarPlazasIgualesTrue() {
+	// 	Client client = new Client(1l);
+	// 	Plaza plaza = new Plaza(1l,client);
 
-		doReturn(Arrays.asList(plaza)).when(plazaRepository).findByDireccionAndAdministrador("TestTrue", client);
+	// 	doReturn(Arrays.asList(plaza)).when(plazaRepository).findByDireccionAndAdministrador("TestTrue", client);
 
-		boolean existe = plazaService.comprobarPlazasIguales("TestTrue", client);
+	// 	boolean existe = plazaService.comprobarPlazasIguales("TestTrue", client);
 
-		Assertions.assertTrue(existe,"El resultado esperado es que SÍ existe la plaza");
+	// 	Assertions.assertTrue(existe,"El resultado esperado es que SÍ existe la plaza");
 
-	}
+	// }
 
-	@Test
-	@DisplayName("Test comprobar plazas iguales False")
-	void testComprobarPlazasIgualesFalse() {
-		Client client = new Client(1l);
+	// @Test
+	// @DisplayName("Test comprobar plazas iguales False")
+	// void testComprobarPlazasIgualesFalse() {
+	// 	Client client = new Client(1l);
 		
-		doReturn(Arrays.asList()).when(plazaRepository).findByDireccionAndAdministrador("TestFalse", client);
+	// 	doReturn(Arrays.asList()).when(plazaRepository).findByDireccionAndAdministrador("TestFalse", client);
 
-		boolean existe = plazaService.comprobarPlazasIguales("TestFalse", client);
+	// 	boolean existe = plazaService.comprobarPlazasIguales("TestFalse", client);
 
-		Assertions.assertFalse(existe,"El resultado esperado es que NO existe la plaza");
-
-	} */
+	// 	Assertions.assertFalse(existe,"El resultado esperado es que NO existe la plaza");
+	// }
 
 }

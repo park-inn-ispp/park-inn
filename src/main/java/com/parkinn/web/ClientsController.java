@@ -6,7 +6,6 @@ import java.net.URISyntaxException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import java.util.List;
 
 import java.util.Set;
@@ -194,6 +193,8 @@ public class ClientsController {
             Set<Role> currentRole = currentClient.getRoles();
             Role roleUser = roleRepository.findByName("ROLE_USER").get();
             Role roleAdmin = roleRepository.findByName("ROLE_ADMIN").get();
+            Role roleBanned = roleRepository.findByName("ROLE_BANNED").get();
+
             if(currentRole.contains(roleAdmin)){
                 errores.add("No puedes banear a un usuario que tiene permisos de administrador");
                 response.put("errores",errores);
@@ -206,8 +207,10 @@ public class ClientsController {
                 return ResponseEntity.badRequest().body(response);
     
              }else{
-    
-                currentClient.setRoles(null);
+                currentRole.clear();
+                currentRole.add(roleBanned);
+
+                currentClient.setRoles(currentRole);
                 currentClient = clientService.save(currentClient);
                 return ResponseEntity.ok(currentClient);
             }
@@ -244,6 +247,7 @@ public class ClientsController {
                 response.put("errores",errores);
                 return ResponseEntity.badRequest().body(response);
             }else{
+                currentRole.clear(); //Borramos los roles que tenga y le ponemos el ROLE_USER
                 currentRole.add(roleUser);
                 currentClient.setRoles(currentRole);
                 currentClient = clientService.save(currentClient);
