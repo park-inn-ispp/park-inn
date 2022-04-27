@@ -5,7 +5,6 @@ import java.net.URISyntaxException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.chrono.ChronoLocalDate;
 import java.time.chrono.ChronoLocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,8 +15,6 @@ import java.util.Map;
 import javax.validation.Valid;
 
 import com.parkinn.model.Horario;
-import com.parkinn.model.EstadoIncidencia;
-import com.parkinn.model.Incidencia;
 import com.parkinn.model.Localizacion;
 import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
@@ -53,7 +50,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 @RequestMapping("/plazas")
 public class PlazaController {
 
-	final static String URL_CORREO = "https://park-inn-ispp-fe.herokuapp.com";
+	final static String URL_CORREO = "https://parkinn-api-v3.herokuapp.com";
 
 	
     @Autowired
@@ -92,28 +89,21 @@ public class PlazaController {
         Map<String,Object> response = new HashMap<>();
         try {
             Localizacion localizacion = plazaService.getLocalizacion(plaza.getDireccion());
-            plaza.setLatitud(localizacion.getLat());
-            plaza.setLongitud(localizacion.getLon());
+            // Se cambia ligeramente si ya existen esas coordenadas en otra plaza
+            List<String> nuevasCoordenadas= plazaService.latitudLongitudDiferentes(localizacion.getLat(),localizacion.getLon());
+            plaza.setLatitud(nuevasCoordenadas.get(0));
+            plaza.setLongitud(nuevasCoordenadas.get(1));
           }
           catch(Exception e) {
-            errores.add("La dirección insertada no existe. Por favor, indique el tipo (calle, avenida...) y nombre correcto de su dirección");
+            errores.add("La dirección insertada no existe o no es reconocida por el sistema. Por favor, indique el tipo (calle, avenida...) y nombre correcto de su dirección");
             response.put("plaza", plaza);
             response.put("errores",errores);
             return ResponseEntity.badRequest().body(response);
           }
-          
         
-       if(plazaService.comprobarPlazasIguales(plaza.getDireccion(),plaza.getAdministrador())){
-        
-        errores.add("Esta plaza ya existe. Intenta añadir una plaza con una dirección diferente");
-        response.put("plaza", plaza);
-        response.put("errores",errores);
-        return ResponseEntity.badRequest().body(response);
-       }else{
+       
         Plaza savedPlaza = plazaService.guardarPlaza(plaza);
         return ResponseEntity.created(new URI("/plazas/" + savedPlaza.getId())).body(savedPlaza);
-       }
-    	    	
     	
     }
 
@@ -127,9 +117,16 @@ public class PlazaController {
 
     	if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) ||currentPlaza.getAdministrador().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
             try{
-                Localizacion localizacion = plazaService.getLocalizacion(plaza.getDireccion());
-                currentPlaza.setLatitud(localizacion.getLat());
-                currentPlaza.setLongitud(localizacion.getLon());
+                // Si se cambia la dirección se recalculan las coordenadas, 
+                // y si ya existen en otra plaza, se modifican ligeramente para no superponerse en el mapa
+                if(!currentPlaza.getDireccion().equals(plaza.getDireccion())){
+                    Localizacion localizacion = plazaService.getLocalizacion(plaza.getDireccion());
+                    List<String> nuevasCoordenadas= plazaService.latitudLongitudDiferentes(localizacion.getLat(),localizacion.getLon());
+                    plaza.setLatitud(nuevasCoordenadas.get(0));
+                    plaza.setLongitud(nuevasCoordenadas.get(1));
+                }
+               
+             
             } catch(Exception e) {
                 errores.add("La dirección insertada no existe o no es reconocida por el sistema. Por favor, indique el tipo (calle, avenida...) y nombre correcto de su dirección");
                 response.put("plaza", plaza);
@@ -137,13 +134,7 @@ public class PlazaController {
                 return ResponseEntity.badRequest().body(response);
             }
 
-            if(plazaService.comprobarPlazasIgualesEditar(plaza.getDireccion(),currentPlaza.getAdministrador(),id)){
-        
-                errores.add("Esta plaza ya existe en tu colección. Intenta añadir una plaza con una dirección diferente");
-                response.put("plaza", plaza);
-                response.put("errores",errores);
-                return ResponseEntity.badRequest().body(response);
-               }else{
+          
                
                 currentPlaza.setDireccion(plaza.getDireccion());
                 currentPlaza.setDescripcion(plaza.getDescripcion());
@@ -156,11 +147,6 @@ public class PlazaController {
     
                 currentPlaza = plazaService.guardarPlaza(currentPlaza);
                 return ResponseEntity.ok(currentPlaza);
-
-               }
-           
-           
-
     	}else{
             
   			errores.add("No puedes editar una plaza que no es de tu propiedad");            
@@ -184,40 +170,23 @@ public class PlazaController {
               //List<String> errores1 = new ArrayList<String>();
               //Map<String,Object> response = new HashMap<>();
       		if(reservaRepository.findByPlazaId(id).isEmpty()) { 
+      		
+      			List<Horario> horarios = horarioRepository.findHorariosByPlazaId(id);
+        		
+        		for(int i = 0; i<horarios.size(); i++) {
+        			Horario horario = horarios.get(i);
+        			horarioRepository.delete(horario);
+        		}
       			plazaService.deleteById(id);
       			return ResponseEntity.ok().build();
       		}else {
-  				/*List<Reserva> reservas = (List<Reserva>) currentPlaza.getReservas();
-      			for(int i = 0; i<reservas.size(); i++) {
-          			Boolean incidenciaPendiente = false;
-  					List<Incidencia> incidenciasporReserva = (List<Incidencia>) reservas.get(i).getIncidencias();
-          			if(!incidenciasporReserva.isEmpty()) {
-          				for(int a = 0; a<incidenciasporReserva.size(); a++) {
-          					if(!incidenciaPendiente) {
-          						incidenciaPendiente = incidenciasporReserva.get(a).getEstado().equals(EstadoIncidencia.pendiente);	
-          					}
-          				}
-          				if(incidenciaPendiente==true) {
-          					errores1.add("No puede eliminar su plaza debido a que tiene pendiente una incidencia");            
-          					response.put("error", errores1);
-          				
-          				}else if(Duration.between(reservas.get(i).getFechaFin(), LocalDateTime.now()).abs().toHours()<24) {
-          					errores1.add("No puede eliminar su plaza debido a que deben pasar 24 horas tras haber concluido una reserva");            
-          					response.put("error", errores1);
-          					
-          				}else {
-          					currentPlaza.setAdministrador(null);
-          				}
-          			}else {
-          		    	currentPlaza.setAdministrador(null);
-          			}
-      			}
-      			if(errores1.isEmpty()){
-      				return ResponseEntity.ok().build();
-      			}
-      			else {
-  					return ResponseEntity.badRequest().body(response);
-      			}*/
+  				
+      			List<Horario> horarios = horarioRepository.findHorariosByPlazaId(id);
+        		
+        		for(int i = 0; i<horarios.size(); i++) {
+        			Horario horario = horarios.get(i);
+        			horarioRepository.delete(horario);
+        		}
       			reservaRepository.findByPlazaId(id).forEach(res->res.setPlaza(null));
       			plazaService.deleteById(id);
       			return ResponseEntity.ok().build();
@@ -373,6 +342,7 @@ public class PlazaController {
         }
     }
     
+
     @SuppressWarnings("rawtypes")
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @PostMapping("/{id}/crearHorarios")
@@ -437,3 +407,4 @@ public class PlazaController {
            }
        }
 }
+

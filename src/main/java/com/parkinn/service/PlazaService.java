@@ -3,7 +3,6 @@ package com.parkinn.service;
 import com.parkinn.repository.PlazaRepository;
 import com.parkinn.model.Localizacion;
 import com.parkinn.model.Plaza;
-import com.parkinn.model.Client;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -38,25 +38,46 @@ public class PlazaService {
         return savedPlaza;
     }
 
-    public boolean comprobarPlazasIguales(String direccion,Client administrador){
-        List<Plaza> plazaExiste =  repository.findByDireccionAndAdministrador(direccion,administrador);
-        return plazaExiste.size() != 0;
-    }
-    public boolean comprobarPlazasIgualesEditar(String direccion,Client administrador,Long idPlazaEditando){
-        List<Plaza> plazaExiste =  repository.findByDireccionAndAdministrador(direccion,administrador);
-        if(plazaExiste.size()==0){
-            return false;
-        } else if(plazaExiste.size()==1){
-            if(plazaExiste.get(0).getId().equals(idPlazaEditando)){
-                return false;
-            }else{
-                return true;
-            }
-        }else{
-            return true;
-        }
-    }
+    // Si ya existe una plaza con la misma latitud y longitud, modificamos levemente las coordenadas para que 
+    // no se pisen en el mapa, y vayan formando una espiral
+    public List<String> latitudLongitudDiferentes(String latitud, String longitud){
+        List<String> nuevasCoordenadas= new ArrayList<String>();
+        nuevasCoordenadas.add(latitud);
+        nuevasCoordenadas.add(longitud);
+        boolean coordenadasRepetidas = true;
+        Double latitudDouble = Double.valueOf(latitud);
+        Double longitudDouble = Double.valueOf(longitud);
+        Double espiralLatitud= 0.0;
+        Double espiralLongitud= 0.0;
+        Double proporcionSumar= 0.0001;
 
+        while(coordenadasRepetidas){
+
+            coordenadasRepetidas= !repository.existsCoordenates(latitud, longitud).isEmpty();
+            if (coordenadasRepetidas){
+                Long ratioLatitud =Math.round(Math.cos(espiralLatitud));
+                Long ratioLongitud =Math.round(Math.sin(espiralLongitud));
+                
+                latitudDouble += ratioLatitud*proporcionSumar;
+                longitudDouble += ratioLongitud*proporcionSumar;
+                latitud = String.valueOf(latitudDouble);
+                longitud= String.valueOf(longitudDouble);
+                proporcionSumar+=0.0001;
+                espiralLatitud+=Math.PI/2;
+                espiralLongitud+=Math.PI/2;
+            }else{
+                nuevasCoordenadas.set(0, latitud);
+                nuevasCoordenadas.set(1, longitud);
+                coordenadasRepetidas= false;
+                break;
+
+            }
+            
+        }
+        
+        return nuevasCoordenadas;
+    }
+ 
     public Plaza findById(Long id){
         Plaza plaza = repository.findById(id).orElse(null);
         return plaza;

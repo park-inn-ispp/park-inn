@@ -6,15 +6,12 @@ import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import com.gargoylesoftware.htmlunit.javascript.host.fetch.Response;
 import com.parkinn.model.Client;
 import com.parkinn.model.Estado;
-import com.parkinn.model.Horario;
 import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
 import com.parkinn.repository.ClientRepository;
@@ -39,7 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/reservas")
 public class ReservaController {
 	
-	final static String URL_CORREO = "https://park-inn-ispp-fe.herokuapp.com";
+	final static String URL_CORREO = "https://parkinn-api-v3.herokuapp.com";
 
 	@Autowired
 	private ReservaService reservaService;
@@ -394,10 +391,8 @@ public class ReservaController {
 			if(propietarioOptional.isPresent()){
 				Client propietario = propietarioOptional.get();
 				esPropietario  = propietario.getEmail().equals(user);
-				emailPropietario= propietario.getEmail();
-				
+				emailPropietario= propietario.getEmail();	
 			}
-			
 		}
 		if(r==null){
 			errores.add("No se encuentra la reserva");

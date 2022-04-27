@@ -1,10 +1,5 @@
 package com.parkinn.model;
 
-import java.util.List;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.persistence.*;
 
 @Entity
@@ -28,9 +23,11 @@ public class Plaza {
     //private List<List<String>> horarios;
     private Boolean tramos;
 
+
     @ManyToOne(optional = true)
     @JoinColumn(name="user_id")
     private Client administrador;
+
 
 	public Boolean getTramos() {
 		return tramos;
