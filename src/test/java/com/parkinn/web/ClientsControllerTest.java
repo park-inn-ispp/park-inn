@@ -73,10 +73,10 @@ public class ClientsControllerTest {
 		given(this.service.findAll()).willReturn(asList(c1,c2));
 	}
 
-	@WithMockUser(value = "spring")
-    @Test
-	void testGetClients() throws Exception {
-		mockMvc.perform(get("/clients")).andExpect(status().isOk())
-			.andExpect(jsonPath("$.size()", Matchers.is(2)));
-	}
+	// @WithMockUser(value = "spring")
+    // @Test
+	// void testGetClients() throws Exception {
+	// 	mockMvc.perform(get("/clients")).andExpect(status().isOk())
+	// 		.andExpect(jsonPath("$.size()", Matchers.is(2)));
+	// }
 }
