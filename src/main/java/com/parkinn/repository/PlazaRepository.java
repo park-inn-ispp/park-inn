@@ -26,6 +26,8 @@ public interface PlazaRepository extends JpaRepository<Plaza, Long> {
     @Query(value = "SELECT DISTINCT p.* FROM Plazas p WHERE p.user_id LIKE :usuario_id", nativeQuery=true)
     public List<Plaza> findByUserId(@Param("usuario_id") Long id) throws DataAccessException;
 
-   	
+    @Query(value = "SELECT p.* FROM Plazas p WHERE p.latitud LIKE :latitud AND p.longitud LIKE :longitud ", nativeQuery=true)
+    public List<Plaza> existsCoordenates(@Param("latitud") String latitud,@Param("longitud") String longitud) throws DataAccessException;
+
 }
 

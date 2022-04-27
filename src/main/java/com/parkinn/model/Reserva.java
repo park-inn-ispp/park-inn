@@ -19,7 +19,10 @@ public class Reserva {
     private Long id;
 
     private String paypal_order_id;
+
+    private Long propietarioId;
    
+  
     private Estado estado;
     private Double precioTotal;
     @NotNull
@@ -28,17 +31,61 @@ public class Reserva {
     private LocalDateTime fechaFin;
     private LocalDateTime fechaSolicitud;
     private String comentarios;
+    private Double fianza;
+    private String direccion;
+    
 
-    @ManyToOne
+    public Reserva(){
+    }
+
+    public Reserva(long id){
+        this.id = id;
+    }
+
+    public Double getFianza() {
+		return fianza;
+	}
+    private Float comision;
+
+
+	public void setFianza(Double fianza) {
+		this.fianza = fianza;
+	}
+
+    public Long getPropietarioId() {
+        return propietarioId;
+    }
+
+    public void setPropietarioId(Long propietarioId) {
+        this.propietarioId = propietarioId;
+    }
+
+	public String getDireccion() {
+		return direccion;
+	}
+
+	public void setDireccion(String direccion) {
+		this.direccion = direccion;
+	}
+
+	@ManyToOne(optional = true)
     @JoinColumn(name="plaza_id")
     private Plaza plaza;
 
-    @ManyToOne
+    @ManyToOne(optional = true)
     @JoinColumn(name="user_id")
     private Client user;
 
-    public Long getId() {
+	public Long getId() {
         return id;
+    }
+
+    public Float getComision() {
+        return comision;
+    }
+
+    public void setComision(Float comision) {
+        this.comision = comision;
     }
 
     public Estado getEstado() {

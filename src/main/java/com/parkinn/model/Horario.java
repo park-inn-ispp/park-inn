@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 import javax.persistence.*;
 
+
 @Entity
 @Table(name = "horarios")
 public class Horario {
@@ -13,12 +14,36 @@ public class Horario {
 
     private LocalDateTime fechaInicio;
     private LocalDateTime fechaFin;
+    private Boolean activo;
 
-    /*
-    @ManyToOne()
+    public Horario(){
+    }
+
+    public Horario(long id){
+        this.id = id;
+    }
+    
+    public Boolean getActivo() {
+		return activo;
+	}
+	public void setActivo(Boolean activo) {
+		this.activo = activo;
+	}
+	public Long getId() {
+		return id;
+	}
+	public void setId(Long id) {
+		this.id = id;
+	}
+	public Plaza getPlaza() {
+		return plaza;
+	}
+	public void setPlaza(Plaza plaza) {
+		this.plaza = plaza;
+	}
+	@ManyToOne(optional = true)
     @JoinColumn(name = "plaza_id")
     private Plaza plaza;
-	*/
     /*
     @OneToOne
     @JoinColumn(name = "plaza_id")
