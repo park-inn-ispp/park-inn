@@ -1,7 +1,6 @@
 package com.parkinn.service;
 
 import com.parkinn.repository.HorarioRepository;
-import com.parkinn.repository.PlazaRepository;
 import com.parkinn.repository.ComisionRepository;
 import com.parkinn.repository.ReservaRepository;
 
@@ -35,7 +34,7 @@ public class ReservaService {
 
 	
 	
-	final static String URL_CORREO = "https://park-inn-ispp-fe.herokuapp.com";
+	final static String URL_CORREO = "https://parkinn-api-v3.herokuapp.com";
 
     @Autowired
     RestTemplate restTemplate;

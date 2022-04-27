@@ -1,6 +1,8 @@
 package com.parkinn.service;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doReturn;
 
 import java.util.Arrays;
@@ -8,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.parkinn.model.Client;
+import com.parkinn.model.Localizacion;
 import com.parkinn.model.Plaza;
 import com.parkinn.repository.PlazaRepository;
 
@@ -17,16 +20,20 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
 @SpringBootTest 
 class PlazaServiceTest {
-
 
 	@Autowired
 	private PlazaService plazaService;
 
 	@MockBean
 	private PlazaRepository plazaRepository;
+
+	@MockBean
+    RestTemplate restTemplate;
 
 	@Test
 	@DisplayName("Test findByID Success")
@@ -38,19 +45,16 @@ class PlazaServiceTest {
 
 		Assertions.assertNotNull(plazaReturn,"La plaza devuelta es null");
 		Assertions.assertSame(plaza,plazaReturn, "La plaza obtenida no es igual a la esperada");
-
 	}
 
 	@Test
 	@DisplayName("Test findByID fail")
 	void testFindByIdFail() {
-
 		doReturn(Optional.empty()).when(plazaRepository).findById(1l);
 
 		Plaza plazaReturn = plazaService.findById(1l);
 
 		Assertions.assertNull(plazaReturn,"La plaza devuelta no es null");
-
 	}
 
 	
@@ -65,7 +69,6 @@ class PlazaServiceTest {
 		List<Plaza> plazaReturn = plazaService.findAll();
 
 		Assertions.assertEquals(2, plazaReturn.size(),"El tamaño de la lista devuelta debe ser 2");
-
 	}
 
 	@Test
@@ -79,7 +82,6 @@ class PlazaServiceTest {
 
 		Assertions.assertNotNull(plazaReturn,"La plaza devuelta  es null");
 		Assertions.assertEquals(1l, plazaReturn.getId(),"El id de la plaza debe ser 1");
-
 	}
 
 	@Test
@@ -90,51 +92,53 @@ class PlazaServiceTest {
 		Plaza plaza2 = new Plaza(2l,client);
 		Plaza plaza3 = new Plaza(3l,client);
 
-
 		doReturn(Arrays.asList(plaza,plaza2,plaza3)).when(plazaRepository).findByUserId(1l);
 
 		List<Plaza> plazaReturn = plazaService.findUserById(1l);
 
 		Assertions.assertEquals(3, plazaReturn.size(),"El tamaño de la lista devuelta debe ser 3");
-
 	}
 
 	@Test
 	@DisplayName("Test buscar plazas por usuario fail")
 	void testFindByUserIdFail() {
-
 		doReturn(null).when(plazaRepository).findByUserId(2l);
 
 		List<Plaza> plazaReturn = plazaService.findUserById(2l);
 
 		Assertions.assertNull(plazaReturn,"El resultado devuelto debe ser null");
+	}
+
+	@Test
+	@DisplayName("Test calculo de latitud y longuitud diferentes")
+	void testLatitudLongitudDiferentes() {
+		Client client = new Client(1l);
+		Plaza plaza = new Plaza(1l,client);
+
+	  	doReturn(Arrays.asList(plaza)).when(plazaRepository).existsCoordenates("1000", "1000");
+
+	 	List<String> latLong = plazaService.latitudLongitudDiferentes("1000", "1000");
+
+	 	Assertions.assertEquals("1000.0001",latLong.get(0),"La latitud no es la esperada");
+		 Assertions.assertEquals("1000.0",latLong.get(1),"La longitud no es la esperada");
 
 	}
 
-	// @Test
-	// @DisplayName("Test comprobar plazas iguales True")
-	// void testComprobarPlazasIgualesTrue() {
-	// 	Client client = new Client(1l);
-	// 	Plaza plaza = new Plaza(1l,client);
-
-	// 	doReturn(Arrays.asList(plaza)).when(plazaRepository).findByDireccionAndAdministrador("TestTrue", client);
-
-	// 	boolean existe = plazaService.comprobarPlazasIguales("TestTrue", client);
-
-	// 	Assertions.assertTrue(existe,"El resultado esperado es que SÍ existe la plaza");
-
-	// }
-
-	// @Test
-	// @DisplayName("Test comprobar plazas iguales False")
-	// void testComprobarPlazasIgualesFalse() {
-	// 	Client client = new Client(1l);
+	@Test
+	@DisplayName("Test get localización")
+	void testGetLocalizacion() {
+	 	String query = "Calle test, numero test, cuidad test, provincia test, codigo test";
+		Localizacion l = new Localizacion();
+		l.setLat("1000");
+		Localizacion[] locs = new Localizacion[1];
+		locs[0] = l;
+		ResponseEntity<Localizacion[]> response = ResponseEntity.ok(locs);
 		
-	// 	doReturn(Arrays.asList()).when(plazaRepository).findByDireccionAndAdministrador("TestFalse", client);
+	 	doReturn(response).when(restTemplate).getForEntity(anyString(), same(Localizacion[].class));
 
-	// 	boolean existe = plazaService.comprobarPlazasIguales("TestFalse", client);
+	 	Localizacion loc = plazaService.getLocalizacion(query);
 
-	// 	Assertions.assertFalse(existe,"El resultado esperado es que NO existe la plaza");
-	// }
+	 	Assertions.assertEquals("1000",loc.getLat(),"La localización no se ha encontrado");
+	}
 
 }
