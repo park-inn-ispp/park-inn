@@ -40,6 +40,12 @@ public class Client {
                inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
     private Set<Role> roles = new HashSet<>();
 
+    public Client(){
+    }
+    
+    public Client(long id){
+        this.id = id;
+    }
 
     public String getPassword() {
         return this.password;

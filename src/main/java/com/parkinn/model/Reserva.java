@@ -34,6 +34,14 @@ public class Reserva {
     private Double fianza;
     private String direccion;
     
+
+    public Reserva(){
+    }
+
+    public Reserva(long id){
+        this.id = id;
+    }
+
     public Double getFianza() {
 		return fianza;
 	}

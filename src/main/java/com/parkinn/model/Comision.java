@@ -17,6 +17,13 @@ public class Comision {
     @Max(1)
     private float porcentaje;
 
+    public Comision(){
+    }
+
+    public Comision(long id){
+        this.id = id;
+    }
+
     public Long getId() {
         return id;
     }
