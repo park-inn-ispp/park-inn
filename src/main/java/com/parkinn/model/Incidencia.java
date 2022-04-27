@@ -22,6 +22,13 @@ public class Incidencia {
     private LocalDateTime fecha;
     private String titulo;
     private String descripcion;
+
+    public Incidencia(){
+    }
+
+    public Incidencia(long id){
+        this.id = id;
+    }
    
     @ManyToOne(optional = true)
     @JoinColumn(name="reserva_id")

@@ -28,6 +28,14 @@ public class Plaza {
     @JoinColumn(name="user_id")
     private Client administrador;
 
+    public Plaza(){
+    }
+
+    public Plaza(long id,Client admin){
+        this.id = id;
+        this.administrador = admin;
+    }
+
 
 	public Boolean getTramos() {
 		return tramos;
