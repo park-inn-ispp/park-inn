@@ -16,7 +16,6 @@
 	
 	<properties>
 		<java.version>11</java.version>
-
 		<jacoco.version>0.8.5</jacoco.version>
 		<spring-format.version>0.0.19</spring-format.version>
 		<selenium.version>3.141.59</selenium.version>

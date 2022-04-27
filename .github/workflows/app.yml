@@ -22,10 +22,8 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
         cache: maven
-    - name: Build with Maven
+    - name: Build with Maven and Test running
       run: mvn -B package --file pom.xml
-    - name: Test with Maven
-      run: mvn -B test --file pom.xml
       
     - name: Deploy to Heroku
       uses: akhileshns/heroku-deploy@v3.12.12
