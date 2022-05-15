@@ -4,6 +4,7 @@
 
 INSERT INTO roles(id, name) values (1, 'ROLE_ADMIN');
 INSERT INTO roles(id, name) values (2, 'ROLE_USER');
-insert into clients(id, name, email, password, phone, surname) values (1, 'admin', 'admin@admin.com', 'admin', 666998877, 'admin');
+-- La contraseña es Admin1234
+insert into clients(id, name, email, password, phone, surname) values (1, 'Admin', 'admin@admin.com', '$2a$10$lrBydvUI6cvLw12966m7cecxVjzfpGUN941ln5kzZGJIZZpyOMFta', 666998877, 'admin');
 insert into CLIENT_ROLES(CLIENT_ID, ROLE_ID) values (1,1);  
 ---
