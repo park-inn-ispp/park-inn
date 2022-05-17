@@ -102,7 +102,11 @@ public class DescuentoController {
 			Map<String,Object> response = new HashMap<>();
         	response.put("descuento", descuento);
 			List<String> errores = new ArrayList<>();
+            Descuento descuentoDoble = descuentoService.findByName(descuento.getName());
 
+            if(descuentoDoble != null){
+				errores.add("Ya existe un descuento con el mismo nombre");
+			}
 			if(descuento.getName() == null || descuento.getName().isEmpty()){
 				errores.add("El descuento debe tener un nombre asociado");
 			}
