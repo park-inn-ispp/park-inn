@@ -106,7 +106,7 @@ public class DescuentoController {
 			if(descuento.getName() == null || descuento.getName().isEmpty()){
 				errores.add("El descuento debe tener un nombre asociado");
 			}
-			if(descuento.getDescuento() <= 0 || descuento.getDescuento() > 100 || descuento.getDescuento() == null){
+			if(descuento.getDescuento() == null || descuento.getDescuento() <= 0 || descuento.getDescuento() > 100 ){
 				errores.add("El descuento debe ser > 0 y <= 100");
 			}
 			
