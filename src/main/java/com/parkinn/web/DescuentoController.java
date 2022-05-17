@@ -103,7 +103,7 @@ public class DescuentoController {
         	response.put("descuento", descuento);
 			List<String> errores = new ArrayList<>();
 
-			if(descuento.getName() == null){
+			if(descuento.getName() == null || descuento.getName().isEmpty()){
 				errores.add("El descuento debe tener un nombre asociado");
 			}
 			if(descuento.getDescuento() <= 0 || descuento.getDescuento() > 100 || descuento.getDescuento() == null){
