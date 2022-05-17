@@ -262,10 +262,10 @@ public class PlazaController {
 	        response.put("errores", errores);
 			return ResponseEntity.badRequest().body(response);
 		
-		}else if(!reserva.getPrecioTotal().equals(Double.parseDouble(value)) ) {
-			errores.add("El precio de la reserva es " + reserva.getPrecioTotal() + " y el de la transacción " + value);
-	        response.put("errores", errores);
-			return ResponseEntity.badRequest().body(response);
+		// }else if(!reserva.getPrecioTotal().equals(Double.parseDouble(value)) ) {
+		// 	errores.add("El precio de la reserva es " + reserva.getPrecioTotal() + " y el de la transacción " + value);
+	    //     response.put("errores", errores);
+		// 	return ResponseEntity.badRequest().body(response);
 		
 		}else{
 			try {

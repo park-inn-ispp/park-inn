@@ -60,7 +60,7 @@ public class DescuentoController {
     }
 
 	@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
-    @GetMapping("/{name}")
+    @GetMapping("/name/{name}")
     public Object getDescuentoByName(@PathVariable String name){
         Descuento  descuento = descuentoService.findByName(name);
         List<String> errores = new ArrayList<String>();
@@ -79,7 +79,7 @@ public class DescuentoController {
 
     @SuppressWarnings("rawtypes")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity deleteDescuento(@PathVariable Long id) {
         List<String> errores = new ArrayList<String>();
     	if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))){
