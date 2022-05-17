@@ -3,6 +3,7 @@ package com.parkinn.web;
 import static java.util.Arrays.asList;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -102,6 +104,7 @@ public class ReservaControllerTest {
 		p1.setDireccion("Calle Real,5,Carmona,Sevilla,41520");
 		p1.setPrecioHora(5.0);
 		p1.setEstaDisponible(true);
+		p1.setAdministrador(c1);
 		l1 = new Localizacion();
 		String latitud = "22,22";
 		String longitud = "33,33";
@@ -125,6 +128,7 @@ public class ReservaControllerTest {
 		r1.setPaypal_order_id("id");
 		r1.setPlaza(p1);
 		r1.setUser(c1);
+		r1.setPropietarioId(1L);
 		List<Reserva> reservas = new ArrayList<Reserva>();
 		paypal = new PayPalClasses();
 		purchase = new PurchaseUnit();
@@ -168,6 +172,15 @@ public class ReservaControllerTest {
 		.andExpect(jsonPath("$.errores[0]").value("No se encuentra al usuario"));
 	}
 	
+	@WithMockUser(authorities  = "ROLE_USER")
+    @Test
+	void testGetReservasUsuarioDenied() throws Exception {
+		
+		mockMvc.perform(get("/reservas/usuario/{id}",1L))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.errores[0]").value("No puedes acceder a las reservas de otro usuario sin ser administrador"));;
+	}
+	
 	@WithMockUser(authorities  = "ROLE_ADMIN")
     @Test
 	void testGetResevasPlaza() throws Exception {
@@ -183,6 +196,15 @@ public class ReservaControllerTest {
 		mockMvc.perform(get("/reservas/plaza/{id}",1)).andExpect(status().isOk());
 	}
 
+	@WithMockUser(authorities  = "ROLE_USER")
+    @Test
+	void testGetReservasPlazaDenied() throws Exception {
+		
+		mockMvc.perform(get("/reservas/plaza/{id}",1L))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.errores[0]").value("No puedes acceder a las reservas de una plaza que no es tuya sin ser administrador"));;
+	}
+	
 	@WithMockUser(authorities  = "ROLE_ADMIN")
     @Test
 	void testGetResevasAll() throws Exception {
@@ -205,6 +227,14 @@ public class ReservaControllerTest {
 		.andExpect(jsonPath("$.errores[0]").value("No se encuentra la reserva"));
 	}
 	
+	@WithMockUser(authorities  = "ROLE_USER")
+    @Test
+	void testGetDetallesReservaDenied() throws Exception {
+		
+		mockMvc.perform(get("/reservas/{id}",1L)).andExpect(status().isBadRequest())
+		.andExpect(jsonPath("$.errores[0]").value("No estás involucrado en esta reserva"));
+	}
+	
 	@WithMockUser(authorities  = "ROLE_ADMIN")
     @Test
 	void testAceptarReservaNoSeEncuentra() throws Exception {
@@ -220,6 +250,24 @@ public class ReservaControllerTest {
 		mockMvc.perform(get("/reservas/{id}/aceptar",1)).andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.errores[0]").value("Esta reserva no es sobre una plaza de tu propiedad"));
 	}
+	
+	@WithMockUser(authorities  = "ROLE_ADMIN")
+    @Test
+	void testAceptarReservaAceptada() throws Exception {
+		
+		mockMvc.perform(get("/reservas/{id}/aceptar",1)).andExpect(status().isOk())
+		;
+	}
+	
+	@WithMockUser(authorities  = "ROLE_ADMIN")
+    @Test
+	void testRechazarReservaAceptada() throws Exception {
+		
+		mockMvc.perform(get("/reservas/{id}/rechazar",1)).andExpect(status().isOk())
+		;
+	}
+	
+	
 	
 	@WithMockUser(authorities  = "ROLE_ADMIN")
     @Test
@@ -247,6 +295,15 @@ public class ReservaControllerTest {
 	
 	@WithMockUser(authorities  = "ROLE_ADMIN")
     @Test
+	void testConfirmarReservaDenied() throws Exception {
+		given(this.clientRepository.findById(r1.getPropietarioId())).willReturn(Optional.of(c1));
+		mockMvc.perform(get("/reservas/{id}/confirmar",1)).andExpect(status().isBadRequest())
+		.andExpect(jsonPath("$.errores[0]").value("No estás involucrado en esta reserva"));
+	}
+	
+	
+	@WithMockUser(authorities  = "ROLE_ADMIN")
+    @Test
 	void testCancelarReservaNoSeEncuentra() throws Exception {
 		
 		mockMvc.perform(get("/reservas/{id}/cancelar",3)).andExpect(status().isBadRequest())
@@ -261,6 +318,15 @@ public class ReservaControllerTest {
 		.andExpect(jsonPath("$.errores[0]").value("No se puede cancelar una reserva que ya no está en proceso"));
 	}
 	
+	
+	@WithMockUser(authorities  = "ROLE_ADMIN")
+    @Test
+	void testDenegarReservaDenied() throws Exception {
+		given(this.clientRepository.findById(r1.getPropietarioId())).willReturn(Optional.of(c1));
+		mockMvc.perform(get("/reservas/{id}/denegar",1)).andExpect(status().isBadRequest())
+		.andExpect(jsonPath("$.errores[0]").value("No estás involucrado en esta reserva"));
+	}
+	
 	@WithMockUser(authorities  = "ROLE_ADMIN")
     @Test
 	void testDenegarReservaNoSeEncuentra() throws Exception {
@@ -268,6 +334,8 @@ public class ReservaControllerTest {
 		mockMvc.perform(get("/reservas/{id}/denegar",3)).andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.errores[0]").value("No se encuentra la reserva"));
 	}
+	
+	
 	
 	
 	@WithMockUser(authorities  = "ROLE_ADMIN")
