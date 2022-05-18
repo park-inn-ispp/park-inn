@@ -324,14 +324,6 @@ public class ClientsController {
                         plazaRepository.delete(plaza);
                     }
                 
-                List<Reserva> reservas = reservasRepository.findByUserId(id);
-                
-                for(int i1 = 0; i1<reservas.size(); i1++) {
-                    Reserva reserva = reservas.get(i1);
-                    reserva.setUser(null);
-                    
-                }
-                clientRepository.findById(id).get().setRoles(null);
                 clientRepository.deleteById(id);
                 return ResponseEntity.ok().build();
             }
