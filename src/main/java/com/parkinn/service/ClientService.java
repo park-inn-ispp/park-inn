@@ -32,6 +32,10 @@ public class ClientService {
         return repository.findByNameOrEmail(name,email).orElse(null);
     }
 
+    public Client findByPhone(String phone){ 
+        return repository.findByPhone(phone).orElse(null);
+    }
+
     public Boolean existsByEmail(String email){ 
         return repository.existsByEmail(email);
     }

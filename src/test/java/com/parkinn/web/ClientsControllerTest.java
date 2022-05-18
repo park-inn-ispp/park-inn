@@ -197,6 +197,10 @@ public class ClientsControllerTest {
     @Test
 	void testUpdateClient() throws Exception {
 		c2.setEmail("emailUpdate");
+		c2.setPassword("prueba");
+		c2.setPhone("633732555");
+		c2.setName("Prueba");
+		c2.setSurname("surname");
 		mockMvc.perform(put("/clients/{id}/edit",c2.getId()).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(c2)))
 			.andExpect(status().isOk()).andExpect(jsonPath("$.email").value(c2.getEmail()));
 	}

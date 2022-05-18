@@ -51,28 +51,19 @@ import org.springframework.security.core.context.SecurityContextHolder;
 public class PlazaController {
 
 	final static String URL_CORREO = "https://parkinn-api-v3.herokuapp.com";
-
 	
     @Autowired
     private PlazaService plazaService;
     @Autowired
     private ReservaService reservaService;
     @Autowired
-	  private HorarioService horarioService;
+	private HorarioService horarioService;
     @Autowired 
     private ReservaRepository reservaRepository;
     @Autowired
     private HorarioRepository horarioRepository;
     @Autowired
     private MailService mailService;
-
-    
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
-    @GetMapping()
-    public List<Plaza> filtrarPlazas(@RequestParam(name = "maxPrecioHora", required=false) Double maxPrecioHora, @RequestParam(name = "fechaInicio", required=false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaInicio,
-        @RequestParam(name = "fechaFin", required=false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fechaFin, @RequestParam(name = "zona", required=false) String zona) {
-        return plazaService.filtrarPlazas(maxPrecioHora, fechaInicio, fechaFin, zona);
-    }
     
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
     @GetMapping("/all")
@@ -262,10 +253,10 @@ public class PlazaController {
 	        response.put("errores", errores);
 			return ResponseEntity.badRequest().body(response);
 		
-		}else if(!reserva.getPrecioTotal().equals(Double.parseDouble(value)) ) {
-			errores.add("El precio de la reserva es " + reserva.getPrecioTotal() + " y el de la transacción " + value);
-	        response.put("errores", errores);
-			return ResponseEntity.badRequest().body(response);
+		// }else if(!reserva.getPrecioTotal().equals(Double.parseDouble(value)) ) {
+		// 	errores.add("El precio de la reserva es " + reserva.getPrecioTotal() + " y el de la transacción " + value);
+	    //     response.put("errores", errores);
+		// 	return ResponseEntity.badRequest().body(response);
 		
 		}else{
 			try {

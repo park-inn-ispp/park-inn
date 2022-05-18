@@ -9,12 +9,22 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.sql.DataSource;
+
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.parkinn.model.Client;
@@ -22,7 +32,6 @@ import com.parkinn.model.Horario;
 import com.parkinn.model.Localizacion;
 import com.parkinn.model.Plaza;
 import com.parkinn.model.Reserva;
-import com.parkinn.model.Role;
 import com.parkinn.model.paypal.Amount;
 import com.parkinn.model.paypal.PayPalClasses;
 import com.parkinn.model.paypal.PurchaseUnit;
@@ -33,16 +42,6 @@ import com.parkinn.service.HorarioService;
 import com.parkinn.service.MailService;
 import com.parkinn.service.PlazaService;
 import com.parkinn.service.ReservaService;
-
-import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = PlazaController.class)
 public class PlazaControllerTest {
@@ -95,6 +94,7 @@ public class PlazaControllerTest {
 	@BeforeEach
 	void setup() {
 		c1 = new Client(1l);
+		c1.setEmail("emailAdmin");
 		c2 = new Client(2l);
 		p1 = new Plaza(1l,c1);
 		p1.setFianza(10.0);
@@ -130,14 +130,14 @@ public class PlazaControllerTest {
 		purchase = new PurchaseUnit();
 		amount = new Amount();
 		amount.setCurrencyCode("EUR");
-		amount.setValue("10.0");
+		amount.setValue("5.0");
 		purchase.setAmount(amount);
 		List<PurchaseUnit> purchases = new ArrayList<PurchaseUnit>();
 		purchases.add(purchase);
 		paypal.setPurchaseUnits(purchases);
 		h1 = new Horario(1l);
-		h1.setFechaFin(fecha);
-		h1.setFechaInicio(fecha.plusHours(1l));
+		h1.setFechaFin(fecha.plusHours(1l));
+		h1.setFechaInicio(fecha);
 		List<Horario> horarios = new ArrayList<Horario>();
 		h1.setPlaza(p1);
 		given(this.plazaService.findAll()).willReturn(asList(p1,p2));
@@ -147,7 +147,7 @@ public class PlazaControllerTest {
 		given(this.plazaService.latitudLongitudDiferentes(l1.getLat(), l1.getLon())).willReturn(coordenadas);
 		given(this.plazaService.guardarPlaza(p1)).willReturn(p1);
 		given(this.horarioRepository.findHorariosByPlazaId(1l)).willReturn(horarios);
-		given(this.horarioService.guardarHorario(h1)).willReturn(h1);
+		given(this.horarioService.guardarHorario(Mockito.any())).willReturn(h1);
 	}
 
 	@WithMockUser(value = "spring")
@@ -157,7 +157,13 @@ public class PlazaControllerTest {
 			.andExpect(jsonPath("$.size()", Matchers.is(2)));
 	}
 	
-
+	@WithMockUser(authorities  = "ROLE_ADMIN")
+    @Test
+	void testCreatePlazaSuccess() throws Exception {
+		given(this.plazaService.guardarPlaza(Mockito.any())).willReturn(p1);
+		mockMvc.perform(post("/plazas").contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(p1)))
+		.andExpect(status().isCreated());
+	}
 	
 	@WithMockUser(authorities  = "ROLE_ADMIN")
     @Test
@@ -183,25 +189,33 @@ public class PlazaControllerTest {
 		.andExpect(status().isBadRequest()).andExpect(jsonPath("$.errores[0]").value("La dirección insertada no existe o no es reconocida por el sistema. Por favor, indique el tipo (calle, avenida...) y nombre correcto de su dirección"));
 	}
 	
+	@WithMockUser(authorities  = "ROLE_USER")
+    @Test
+	void testUpdatePlazaDenied() throws Exception {
+		given(this.plazaService.findById(p2.getId())).willReturn(p1);
+		mockMvc.perform(put("/plazas/{id}/",p2.getId()).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(p1)))
+		.andExpect(status().isBadRequest()).andExpect(jsonPath("$.errores[0]").value("No puedes editar una plaza que no es de tu propiedad"));
+	}
+	
 	@WithMockUser(authorities  = "ROLE_ADMIN")
     @Test
 	void testDeletePlaza() throws Exception {
 		mockMvc.perform(delete("/plazas/{id}",p2.getId())).andExpect(status().isOk());
 	}
-	
 
-	@WithMockUser(authorities  = "ROLE_ADMIN")
+	@WithMockUser(authorities = "ROLE_ADMIN")
     @Test
-	void testCreateReservaPrecioMal() throws Exception {
-		amount.setValue("15.0");
+	void testCreateReserva() throws Exception {
+		given(this.reservaService.guardarReserva(Mockito.any())).willReturn(r1);
 		List<String> errores = new ArrayList<String>();
 		given(this.reservaService.erroresNuevaReservaAntesDelPago(r1)).willReturn(errores);
 		given(this.reservaService.getPayPal(r1.getPaypal_order_id())).willReturn(paypal);
 		mockMvc.perform(post("/plazas/{id}/reservar",p1.getId()).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(r1)))
-			.andExpect(status().isBadRequest());
+			.andExpect(status().isCreated());
 	}
+
 	
-	@WithMockUser(authorities  = "ROLE_ADMIN")
+	@WithMockUser(authorities = "ROLE_ADMIN")
     @Test
 	void testCreateReservaMonedaMal() throws Exception {
 		amount.setCurrencyCode("USD");
@@ -210,6 +224,29 @@ public class PlazaControllerTest {
 		given(this.reservaService.getPayPal(r1.getPaypal_order_id())).willReturn(paypal);
 		mockMvc.perform(post("/plazas/{id}/reservar",p1.getId()).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(r1)))
 			.andExpect(status().isBadRequest());
+	}
+	
+	@WithMockUser(authorities = "ROLE_ADMIN")
+    @Test
+	void testCreateReservaErrores() throws Exception {
+		List<String> errores = new ArrayList<String>();
+		errores.add("mensajeError");
+		given(this.reservaService.erroresNuevaReservaAntesDelPago(Mockito.any())).willReturn(errores);
+		mockMvc.perform(post("/plazas/{id}/reservar",p1.getId()).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(r1)))
+			.andExpect(status().isBadRequest());
+	}
+	
+	@WithMockUser(authorities = "ROLE_ADMIN")
+    @Test
+	void testCreateReservaDuplicada() throws Exception {
+		List<Reserva> reservas = new ArrayList<Reserva>();
+		reservas.add(r1);
+		given(this.reservaService.findAll()).willReturn(reservas);
+		List<String> errores = new ArrayList<String>();
+		given(this.reservaService.erroresNuevaReservaAntesDelPago(r1)).willReturn(errores);
+		mockMvc.perform(post("/plazas/{id}/reservar",p1.getId()).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(r1)))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.errores[0]").value("La transacción ya existía en la base de datos"));
 	}
 	
 	@WithMockUser(authorities  = "ROLE_ADMIN")
@@ -240,6 +277,13 @@ public class PlazaControllerTest {
 		.andExpect(jsonPath("$.errores[0]").value("Esta plaza no existe"));
 	}
 	
+	@WithMockUser(authorities  = "ROLE_USER")
+    @Test
+	void testGetPlazaFormularioDenied() throws Exception {
+		mockMvc.perform(get("/plazas/{id}/formularioEditar",1)).andExpect(status().isBadRequest())
+		.andExpect(jsonPath("$.errores[0]").value("No puedes visualizar ni editar una plaza que no es de tu propiedad"));
+	}
+	
 	@WithMockUser(authorities  = "ROLE_ADMIN")
     @Test
 	void testGetPlazasCliente() throws Exception {
@@ -247,6 +291,16 @@ public class PlazaControllerTest {
 		plazas.add(p1);
 		given(this.plazaService.findUserById(c1.getId())).willReturn(plazas);
 		mockMvc.perform(get("/plazas/plazasDelUsuario/{id}",1)).andExpect(status().isOk());
+	}
+	
+	@WithMockUser(authorities  = "ROLE_USER")
+    @Test
+	void testGetPlazasClienteDenied() throws Exception {
+		List<Plaza> plazas = new ArrayList<Plaza>();
+		plazas.add(p1);
+		given(this.plazaService.findUserById(c1.getId())).willReturn(plazas);
+		mockMvc.perform(get("/plazas/plazasDelUsuario/{id}",1)).andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.errores[0]").value("Esta plaza no es de tu propiedad"));
 	}
 	
 	@WithMockUser(authorities  = "ROLE_ADMIN")
@@ -261,21 +315,69 @@ public class PlazaControllerTest {
 	
 	@WithMockUser(authorities  = "ROLE_ADMIN")
     @Test
+	void testValidateReservaAntesDePagoFail() throws Exception {
+		List<String> errores = new ArrayList<String>();
+		errores.add("mensajeError");
+		given(this.reservaService.erroresNuevaReservaAntesDelPago(Mockito.any())).willReturn(errores);
+		mockMvc.perform(post("/plazas/{id}/validateReservaAntesPago",p1.getId()).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(r1)))
+		.andExpect(status().isBadRequest());
+	}
+	
+	@WithMockUser(authorities  = "ROLE_ADMIN")
+    @Test
 	void testUpdateDisponibilidad() throws Exception {
 		p1.setFianza(12.0);
 		mockMvc.perform(put("/plazas/{id}/cambiarDisponibilidad/{disponibilidad}",p1.getId(),false).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(p1)))
 			.andExpect(status().isOk());
 	}
 	
+	@WithMockUser(authorities  = "ROLE_USER")
+    @Test
+	void testUpdateDisponibilidadDenied() throws Exception {
+		p1.setFianza(12.0);
+		mockMvc.perform(put("/plazas/{id}/cambiarDisponibilidad/{disponibilidad}",p1.getId(),false).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(p1)))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.errores[0]").value("No puedes editar una plaza que no es de tu propiedad"));;
+	}
+	
 	@WithMockUser(authorities  = "ROLE_ADMIN")
     @Test
-	void testCreateHorario() throws Exception {
-		List<String> errores = new ArrayList<String>();
-		given(this.reservaService.erroresNuevaReservaAntesDelPago(r1)).willReturn(errores);
-		given(this.reservaService.getPayPal(r1.getPaypal_order_id())).willReturn(paypal);
+	void testCreateHorarioSuccess() throws Exception {
+		mockMvc.perform(post("/plazas/{id}/crearHorarios",p1.getId()).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(h1)))
+		.andExpect(status().isCreated());
+	}
+	
+	@WithMockUser(authorities  = "ROLE_ADMIN")
+    @Test
+	void testCreateHorarioAfterFail() throws Exception {
+		h1.setFechaInicio(fecha.plusHours(2l));
 		mockMvc.perform(post("/plazas/{id}/crearHorarios",p1.getId()).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(h1)))
 		.andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.errores[0]").value("No puede existir una fecha de inicio posterior a la fecha de fin"));
 	}
+  
+	@WithMockUser(authorities  = "ROLE_ADMIN")
+    @Test
+	void testCreateHorarioTramo0() throws Exception {
+		h1.setFechaInicio(h1.getFechaFin());
+		mockMvc.perform(post("/plazas/{id}/crearHorarios",p1.getId()).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(h1)))
+		.andExpect(status().isBadRequest())
+		.andExpect(jsonPath("$.errores[0]").value("No puede existir un tramo horario cuya fecha de inicio y fecha de fin coincidan"));
+	}
+	
+	@WithMockUser(authorities  = "ROLE_ADMIN")
+    @Test
+	void testCreateHorarioConflicto() throws Exception {
+		List<Horario> horarios = new ArrayList<>();
+		Horario h2 = new Horario(2l);
+		h2.setFechaFin(fecha.plusHours(1L));
+		h2.setFechaInicio(fecha.minusHours(2l));
+		horarios.add(h2);
+		given(this.horarioRepository.findHorariosByPlazaId(1l)).willReturn(horarios);
+		mockMvc.perform(post("/plazas/{id}/crearHorarios",p1.getId()).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(h1)))
+		.andExpect(status().isBadRequest())
+		.andExpect(jsonPath("$.errores[0]").value("Este tramo horario entra en conflicto con otro. Seleccione otras fechas"));
+	}
 	
 }
+

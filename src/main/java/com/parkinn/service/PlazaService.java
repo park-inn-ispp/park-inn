@@ -23,12 +23,6 @@ public class PlazaService {
     @Autowired
     RestTemplate restTemplate;
 
-    
-    public List<Plaza> filtrarPlazas(Double max, LocalDateTime inicio, LocalDateTime fin, String zona){
-        List<Plaza> plazas = repository.filter(max, inicio, fin, zona);
-        return plazas;
-    }
-
     public List<Plaza> findAll(){
         return repository.findAll();
     }
