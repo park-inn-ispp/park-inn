@@ -189,18 +189,6 @@ public class PlazaControllerTest {
 		mockMvc.perform(delete("/plazas/{id}",p2.getId())).andExpect(status().isOk());
 	}
 	
-
-	@WithMockUser(authorities  = "ROLE_ADMIN")
-    @Test
-	void testCreateReservaPrecioMal() throws Exception {
-		amount.setValue("15.0");
-		List<String> errores = new ArrayList<String>();
-		given(this.reservaService.erroresNuevaReservaAntesDelPago(r1)).willReturn(errores);
-		given(this.reservaService.getPayPal(r1.getPaypal_order_id())).willReturn(paypal);
-		mockMvc.perform(post("/plazas/{id}/reservar",p1.getId()).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(r1)))
-			.andExpect(status().isBadRequest());
-	}
-	
 	@WithMockUser(authorities  = "ROLE_ADMIN")
     @Test
 	void testCreateReservaMonedaMal() throws Exception {
