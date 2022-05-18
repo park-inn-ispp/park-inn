@@ -33,19 +33,28 @@ insert into plazas(id, direccion, precio_hora, fianza, ancho, largo, latitud, lo
 
 
 insert into reservas(id, paypal_order_id,propietario_id,estado, precio_total, fecha_inicio, fecha_fin, fecha_solicitud, comentarios, fianza, direccion,plaza_id,comision,user_id) values 
-(5,1000,2,0,200,TO_TIMESTAMP('2030-07-02 06:14:00', 'YYYY-MM-DD HH24:MI:SS'),TO_TIMESTAMP('2030-07-03 06:14:00.742000000', 'YYYY-MM-DD HH24:MI:SS.FF'),
+(1,1101,2,0,200,TO_TIMESTAMP('2030-07-02 06:14:00', 'YYYY-MM-DD HH24:MI:SS'),TO_TIMESTAMP('2030-07-03 06:14:00.742000000', 'YYYY-MM-DD HH24:MI:SS.FF'),
+TO_TIMESTAMP('2022-05-17 06:14:00.742000000', 'YYYY-MM-DD HH24:MI:SS.FF'),'',50,'Calle Bami 4',1,6,3);
+
+insert into reservas(id, paypal_order_id,propietario_id,estado, precio_total, fecha_inicio, fecha_fin, fecha_solicitud, comentarios, fianza, direccion,plaza_id,comision,user_id) values 
+(2,1102,2,0,200,TO_TIMESTAMP('2030-07-02 06:14:00', 'YYYY-MM-DD HH24:MI:SS'),TO_TIMESTAMP('2030-07-03 06:14:00.742000000', 'YYYY-MM-DD HH24:MI:SS.FF'),
+TO_TIMESTAMP('2022-05-17 06:14:00.742000000', 'YYYY-MM-DD HH24:MI:SS.FF'),'',50,'Calle Bami 4',1,6,3);
+
+
+insert into reservas(id, paypal_order_id,propietario_id,estado, precio_total, fecha_inicio, fecha_fin, fecha_solicitud, comentarios, fianza, direccion,plaza_id,comision,user_id) values 
+(5,1000,5,0,200,TO_TIMESTAMP('2030-07-02 06:14:00', 'YYYY-MM-DD HH24:MI:SS'),TO_TIMESTAMP('2030-07-03 06:14:00.742000000', 'YYYY-MM-DD HH24:MI:SS.FF'),
 TO_TIMESTAMP('2022-05-17 06:14:00.742000000', 'YYYY-MM-DD HH24:MI:SS.FF'),'',50,'Calle Tejares 3',4,6,6);
 
 insert into reservas(id, paypal_order_id,propietario_id,estado, precio_total, fecha_inicio, fecha_fin, fecha_solicitud, comentarios, fianza, direccion,plaza_id,comision,user_id) values 
-(7,1001,2,0,200,TO_TIMESTAMP('2030-08-02 06:14:00', 'YYYY-MM-DD HH24:MI:SS'),TO_TIMESTAMP('2030-08-03 06:14:00.742000000', 'YYYY-MM-DD HH24:MI:SS.FF'),
+(7,1001,5,0,200,TO_TIMESTAMP('2030-08-02 06:14:00', 'YYYY-MM-DD HH24:MI:SS'),TO_TIMESTAMP('2030-08-03 06:14:00.742000000', 'YYYY-MM-DD HH24:MI:SS.FF'),
 TO_TIMESTAMP('2022-05-17 06:14:00.742000000', 'YYYY-MM-DD HH24:MI:SS.FF'),'',50,'Calle Tejares 3',4,6,6);
 
 insert into reservas(id, paypal_order_id,propietario_id,estado, precio_total, fecha_inicio, fecha_fin, fecha_solicitud, comentarios, fianza, direccion,plaza_id,comision,user_id) values 
-(8,1002,2,1,200,TO_TIMESTAMP('2030-09-02 06:14:00', 'YYYY-MM-DD HH24:MI:SS'),TO_TIMESTAMP('2030-09-03 06:14:00', 'YYYY-MM-DD HH24:MI:SS'),
+(8,1002,5,1,200,TO_TIMESTAMP('2030-09-02 06:14:00', 'YYYY-MM-DD HH24:MI:SS'),TO_TIMESTAMP('2030-09-03 06:14:00', 'YYYY-MM-DD HH24:MI:SS'),
 TO_TIMESTAMP('2022-05-17 06:14:00', 'YYYY-MM-DD HH24:MI:SS'),'',50,'Calle Tejares 3',4,6,6);
 
 insert into reservas(id, paypal_order_id,propietario_id,estado, precio_total, fecha_inicio, fecha_fin, fecha_solicitud, comentarios, fianza, direccion,plaza_id,comision,user_id) values 
-(9,1003,2,1,200,TO_TIMESTAMP('2030-10-02 06:14:00', 'YYYY-MM-DD HH24:MI:SS'),TO_TIMESTAMP('2030-10-03 06:14:00', 'YYYY-MM-DD HH24:MI:SS'),
+(9,1003,5,1,200,TO_TIMESTAMP('2030-10-02 06:14:00', 'YYYY-MM-DD HH24:MI:SS'),TO_TIMESTAMP('2030-10-03 06:14:00', 'YYYY-MM-DD HH24:MI:SS'),
 TO_TIMESTAMP('2022-05-17 06:14:00', 'YYYY-MM-DD HH24:MI:SS'),'',50,'Calle Tejares 3',4,6,6);
 
 
