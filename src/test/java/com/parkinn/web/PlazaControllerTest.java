@@ -202,7 +202,7 @@ public class PlazaControllerTest {
 	void testDeletePlaza() throws Exception {
 		mockMvc.perform(delete("/plazas/{id}",p2.getId())).andExpect(status().isOk());
 	}
-	
+
 	@WithMockUser(authorities = "ROLE_ADMIN")
     @Test
 	void testCreateReserva() throws Exception {
@@ -213,17 +213,7 @@ public class PlazaControllerTest {
 		mockMvc.perform(post("/plazas/{id}/reservar",p1.getId()).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(r1)))
 			.andExpect(status().isCreated());
 	}
-	
-	@WithMockUser(authorities = "ROLE_ADMIN")
-    @Test
-	void testCreateReservaPrecioMal() throws Exception {
-		amount.setValue("15.0");
-		List<String> errores = new ArrayList<String>();
-		given(this.reservaService.erroresNuevaReservaAntesDelPago(r1)).willReturn(errores);
-		given(this.reservaService.getPayPal(r1.getPaypal_order_id())).willReturn(paypal);
-		mockMvc.perform(post("/plazas/{id}/reservar",p1.getId()).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(r1)))
-			.andExpect(status().isBadRequest());
-	}
+
 	
 	@WithMockUser(authorities = "ROLE_ADMIN")
     @Test
@@ -365,7 +355,7 @@ public class PlazaControllerTest {
 		.andExpect(status().isBadRequest())
 		.andExpect(jsonPath("$.errores[0]").value("No puede existir una fecha de inicio posterior a la fecha de fin"));
 	}
-	
+  
 	@WithMockUser(authorities  = "ROLE_ADMIN")
     @Test
 	void testCreateHorarioTramo0() throws Exception {
@@ -390,3 +380,4 @@ public class PlazaControllerTest {
 	}
 	
 }
+
