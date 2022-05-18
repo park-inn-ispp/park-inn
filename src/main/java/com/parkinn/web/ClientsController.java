@@ -143,34 +143,52 @@ public class ClientsController {
 
     
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
-    @PutMapping("/{id}/edit")
-    @SuppressWarnings("rawtypes")
-    public ResponseEntity updateClient(@PathVariable Long id, @RequestBody Client client) {
-        Map<String,Object> response = new HashMap<>();
-        List<String> errores = new ArrayList<String>();
-        Optional<Client> cliente = clientRepository.findById(id);
-        if(!cliente.isPresent()){
-            errores.add("Este usuario no existe");
-            response.put("errores", errores);
-			return ResponseEntity.badRequest().body(response);
-        }else if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) || cliente.get().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
-            Client currentClient = clientRepository.findById(id).orElseThrow(RuntimeException::new);
+@PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
+@PutMapping("/{id}/edit")
+@SuppressWarnings("rawtypes")
+public ResponseEntity updateClient(@PathVariable Long id, @RequestBody Client client) {
+    Map<String,Object> response = new HashMap<>();
+    List<String> errores = new ArrayList<String>();
+    Optional<Client> cliente = clientRepository.findById(id);
+    if(!cliente.isPresent()){
+        errores.add("Este usuario no existe");
+        response.put("errores", errores);
+        return ResponseEntity.badRequest().body(response);
+    }else if(SecurityContextHolder.getContext().getAuthentication().getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) || cliente.get().getEmail().equals(SecurityContextHolder.getContext().getAuthentication().getPrincipal())){
+        Client currentClient = clientRepository.findById(id).orElseThrow(RuntimeException::new);
+        if(currentClient.getEmail().equals(client.getEmail()) && currentClient.getPhone().equals(client.getPhone())){
             currentClient.setName(client.getName());
             currentClient.setEmail(client.getEmail());
             currentClient.setPhone(client.getPhone());
             currentClient.setSurname(client.getSurname());
-            
             currentClient = clientRepository.save(currentClient);
+           
             return ResponseEntity.ok(currentClient);
-        }else{
-            errores.add("Solo puedes editar los datos de tu perfil");
+        } else if(!this.clientRepository.findByEmail(client.getEmail()).isPresent() && !this.clientRepository.findByPhone(client.getPhone()).isPresent()){
+            currentClient.setName(client.getName());
+            currentClient.setEmail(client.getEmail());
+            currentClient.setPhone(client.getPhone());
+            currentClient.setSurname(client.getSurname());
+            currentClient = clientRepository.save(currentClient);
+           
+            return ResponseEntity.ok(currentClient);
+        } else if(this.clientRepository.findByEmail(client.getEmail()).isPresent() && !currentClient.getEmail().equals(client.getEmail())){
+            errores.add("Este email ya está en uso");
             response.put("errores", errores);
-			return ResponseEntity.badRequest().body(response);
-
+            return ResponseEntity.badRequest().body(response);
+        } else{
+            errores.add("Este teléfono ya está en uso");
+            response.put("errores", errores);
+            return ResponseEntity.badRequest().body(response);
         }
-        
+    }else{
+        errores.add("Solo puedes editar los datos de tu perfil");
+        response.put("errores", errores);
+        return ResponseEntity.badRequest().body(response);
+
     }
+    
+}
 
 
 @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_USER')")
